@@ -1,0 +1,52 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Simple Interview Backend",
+  "main": "index.js",
+  "scripts": {
+    "watch": "tsc --watch",
+    "dev": "nodemon dist/index.js",
+    "start": "node dist/index.js",
+    "start2": "ts-node src/index.ts"
+  },
+  "author": "Marika Mella",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express-session": "^1.18.1",
+    "@types/ioredis": "^4.28.10",
+    "@types/node": "^22.13.14",
+    "@types/nodemailer": "^6.4.17",
+    "@types/pg": "^8",
+    "@types/redis": "^4.0.10",
+    "@types/uuid": "^10.0.0",
+    "nodemon": "^3.1.9",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.1",
+    "apollo-server-express": "^3.13.0",
+    "argon2": "^0.41.1",
+    "connect-redis": "^8.0.2",
+    "cors": "^2.8.5",
+    "dataloader": "^2.2.3",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "graphql": "^16.10.0",
+    "ioredis": "^5.6.0",
+    "nodemailer": "^6.10.0",
+    "pg": "^8.14.1",
+    "reflect-metadata": "^0.2.2",
+    "ts-node": "^10.9.2",
+    "type-graphql": "^2.0.0-rc.2",
+    "typeorm": "^0.3.21",
+    "uuid": "^11.1.0"
+  },
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/mikro-orm.config.ts",
+      "./dist/mikro-orm.config.js"
+    ]
+  }
+}

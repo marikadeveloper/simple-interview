@@ -12,6 +12,7 @@ import { DataSource } from 'typeorm';
 import { __prod__, COOKIE_NAME } from './constants';
 import { CandidateInvitation } from './entities/CandidateInvitation';
 import { User } from './entities/User';
+import { CandidateInvitationResolver } from './resolvers/candidateInvitation';
 import { UserResolver } from './resolvers/user';
 
 dotenv.config(); // Load environment variables from .env file
@@ -70,7 +71,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver],
+      resolvers: [UserResolver, CandidateInvitationResolver],
       validate: false,
     }),
     context: ({ req, res }) => ({

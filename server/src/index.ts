@@ -45,7 +45,7 @@ const main = async () => {
   // enable cors on all routes
   app.use(
     cors({
-      origin: 'http://localhost:3000',
+      origin: process.env.CLIENT_URL,
       credentials: true,
     }),
   );
@@ -63,7 +63,7 @@ const main = async () => {
         secure: __prod__, // set to true if using https
         sameSite: 'lax', // CSRF protection
       },
-      secret: 'iwoafnwianflksmfkdsnfso',
+      secret: process.env.REDIS_SECRET as string, // Use environment variable
     }),
   );
 

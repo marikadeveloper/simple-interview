@@ -1,4 +1,5 @@
 import argon2 from 'argon2';
+import { CandidateInvitation } from 'src/entities/CandidateInvitation';
 import {
   Arg,
   Ctx,
@@ -11,7 +12,7 @@ import {
 } from 'type-graphql';
 import { v4 } from 'uuid';
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
-import { User } from '../entities/User';
+import { User, UserRole } from '../entities/User';
 import { dataSource } from '../index';
 import { MyContext } from '../types';
 import { sendEmail } from '../utils/sendEmail';
@@ -24,13 +25,22 @@ export class AuthInput {
 }
 
 @InputType()
+export class RegisterInput {
+  @Field() email: string;
+  @Field() password: string;
+  @Field() fullName: string;
+  @Field() role: UserRole;
+  @Field() invitationId?: string;
+}
+
+@InputType()
 export class ChangePasswordInput {
   @Field() token: string;
   @Field() newPassword: string;
 }
 
 @ObjectType()
-class FieldError {
+export class FieldError {
   @Field() field: string;
   @Field() message: string;
 }
@@ -143,29 +153,46 @@ export class UserResolver {
 
   @Mutation(() => AuthResponse)
   async register(
-    @Arg('input', () => AuthInput) input: AuthInput,
+    @Arg('input', () => RegisterInput) input: RegisterInput,
     @Ctx() { req }: MyContext,
   ): Promise<AuthResponse> {
-    const errors = validateRegister(input);
+    const errors = await validateRegister(input);
     if (errors) {
       return { errors };
     }
 
     const hashedPassword = await argon2.hash(input.password);
-    let user;
-    try {
-      const result = await dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(User)
-        .values({
-          email: input.email,
-          password: hashedPassword,
-        })
-        .returning('*')
-        .execute();
 
-      user = result.raw[0];
+    try {
+      const user = await dataSource.transaction(
+        async (transactionalEntityManager) => {
+          if (input.role === UserRole.CANDIDATE) {
+            const candidateInvitation =
+              await transactionalEntityManager.findOne(CandidateInvitation, {
+                where: { email: input.email, used: false },
+              });
+
+            if (!candidateInvitation) {
+              throw new Error('Invalid invitation');
+            }
+
+            candidateInvitation.used = true;
+            await transactionalEntityManager.save(candidateInvitation);
+          }
+
+          return transactionalEntityManager.save(User, {
+            email: input.email,
+            password: hashedPassword,
+            fullName: input.fullName,
+            role: input.role,
+          });
+        },
+      );
+
+      // Store user id session
+      req.session.userId = user.id;
+
+      return { user };
     } catch (err) {
       if (err.code === '23505') {
         return {
@@ -178,14 +205,15 @@ export class UserResolver {
         };
       }
       console.error(err.message);
+      return {
+        errors: [
+          {
+            field: 'general',
+            message: 'An unexpected error occurred',
+          },
+        ],
+      };
     }
-
-    // store user id session
-    // This will set a cookie on the user
-    // and keep them logged in
-    req.session.userId = user.id;
-
-    return { user };
   }
 
   @Mutation(() => AuthResponse)

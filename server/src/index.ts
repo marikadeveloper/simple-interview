@@ -10,6 +10,7 @@ import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { DataSource } from 'typeorm';
 import { __prod__, COOKIE_NAME } from './constants';
+import { CandidateInvitation } from './entities/CandidateInvitation';
 import { User } from './entities/User';
 import { UserResolver } from './resolvers/user';
 
@@ -26,7 +27,7 @@ const main = async () => {
     logging: true,
     synchronize: true,
     migrations: [path.join(__dirname, './migrations/*')],
-    entities: [User],
+    entities: [User, CandidateInvitation],
   });
   await dataSource.initialize();
   await dataSource.runMigrations();

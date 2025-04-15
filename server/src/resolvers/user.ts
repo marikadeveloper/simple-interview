@@ -1,5 +1,4 @@
 import argon2 from 'argon2';
-import { CandidateInvitation } from 'src/entities/CandidateInvitation';
 import {
   Arg,
   Ctx,
@@ -9,12 +8,16 @@ import {
   ObjectType,
   Query,
   Resolver,
+  UseMiddleware,
 } from 'type-graphql';
 import { v4 } from 'uuid';
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
+import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { dataSource } from '../index';
+import { isAdmin } from '../middleware/isAdmin';
 import { MyContext } from '../types';
+import { handleRegistrationErrors } from '../utils/handleRegistrationErrors';
 import { sendEmail } from '../utils/sendEmail';
 import { validateRegister } from '../utils/validateRegister';
 
@@ -29,8 +32,6 @@ export class RegisterInput {
   @Field() email: string;
   @Field() password: string;
   @Field() fullName: string;
-  @Field() role: UserRole;
-  @Field() invitationId?: string;
 }
 
 @InputType()
@@ -152,11 +153,42 @@ export class UserResolver {
   }
 
   @Mutation(() => AuthResponse)
-  async register(
+  async adminRegister(
+    @Arg('input', () => RegisterInput) input: RegisterInput,
+    @Ctx() { req }: MyContext,
+  ) {
+    const errors = await validateRegister(input, UserRole.ADMIN);
+    if (errors) {
+      return { errors };
+    }
+
+    const hashedPassword = await argon2.hash(input.password);
+
+    try {
+      const user = await User.create({
+        email: input.email,
+        password: hashedPassword,
+        fullName: input.fullName,
+        role: UserRole.ADMIN,
+      }).save();
+
+      // Store user id session
+      req.session.userId = user.id;
+
+      return { user };
+    } catch (err) {
+      console.log(err);
+      console.log(err.__proto__);
+      return handleRegistrationErrors(err);
+    }
+  }
+
+  @Mutation(() => AuthResponse)
+  async candidateRegister(
     @Arg('input', () => RegisterInput) input: RegisterInput,
     @Ctx() { req }: MyContext,
   ): Promise<AuthResponse> {
-    const errors = await validateRegister(input);
+    const errors = await validateRegister(input, UserRole.CANDIDATE);
     if (errors) {
       return { errors };
     }
@@ -166,25 +198,25 @@ export class UserResolver {
     try {
       const user = await dataSource.transaction(
         async (transactionalEntityManager) => {
-          if (input.role === UserRole.CANDIDATE) {
-            const candidateInvitation =
-              await transactionalEntityManager.findOne(CandidateInvitation, {
-                where: { email: input.email, used: false },
-              });
+          const candidateInvitation = await transactionalEntityManager.findOne(
+            CandidateInvitation,
+            {
+              where: { email: input.email, used: false },
+            },
+          );
 
-            if (!candidateInvitation) {
-              throw new Error('Invalid invitation');
-            }
-
-            candidateInvitation.used = true;
-            await transactionalEntityManager.save(candidateInvitation);
+          if (!candidateInvitation) {
+            throw new Error('Invalid invitation');
           }
+
+          candidateInvitation.used = true;
+          await transactionalEntityManager.save(candidateInvitation);
 
           return transactionalEntityManager.save(User, {
             email: input.email,
             password: hashedPassword,
             fullName: input.fullName,
-            role: input.role,
+            role: UserRole.CANDIDATE,
           });
         },
       );
@@ -194,25 +226,46 @@ export class UserResolver {
 
       return { user };
     } catch (err) {
-      if (err.code === '23505') {
-        return {
-          errors: [
-            {
-              field: 'email',
-              message: 'email already taken',
-            },
-          ],
-        };
-      }
-      console.error(err.message);
-      return {
-        errors: [
-          {
-            field: 'general',
-            message: 'An unexpected error occurred',
-          },
-        ],
-      };
+      return handleRegistrationErrors(err);
+    }
+  }
+
+  @Mutation(() => AuthResponse)
+  @UseMiddleware(isAdmin)
+  async interviewerRegister(
+    @Arg('input', () => RegisterInput) input: RegisterInput,
+  ): Promise<AuthResponse> {
+    const errors = await validateRegister(input, UserRole.INTERVIEWER);
+    if (errors) {
+      return { errors };
+    }
+
+    const hashedPassword = await argon2.hash(input.password);
+
+    try {
+      const user = await User.create({
+        email: input.email,
+        password: hashedPassword,
+        fullName: input.fullName,
+        role: UserRole.INTERVIEWER,
+      });
+
+      // send email to interviewer
+      const anchorTag = `<a href="${process.env.CLIENT_URL}/login">Login</a>`;
+      await sendEmail(
+        input.email,
+        'Welcome to Simple Interview',
+        `
+        <p>Hi ${input.fullName},</p>
+        <p>A Simple Interview account has been set up for you. Click the link below to login:</p>
+        <div>${anchorTag}</div>
+        <p>Thank you for joining us!</p>
+        `,
+      );
+
+      return { user };
+    } catch (err) {
+      return handleRegistrationErrors(err);
     }
   }
 

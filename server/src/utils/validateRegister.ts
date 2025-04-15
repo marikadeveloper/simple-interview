@@ -1,9 +1,10 @@
-import { CandidateInvitation } from 'src/entities/CandidateInvitation';
+import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { FieldError, RegisterInput } from '../resolvers/user';
 
 export const validateRegister = async (
   input: RegisterInput,
+  role: UserRole,
 ): Promise<FieldError[] | null> => {
   if (!input.email.includes('@')) {
     return [
@@ -32,7 +33,7 @@ export const validateRegister = async (
     ];
   }
 
-  if (!input.role) {
+  if (!role) {
     return [
       {
         field: 'role',
@@ -41,11 +42,7 @@ export const validateRegister = async (
     ];
   }
 
-  if (
-    input.role !== 'admin' &&
-    input.role !== 'interviewer' &&
-    input.role !== 'candidate'
-  ) {
+  if (role !== 'admin' && role !== 'interviewer' && role !== 'candidate') {
     return [
       {
         field: 'role',
@@ -61,10 +58,10 @@ export const validateRegister = async (
    * - interviewer sign up must be approved by admin
    * - candidate can sign up only by email invitation
    */
-  if (input.role === 'admin') {
+  if (role === 'admin') {
     return validateAdmin();
   }
-  if (input.role === 'candidate') {
+  if (role === 'candidate') {
     return validateCandidate(input);
   }
 

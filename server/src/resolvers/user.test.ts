@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { DataSource } from 'typeorm';
+import { User, UserRole } from '../entities/User';
 import { graphqlCall } from '../test-utils/graphqlCall';
 import { testConn } from '../test-utils/testConn';
 import { RegisterInput } from './user';
@@ -21,6 +22,14 @@ afterAll(async () => {
   await conn.destroy();
 });
 
+const meQuery = `
+  query Me {
+    me {
+      id
+    }
+  }
+`;
+
 const adminRegisterMutation = `
   mutation Register($input: RegisterInput!) {
     adminRegister(input: $input) {
@@ -35,34 +44,96 @@ const adminRegisterMutation = `
   }
 `;
 
-/**
- * Problems:
- * - test is run twice
- */
-
 describe('UserResolver', () => {
-  it('should register a new admin', async () => {
-    const input: RegisterInput = {
-      email: faker.internet.email(),
-      fullName: faker.person.fullName(),
-      password: faker.internet.password(),
-    };
-    const response = await graphqlCall({
-      source: adminRegisterMutation,
-      variableValues: {
-        input,
-      },
+  describe('me', () => {
+    it('should return the current user', async () => {
+      const user = await User.create({
+        fullName: faker.person.fullName(),
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        role: UserRole.INTERVIEWER,
+      }).save();
+
+      const response = await graphqlCall({
+        source: meQuery,
+        userId: user.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          me: {
+            id: user.id,
+          },
+        },
+      });
     });
 
-    expect(response).toMatchObject({
-      data: {
-        adminRegister: {
-          user: {
-            id: expect.any(Number),
-          },
-          errors: null,
+    it('should return null if no user is logged in', async () => {
+      const response = await graphqlCall({
+        source: meQuery,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          me: null,
         },
-      },
+      });
+    });
+  });
+
+  describe('adminRegister', () => {
+    it('should register a new admin', async () => {
+      const input: RegisterInput = {
+        email: faker.internet.email(),
+        fullName: faker.person.fullName(),
+        password: faker.internet.password(),
+      };
+      const response = await graphqlCall({
+        source: adminRegisterMutation,
+        variableValues: {
+          input,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          adminRegister: {
+            user: {
+              id: expect.any(Number),
+            },
+            errors: null,
+          },
+        },
+      });
+    });
+
+    it('should not register a new admin if one is already registered', async () => {
+      const input: RegisterInput = {
+        email: faker.internet.email(),
+        fullName: faker.person.fullName(),
+        password: faker.internet.password(),
+      };
+
+      const response = await graphqlCall({
+        source: adminRegisterMutation,
+        variableValues: {
+          input,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          adminRegister: {
+            user: null,
+            errors: [
+              {
+                field: 'role',
+                message: 'only one admin is allowed',
+              },
+            ],
+          },
+        },
+      });
     });
   });
 });

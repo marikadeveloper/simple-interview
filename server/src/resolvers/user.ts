@@ -177,8 +177,6 @@ export class UserResolver {
 
       return { user };
     } catch (err) {
-      console.log(err);
-      console.log(err.__proto__);
       return handleRegistrationErrors(err);
     }
   }

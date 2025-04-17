@@ -5,31 +5,35 @@ import dotenv from 'dotenv';
 import express from 'express';
 import session from 'express-session';
 import Redis from 'ioredis';
-import path from 'path';
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { __prod__, COOKIE_NAME } from './constants';
-import { CandidateInvitation } from './entities/CandidateInvitation';
-import { User } from './entities/User';
+import { testConn } from './test-utils/testConn';
 import { createSchema } from './utils/createSchema';
+import { prodConn } from './utils/prodConn';
 
 dotenv.config(); // Load environment variables from .env file
 
 export let dataSource: DataSource;
 
 const main = async () => {
-  dataSource = new DataSource({
-    type: 'postgres',
-    database: 'simpleinterview',
-    username: process.env.POSTGRES_USER, // Use environment variable
-    password: process.env.POSTGRES_PASSWORD, // Use environment variable
-    logging: true,
-    synchronize: true,
-    migrations: [path.join(__dirname, './migrations/*')],
-    entities: [User, CandidateInvitation],
-  });
+  if (process.env.NODE_ENV === 'test') {
+    dataSource = testConn();
+  } else {
+    dataSource = prodConn();
+  }
   await dataSource.initialize();
   await dataSource.runMigrations();
+
+  const apolloServer = new ApolloServer({
+    schema: await createSchema(),
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+    }),
+  }); // start apollo server
+  await apolloServer.start();
 
   // create app
   const app = express();
@@ -66,16 +70,6 @@ const main = async () => {
       secret: process.env.REDIS_SECRET as string, // Use environment variable
     }),
   );
-
-  const apolloServer = new ApolloServer({
-    schema: await createSchema(),
-    context: ({ req, res }) => ({
-      req,
-      res,
-      redis,
-    }),
-  }); // start apollo server
-  await apolloServer.start();
 
   // apply middleware
   apolloServer.applyMiddleware({

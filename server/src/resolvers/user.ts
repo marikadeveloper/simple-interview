@@ -75,7 +75,7 @@ export class UserResolver {
     @Arg('input') input: ChangePasswordInput,
     @Ctx() { redis, req }: MyContext,
   ): Promise<AuthResponse> {
-    if (input.newPassword.length <= PASSWORD_MIN_LENGTH) {
+    if (input.newPassword.length < PASSWORD_MIN_LENGTH) {
       return {
         errors: [
           {
@@ -208,7 +208,7 @@ export class UserResolver {
           );
 
           if (!candidateInvitation) {
-            throw new Error('Invalid invitation');
+            throw new Error('invalid invitation');
           }
 
           candidateInvitation.used = true;

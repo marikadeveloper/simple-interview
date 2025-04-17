@@ -1,3 +1,4 @@
+import { FULL_NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '../constants';
 import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { FieldError, RegisterInput } from '../resolvers/user';
@@ -15,20 +16,20 @@ export const validateRegister = async (
     ];
   }
 
-  if (input.password.length <= 7) {
+  if (input.password.length < PASSWORD_MIN_LENGTH) {
     return [
       {
         field: 'password',
-        message: 'length must be greater than 7',
+        message: `Length must be at least ${PASSWORD_MIN_LENGTH} characters`,
       },
     ];
   }
 
-  if (input.fullName.length <= 2) {
+  if (input.fullName.length < FULL_NAME_MIN_LENGTH) {
     return [
       {
         field: 'fullName',
-        message: 'length must be greater than 2',
+        message: `Length must be at least ${FULL_NAME_MIN_LENGTH} characters`,
       },
     ];
   }
@@ -86,6 +87,7 @@ const validateAdmin = async (): Promise<FieldError[] | null> => {
   return null;
 };
 
+// TODO: This may be useless
 const validateCandidate = async (
   input: RegisterInput,
 ): Promise<FieldError[] | null> => {

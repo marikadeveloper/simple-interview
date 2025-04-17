@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { DataSource } from 'typeorm';
-import { PASSWORD_MIN_LENGTH } from '../constants';
+import { FULL_NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '../constants';
+import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { graphqlCall } from '../test-utils/graphqlCall';
 import { testConn } from '../test-utils/testConn';
@@ -54,6 +55,20 @@ const forgotPasswordMutation = `
 const adminRegisterMutation = `
   mutation Register($input: RegisterInput!) {
     adminRegister(input: $input) {
+      user {
+        id
+      }
+      errors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const candidateRegisterMutation = `
+  mutation CandidateRegister($input: RegisterInput!) {
+    candidateRegister(input: $input) {
       user {
         id
       }
@@ -329,6 +344,158 @@ describe('UserResolver', () => {
               {
                 field: 'role',
                 message: 'only one admin is allowed',
+              },
+            ],
+          },
+        },
+      });
+    });
+  });
+
+  describe('candidateRegister', () => {
+    it('given a correct input should register a new candidate', async () => {
+      // create an invite
+      const email = faker.internet.email();
+      await CandidateInvitation.create({
+        email,
+        used: false,
+      }).save();
+
+      // create the candidate
+      const candidateInput = {
+        email,
+        fullName: faker.person.fullName(),
+        password: faker.internet.password(),
+      };
+
+      const response = await graphqlCall({
+        source: candidateRegisterMutation,
+        variableValues: {
+          input: candidateInput,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          candidateRegister: {
+            user: {
+              id: expect.any(Number),
+            },
+            errors: null,
+          },
+        },
+      });
+    });
+
+    it('given an invalid email should return an error', async () => {
+      const candidateInput = {
+        email: 'invalid-email',
+        fullName: faker.person.fullName(),
+        password: faker.internet.password(),
+      };
+
+      const response = await graphqlCall({
+        source: candidateRegisterMutation,
+        variableValues: {
+          input: candidateInput,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          candidateRegister: {
+            user: null,
+            errors: [
+              {
+                field: 'email',
+                message: 'invalid email',
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('given a short password should return an error', async () => {
+      const candidateInput = {
+        email: faker.internet.email(),
+        fullName: faker.person.fullName(),
+        password: 'a'.repeat(PASSWORD_MIN_LENGTH - 1),
+      };
+
+      const response = await graphqlCall({
+        source: candidateRegisterMutation,
+        variableValues: {
+          input: candidateInput,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          candidateRegister: {
+            user: null,
+            errors: [
+              {
+                field: 'password',
+                message: `Length must be at least ${PASSWORD_MIN_LENGTH} characters`,
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('given a short full name should return an error', async () => {
+      const candidateInput = {
+        email: faker.internet.email(),
+        fullName: 'a',
+        password: faker.internet.password(),
+      };
+
+      const response = await graphqlCall({
+        source: candidateRegisterMutation,
+        variableValues: {
+          input: candidateInput,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          candidateRegister: {
+            user: null,
+            errors: [
+              {
+                field: 'fullName',
+                message: `Length must be at least ${FULL_NAME_MIN_LENGTH} characters`,
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('given no valid invite should return an error', async () => {
+      const candidateInput = {
+        email: faker.internet.email(),
+        fullName: faker.person.fullName(),
+        password: faker.internet.password(),
+      };
+
+      const response = await graphqlCall({
+        source: candidateRegisterMutation,
+        variableValues: {
+          input: candidateInput,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          candidateRegister: {
+            user: null,
+            errors: [
+              {
+                field: 'email',
+                message: 'invalid invitation',
               },
             ],
           },

@@ -11,7 +11,11 @@ import {
   UseMiddleware,
 } from 'type-graphql';
 import { v4 } from 'uuid';
-import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
+import {
+  COOKIE_NAME,
+  FORGET_PASSWORD_PREFIX,
+  PASSWORD_MIN_LENGTH,
+} from '../constants';
 import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { dataSource } from '../index';
@@ -71,12 +75,12 @@ export class UserResolver {
     @Arg('input') input: ChangePasswordInput,
     @Ctx() { redis, req }: MyContext,
   ): Promise<AuthResponse> {
-    if (input.newPassword.length <= 8) {
+    if (input.newPassword.length <= PASSWORD_MIN_LENGTH) {
       return {
         errors: [
           {
             field: 'newPassword',
-            message: 'Length must be greater than 8',
+            message: `Length must be at least ${PASSWORD_MIN_LENGTH} characters`,
           },
         ],
       };
@@ -84,6 +88,8 @@ export class UserResolver {
 
     const key = FORGET_PASSWORD_PREFIX + input.token;
     const userId = await redis.get(key);
+
+    console.log('userIdFromRedis', userId);
 
     if (!userId) {
       return {

@@ -33,6 +33,11 @@ export const graphqlCall = async ({
       res: {
         clearCookie: jest.fn(),
       },
+      redis: {
+        get: jest.fn().mockResolvedValue(userId ? userId.toString() : null),
+        set: jest.fn(),
+        del: jest.fn().mockResolvedValue(true),
+      },
     },
   });
 };

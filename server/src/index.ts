@@ -7,13 +7,11 @@ import session from 'express-session';
 import Redis from 'ioredis';
 import path from 'path';
 import 'reflect-metadata';
-import { buildSchema } from 'type-graphql';
 import { DataSource } from 'typeorm';
 import { __prod__, COOKIE_NAME } from './constants';
 import { CandidateInvitation } from './entities/CandidateInvitation';
 import { User } from './entities/User';
-import { CandidateInvitationResolver } from './resolvers/candidateInvitation';
-import { UserResolver } from './resolvers/user';
+import { createSchema } from './utils/createSchema';
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -70,10 +68,7 @@ const main = async () => {
   );
 
   const apolloServer = new ApolloServer({
-    schema: await buildSchema({
-      resolvers: [UserResolver, CandidateInvitationResolver],
-      validate: false,
-    }),
+    schema: await createSchema(),
     context: ({ req, res }) => ({
       req,
       res,

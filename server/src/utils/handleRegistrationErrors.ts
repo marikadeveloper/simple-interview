@@ -17,7 +17,7 @@ export const handleRegistrationErrors = (
     errors: [
       {
         field: 'general',
-        message: 'An unexpected error occurred',
+        message: err.message,
       },
     ],
   };

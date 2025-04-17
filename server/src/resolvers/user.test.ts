@@ -24,6 +24,12 @@ afterAll(async () => {
   await conn.destroy();
 });
 
+afterEach(async () => {
+  // Clear tables after each test
+  await CandidateInvitation.clear();
+  await User.clear();
+});
+
 const meQuery = `
   query Me {
     me {
@@ -80,21 +86,37 @@ const candidateRegisterMutation = `
   }
 `;
 
-const createFakeInterviewer = async () => {
-  const user = await User.create({
-    fullName: faker.person.fullName(),
-    email: faker.internet.email(),
-    password: faker.internet.password(),
-    role: UserRole.INTERVIEWER,
-  }).save();
+const interviewerRegisterMutation = `
+  mutation InterviewerRegister($input: RegisterInput!) {
+    interviewerRegister(input: $input) {
+      user {
+        id
+      }
+      errors {
+        field
+        message
+      }
+    }
+  }
+`;
 
+const fakeUserData = () => ({
+  email: faker.internet.email(),
+  fullName: faker.person.fullName(),
+  password: faker.internet.password(),
+});
+const createFakeUser = async (role: UserRole) => {
+  const user = await User.create({
+    ...fakeUserData(),
+    role,
+  }).save();
   return user;
 };
 
 describe('UserResolver', () => {
   describe('me', () => {
     it('should return the current user', async () => {
-      const user = await createFakeInterviewer();
+      const user = await createFakeUser(UserRole.INTERVIEWER);
 
       const response = await graphqlCall({
         source: meQuery,
@@ -125,7 +147,7 @@ describe('UserResolver', () => {
 
   describe('changePassword', () => {
     it('given correct input should change the password', async () => {
-      const user = await createFakeInterviewer();
+      const user = await createFakeUser(UserRole.INTERVIEWER);
 
       const newPassword = faker.internet.password();
 
@@ -153,7 +175,7 @@ describe('UserResolver', () => {
     });
 
     it('given short password should return error', async () => {
-      const user = await createFakeInterviewer();
+      const user = await createFakeUser(UserRole.INTERVIEWER);
 
       const response = await graphqlCall({
         source: changePasswordMutation,
@@ -239,7 +261,7 @@ describe('UserResolver', () => {
       jest.clearAllMocks(); // Reset mock call history before each test
     });
     it('given a valid user should send a reset password email', async () => {
-      const user = await createFakeInterviewer();
+      const user = await createFakeUser(UserRole.INTERVIEWER);
 
       const response = await graphqlCall({
         source: forgotPasswordMutation,
@@ -274,12 +296,6 @@ describe('UserResolver', () => {
   });
 
   describe('adminRegister', () => {
-    const adminInput = {
-      email: faker.internet.email(),
-      fullName: faker.person.fullName(),
-      password: faker.internet.password(),
-    };
-
     it('should handle unexpected errors', async () => {
       // Simulate an unexpected error
       jest.spyOn(User, 'create').mockImplementationOnce(() => {
@@ -289,7 +305,7 @@ describe('UserResolver', () => {
       const response = await graphqlCall({
         source: adminRegisterMutation,
         variableValues: {
-          input: adminInput,
+          input: fakeUserData(),
         },
       });
 
@@ -300,7 +316,7 @@ describe('UserResolver', () => {
             errors: [
               {
                 field: 'general',
-                message: 'An unexpected error occurred',
+                message: 'Unexpected error',
               },
             ],
           },
@@ -312,7 +328,7 @@ describe('UserResolver', () => {
       const response = await graphqlCall({
         source: adminRegisterMutation,
         variableValues: {
-          input: adminInput,
+          input: fakeUserData(),
         },
       });
 
@@ -329,10 +345,12 @@ describe('UserResolver', () => {
     });
 
     it('should not register a new admin if one is already registered', async () => {
+      await createFakeUser(UserRole.ADMIN);
+      // create a second admin
       const response = await graphqlCall({
         source: adminRegisterMutation,
         variableValues: {
-          input: adminInput,
+          input: fakeUserData(),
         },
       });
 
@@ -363,9 +381,8 @@ describe('UserResolver', () => {
 
       // create the candidate
       const candidateInput = {
+        ...fakeUserData(),
         email,
-        fullName: faker.person.fullName(),
-        password: faker.internet.password(),
       };
 
       const response = await graphqlCall({
@@ -389,9 +406,8 @@ describe('UserResolver', () => {
 
     it('given an invalid email should return an error', async () => {
       const candidateInput = {
+        ...fakeUserData(),
         email: 'invalid-email',
-        fullName: faker.person.fullName(),
-        password: faker.internet.password(),
       };
 
       const response = await graphqlCall({
@@ -418,8 +434,7 @@ describe('UserResolver', () => {
 
     it('given a short password should return an error', async () => {
       const candidateInput = {
-        email: faker.internet.email(),
-        fullName: faker.person.fullName(),
+        ...fakeUserData(),
         password: 'a'.repeat(PASSWORD_MIN_LENGTH - 1),
       };
 
@@ -447,9 +462,8 @@ describe('UserResolver', () => {
 
     it('given a short full name should return an error', async () => {
       const candidateInput = {
-        email: faker.internet.email(),
+        ...fakeUserData(),
         fullName: 'a',
-        password: faker.internet.password(),
       };
 
       const response = await graphqlCall({
@@ -476,9 +490,7 @@ describe('UserResolver', () => {
 
     it('given no valid invite should return an error', async () => {
       const candidateInput = {
-        email: faker.internet.email(),
-        fullName: faker.person.fullName(),
-        password: faker.internet.password(),
+        ...fakeUserData(),
       };
 
       const response = await graphqlCall({
@@ -494,10 +506,42 @@ describe('UserResolver', () => {
             user: null,
             errors: [
               {
-                field: 'email',
+                field: 'general',
                 message: 'invalid invitation',
               },
             ],
+          },
+        },
+      });
+    });
+  });
+
+  describe('interviewerRegister', () => {
+    it('given a correct input should register a new interviewer', async () => {
+      // get admin ID to log in
+      const admin = await createFakeUser(UserRole.ADMIN);
+
+      const interviewerInput = {
+        ...fakeUserData(),
+      };
+
+      const response = await graphqlCall({
+        source: interviewerRegisterMutation,
+        variableValues: {
+          input: interviewerInput,
+        },
+        userId: admin.id,
+      });
+
+      // TODO: response returns user as null
+
+      expect(response).toMatchObject({
+        data: {
+          interviewerRegister: {
+            user: {
+              id: expect.any(Number),
+            },
+            errors: null,
           },
         },
       });

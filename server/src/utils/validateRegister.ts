@@ -1,5 +1,4 @@
 import { FULL_NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '../constants';
-import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { FieldError, RegisterInput } from '../resolvers/user';
 
@@ -62,9 +61,9 @@ export const validateRegister = async (
   if (role === 'admin') {
     return validateAdmin();
   }
-  if (role === 'candidate') {
-    return validateCandidate(input);
-  }
+  // if (role === 'candidate') {
+  //   return validateCandidate(input);
+  // }
 
   return null;
 };
@@ -88,24 +87,24 @@ const validateAdmin = async (): Promise<FieldError[] | null> => {
 };
 
 // TODO: This may be useless
-const validateCandidate = async (
-  input: RegisterInput,
-): Promise<FieldError[] | null> => {
-  const invitation = await CandidateInvitation.findOne({
-    where: {
-      email: input.email,
-      used: false,
-    },
-  });
+// const validateCandidate = async (
+//   input: RegisterInput,
+// ): Promise<FieldError[] | null> => {
+//   const invitation = await CandidateInvitation.findOne({
+//     where: {
+//       email: input.email,
+//       used: false,
+//     },
+//   });
 
-  if (!invitation) {
-    return [
-      {
-        field: 'email',
-        message: 'invalid invitation',
-      },
-    ];
-  }
+//   if (!invitation) {
+//     return [
+//       {
+//         field: 'email',
+//         message: 'invalid invitation',
+//       },
+//     ];
+//   }
 
-  return null;
-};
+//   return null;
+// };

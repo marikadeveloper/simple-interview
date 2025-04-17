@@ -265,6 +265,8 @@ export class UserResolver {
         `,
       );
 
+      console.log('mokoko', user);
+
       return { user };
     } catch (err) {
       return handleRegistrationErrors(err);

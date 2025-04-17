@@ -159,6 +159,58 @@ describe('UserResolver', () => {
         },
       });
     });
+
+    it('given invalid token should return error', async () => {
+      const response = await graphqlCall({
+        source: changePasswordMutation,
+        variableValues: {
+          input: {
+            token: 'invalid-token',
+            newPassword: faker.internet.password(),
+          },
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          changePassword: {
+            errors: [
+              {
+                field: 'token',
+                message: 'Token expired or invalid',
+              },
+            ],
+            user: null,
+          },
+        },
+      });
+    });
+
+    it('given non-existent user should return error', async () => {
+      const response = await graphqlCall({
+        source: changePasswordMutation,
+        variableValues: {
+          input: {
+            token: 'valid-token',
+            newPassword: faker.internet.password(),
+          },
+        },
+        userId: -1, // Simulate a non-existent user
+      });
+      expect(response).toMatchObject({
+        data: {
+          changePassword: {
+            errors: [
+              {
+                field: 'token',
+                message: 'User no longer exists',
+              },
+            ],
+            user: null,
+          },
+        },
+      });
+    });
   });
 
   describe('adminRegister', () => {

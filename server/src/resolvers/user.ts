@@ -89,8 +89,6 @@ export class UserResolver {
     const key = FORGET_PASSWORD_PREFIX + input.token;
     const userId = await redis.get(key);
 
-    console.log('userIdFromRedis', userId);
-
     if (!userId) {
       return {
         errors: [

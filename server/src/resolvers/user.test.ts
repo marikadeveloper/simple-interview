@@ -4,7 +4,7 @@ import { PASSWORD_MIN_LENGTH } from '../constants';
 import { User, UserRole } from '../entities/User';
 import { graphqlCall } from '../test-utils/graphqlCall';
 import { testConn } from '../test-utils/testConn';
-import { RegisterInput } from './user';
+import { sendEmail } from '../utils/sendEmail';
 
 jest.mock('../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {
@@ -42,6 +42,12 @@ const changePasswordMutation = `
         id
       }
     }
+  }
+`;
+
+const forgotPasswordMutation = `
+  mutation ForgotPassword($email: String!) {
+    forgotPassword(email: $email)
   }
 `;
 
@@ -213,17 +219,85 @@ describe('UserResolver', () => {
     });
   });
 
+  describe('forgotPassword', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset mock call history before each test
+    });
+    it('given a valid user should send a reset password email', async () => {
+      const user = await createFakeInterviewer();
+
+      const response = await graphqlCall({
+        source: forgotPasswordMutation,
+        variableValues: {
+          email: user.email,
+        },
+      });
+
+      expect(sendEmail).toHaveBeenCalled();
+      expect(response).toMatchObject({
+        data: {
+          forgotPassword: true,
+        },
+      });
+    });
+
+    it('should ignore if user does not exist', async () => {
+      const response = await graphqlCall({
+        source: forgotPasswordMutation,
+        variableValues: {
+          email: 'nonexisting@email.it',
+        },
+      });
+
+      expect(sendEmail).not.toHaveBeenCalled();
+      expect(response).toMatchObject({
+        data: {
+          forgotPassword: true,
+        },
+      });
+    });
+  });
+
   describe('adminRegister', () => {
-    it('should register a new admin', async () => {
-      const input: RegisterInput = {
-        email: faker.internet.email(),
-        fullName: faker.person.fullName(),
-        password: faker.internet.password(),
-      };
+    const adminInput = {
+      email: faker.internet.email(),
+      fullName: faker.person.fullName(),
+      password: faker.internet.password(),
+    };
+
+    it('should handle unexpected errors', async () => {
+      // Simulate an unexpected error
+      jest.spyOn(User, 'create').mockImplementationOnce(() => {
+        throw new Error('Unexpected error');
+      });
+
       const response = await graphqlCall({
         source: adminRegisterMutation,
         variableValues: {
-          input,
+          input: adminInput,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          adminRegister: {
+            user: null,
+            errors: [
+              {
+                field: 'general',
+                message: 'An unexpected error occurred',
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should register a new admin', async () => {
+      const response = await graphqlCall({
+        source: adminRegisterMutation,
+        variableValues: {
+          input: adminInput,
         },
       });
 
@@ -240,16 +314,10 @@ describe('UserResolver', () => {
     });
 
     it('should not register a new admin if one is already registered', async () => {
-      const input: RegisterInput = {
-        email: faker.internet.email(),
-        fullName: faker.person.fullName(),
-        password: faker.internet.password(),
-      };
-
       const response = await graphqlCall({
         source: adminRegisterMutation,
         variableValues: {
-          input,
+          input: adminInput,
         },
       });
 

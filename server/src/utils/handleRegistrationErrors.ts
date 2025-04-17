@@ -13,7 +13,6 @@ export const handleRegistrationErrors = (
       ],
     };
   }
-  console.error(err.message);
   return {
     errors: [
       {

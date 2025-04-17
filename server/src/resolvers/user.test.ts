@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { DataSource } from 'typeorm';
+import { PASSWORD_MIN_LENGTH } from '../constants';
 import { User, UserRole } from '../entities/User';
 import { graphqlCall } from '../test-utils/graphqlCall';
 import { testConn } from '../test-utils/testConn';
@@ -58,15 +59,21 @@ const adminRegisterMutation = `
   }
 `;
 
+const createFakeInterviewer = async () => {
+  const user = await User.create({
+    fullName: faker.person.fullName(),
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+    role: UserRole.INTERVIEWER,
+  }).save();
+
+  return user;
+};
+
 describe('UserResolver', () => {
-  describe.skip('me', () => {
+  describe('me', () => {
     it('should return the current user', async () => {
-      const user = await User.create({
-        fullName: faker.person.fullName(),
-        email: faker.internet.email(),
-        password: faker.internet.password(),
-        role: UserRole.INTERVIEWER,
-      }).save();
+      const user = await createFakeInterviewer();
 
       const response = await graphqlCall({
         source: meQuery,
@@ -97,12 +104,7 @@ describe('UserResolver', () => {
 
   describe('changePassword', () => {
     it('given correct input should change the password', async () => {
-      const user = await User.create({
-        fullName: faker.person.fullName(),
-        email: faker.internet.email(),
-        password: faker.internet.password(),
-        role: UserRole.INTERVIEWER,
-      }).save();
+      const user = await createFakeInterviewer();
 
       const newPassword = faker.internet.password();
 
@@ -128,9 +130,38 @@ describe('UserResolver', () => {
         },
       });
     });
+
+    it('given short password should return error', async () => {
+      const user = await createFakeInterviewer();
+
+      const response = await graphqlCall({
+        source: changePasswordMutation,
+        variableValues: {
+          input: {
+            token: 'valid-token',
+            newPassword: 'a'.repeat(PASSWORD_MIN_LENGTH - 1),
+          },
+        },
+        userId: user.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          changePassword: {
+            errors: [
+              {
+                field: 'newPassword',
+                message: `Length must be at least ${PASSWORD_MIN_LENGTH} characters`,
+              },
+            ],
+            user: null,
+          },
+        },
+      });
+    });
   });
 
-  describe.skip('adminRegister', () => {
+  describe('adminRegister', () => {
     it('should register a new admin', async () => {
       const input: RegisterInput = {
         email: faker.internet.email(),

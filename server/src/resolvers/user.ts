@@ -20,6 +20,7 @@ import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { dataSource } from '../index';
 import { isAdmin } from '../middleware/isAdmin';
+import { isAuth } from '../middleware/isAuth';
 import { isValidRegistrationData } from '../middleware/isValidRegistrationData';
 import { MyContext } from '../types';
 import { handleRegistrationErrors } from '../utils/handleRegistrationErrors';
@@ -243,6 +244,7 @@ export class UserResolver {
   }
 
   @Mutation(() => AuthResponse)
+  @UseMiddleware(isAuth)
   @UseMiddleware(isAdmin)
   @UseMiddleware(isValidRegistrationData)
   async interviewerRegister(

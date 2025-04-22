@@ -545,5 +545,32 @@ describe('UserResolver', () => {
         },
       });
     });
+
+    it('should return error trying to register an interviewer without sign in as admin', async () => {
+      const interviewerInput = {
+        ...fakeUserData(),
+      };
+
+      const response = await graphqlCall({
+        source: interviewerRegisterMutation,
+        variableValues: {
+          input: interviewerInput,
+        },
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          interviewerRegister: {
+            user: null,
+            errors: [
+              {
+                field: 'general',
+                message: 'User not logged in',
+              },
+            ],
+          },
+        },
+      });
+    });
   });
 });

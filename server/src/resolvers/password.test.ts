@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { PASSWORD_MIN_LENGTH } from '../constants';
-import { CandidateInvitation } from '../entities/CandidateInvitation';
-import { User, UserRole } from '../entities/User';
+import { UserRole } from '../entities/User';
 import { graphqlCall } from '../test-utils/graphqlCall';
 import { createFakeUser } from '../test-utils/mockData';
 import { setupTestDB } from '../test-utils/testSetup';
@@ -16,12 +15,6 @@ jest.mock('../utils/sendEmail', () => ({
 // Set up the database connection before all tests
 beforeAll(async () => {
   await setupTestDB();
-});
-
-afterEach(async () => {
-  // Clear tables after each test
-  await CandidateInvitation.clear();
-  await User.clear();
 });
 
 const changePasswordMutation = `
@@ -71,6 +64,9 @@ describe('changePassword', () => {
         },
       },
     });
+
+    // clean up
+    await user.remove();
   });
 
   it('given short password should return error', async () => {
@@ -100,6 +96,9 @@ describe('changePassword', () => {
         },
       },
     });
+
+    // clean up
+    await user.remove();
   });
 
   it('given invalid token should return error', async () => {
@@ -175,6 +174,9 @@ describe('forgotPassword', () => {
         forgotPassword: true,
       },
     });
+
+    // clean up
+    await user.remove();
   });
 
   it('should ignore if user does not exist', async () => {

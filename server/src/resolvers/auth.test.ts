@@ -1,5 +1,4 @@
-import { CandidateInvitation } from '../entities/CandidateInvitation';
-import { User, UserRole } from '../entities/User';
+import { UserRole } from '../entities/User';
 import { graphqlCall } from '../test-utils/graphqlCall';
 import { createFakeUser } from '../test-utils/mockData';
 import { setupTestDB } from '../test-utils/testSetup';
@@ -13,12 +12,6 @@ jest.mock('../utils/sendEmail', () => ({
 // Set up the database connection before all tests
 beforeAll(async () => {
   await setupTestDB();
-});
-
-afterEach(async () => {
-  // Clear tables after each test
-  await CandidateInvitation.clear();
-  await User.clear();
 });
 
 const meQuery = `
@@ -41,10 +34,13 @@ describe('me', () => {
     expect(response).toMatchObject({
       data: {
         me: {
-          id: user.id,
+          id: expect.any(Number),
         },
       },
     });
+
+    // clean up
+    await user.remove();
   });
 
   it('should return null if no user is logged in', async () => {

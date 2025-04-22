@@ -113,10 +113,17 @@ describe('UserResolver', () => {
           },
         },
       });
+
+      // clean up
+      // @ts-ignore
+      if (response?.data?.adminRegister?.user?.id) {
+        // @ts-ignore
+        await User.delete(response.data.adminRegister.user.id);
+      }
     });
 
     it('should not register a new admin if one is already registered', async () => {
-      await createFakeUser(UserRole.ADMIN);
+      const admin = await createFakeUser(UserRole.ADMIN);
       // create a second admin
       const response = await graphqlCall({
         source: adminRegisterMutation,
@@ -138,6 +145,9 @@ describe('UserResolver', () => {
           },
         },
       });
+
+      // clean up
+      await admin.remove();
     });
   });
 
@@ -145,7 +155,7 @@ describe('UserResolver', () => {
     it('given a correct input should register a new candidate', async () => {
       // create an invite
       const email = faker.internet.email();
-      await CandidateInvitation.create({
+      const candidateInvitation = await CandidateInvitation.create({
         email,
         used: false,
       }).save();
@@ -173,6 +183,14 @@ describe('UserResolver', () => {
           },
         },
       });
+
+      // clean up
+      await candidateInvitation.remove();
+      // @ts-ignore
+      if (response?.data?.candidateRegister?.user?.id) {
+        // @ts-ignore
+        await User.delete(response.data.candidateRegister.user.id);
+      }
     });
 
     it('given an invalid email should return an error', async () => {
@@ -314,6 +332,14 @@ describe('UserResolver', () => {
           },
         },
       });
+
+      // clean up
+      // @ts-ignore
+      if (response?.data?.interviewerRegister?.user?.id) {
+        // @ts-ignore
+        await User.delete(response.data.interviewerRegister.user.id);
+      }
+      await admin.remove();
     });
 
     it('should return error trying to register an interviewer without sign in as admin', async () => {

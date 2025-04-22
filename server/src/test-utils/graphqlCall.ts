@@ -28,6 +28,9 @@ export const graphqlCall = async ({
       req: {
         session: {
           userId,
+          destroy: jest.fn((callback) => {
+            callback(userId ? null : 'DESTROY_TEST_ERROR');
+          }),
         },
       },
       res: {

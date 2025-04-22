@@ -52,6 +52,12 @@ const loginMutation = `
   }
 `;
 
+const logoutMutation = `
+  mutation Logout {
+    logout
+  }
+`;
+
 describe('me', () => {
   it('should return the current user', async () => {
     // Create user and track for cleanup
@@ -87,6 +93,27 @@ describe('me', () => {
             {
               field: 'general',
               message: 'not authenticated',
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should return an error if the user is not found', async () => {
+    const response = await graphqlCall({
+      source: meQuery,
+      userId: 9999, // Non-existent user ID
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        me: {
+          user: null,
+          errors: [
+            {
+              field: 'general',
+              message: 'user not found',
             },
           ],
         },
@@ -174,6 +201,37 @@ describe('login', () => {
             },
           ],
         },
+      },
+    });
+  });
+});
+
+describe('logout', () => {
+  it('should log out a user', async () => {
+    // Create user and track for cleanup
+    const user = await createFakeUser(UserRole.INTERVIEWER);
+    testUsers.push(user);
+
+    const response = await graphqlCall({
+      source: logoutMutation,
+      userId: user.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        logout: true,
+      },
+    });
+  });
+
+  it('should return an error if no user is logged in', async () => {
+    const response = await graphqlCall({
+      source: logoutMutation,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        logout: false,
       },
     });
   });

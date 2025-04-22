@@ -1,5 +1,6 @@
 import { FULL_NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '../constants';
-import { FieldError, RegisterInput } from '../resolvers/user';
+import { RegisterInput } from '../resolvers/registration.resolver';
+import { FieldError } from '../resolvers/user';
 
 export const validateRegister = async (
   input: RegisterInput,

@@ -1,9 +1,16 @@
 import { buildSchema } from 'type-graphql';
-import { CandidateInvitationResolver } from '../resolvers/candidateInvitation';
-import { UserResolver } from '../resolvers/user';
+import { AuthResolver } from '../resolvers/auth.resolver';
+import { CandidateInvitationResolver } from '../resolvers/candidateInvitation.resolver';
+import { PasswordResolver } from '../resolvers/password.resolver';
+import { RegistrationResolver } from '../resolvers/registration.resolver';
 
 export const createSchema = () =>
   buildSchema({
-    resolvers: [UserResolver, CandidateInvitationResolver],
+    resolvers: [
+      CandidateInvitationResolver,
+      AuthResolver,
+      PasswordResolver,
+      RegistrationResolver,
+    ],
     validate: false,
   });

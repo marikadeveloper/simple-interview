@@ -1,11 +1,10 @@
 import { faker } from '@faker-js/faker';
-import { DataSource } from 'typeorm';
 import { FULL_NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '../constants';
 import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { graphqlCall } from '../test-utils/graphqlCall';
-import { testConn } from '../test-utils/testConn';
-import { sendEmail } from '../utils/sendEmail';
+import { createFakeUser, fakeUserData } from '../test-utils/mockData';
+import { setupTestDB } from '../test-utils/testSetup';
 
 jest.mock('../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {
@@ -13,15 +12,9 @@ jest.mock('../utils/sendEmail', () => ({
   }),
 }));
 
-let conn: DataSource;
+// Set up the database connection before all tests
 beforeAll(async () => {
-  conn = testConn(); // Get connection config (drop: false by default)
-  await conn.initialize(); // Initialize connection for this test suite
-  // await conn.runMigrations(); // Remove: Migrations/schema sync handled by globalSetup
-});
-
-afterAll(async () => {
-  await conn.destroy();
+  await setupTestDB();
 });
 
 afterEach(async () => {
@@ -29,34 +22,6 @@ afterEach(async () => {
   await CandidateInvitation.clear();
   await User.clear();
 });
-
-const meQuery = `
-  query Me {
-    me {
-      id
-    }
-  }
-`;
-
-const changePasswordMutation = `
-  mutation ChangePassword($input: ChangePasswordInput!) {
-    changePassword(input: $input) {
-      errors {
-        field
-        message
-      }
-      user {
-        id
-      }
-    }
-  }
-`;
-
-const forgotPasswordMutation = `
-  mutation ForgotPassword($email: String!) {
-    forgotPassword(email: $email)
-  }
-`;
 
 const adminRegisterMutation = `
   mutation Register($input: RegisterInput!) {
@@ -100,202 +65,7 @@ const interviewerRegisterMutation = `
   }
 `;
 
-const fakeUserData = () => ({
-  email: faker.internet.email(),
-  fullName: faker.person.fullName(),
-  password: faker.internet.password(),
-});
-
-const createFakeUser = async (role: UserRole) => {
-  const user = await User.create({
-    ...fakeUserData(),
-    role,
-  }).save();
-  return user;
-};
-
 describe('UserResolver', () => {
-  describe('me', () => {
-    it('should return the current user', async () => {
-      const user = await createFakeUser(UserRole.INTERVIEWER);
-
-      const response = await graphqlCall({
-        source: meQuery,
-        userId: user.id,
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          me: {
-            id: user.id,
-          },
-        },
-      });
-    });
-
-    it('should return null if no user is logged in', async () => {
-      const response = await graphqlCall({
-        source: meQuery,
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          me: null,
-        },
-      });
-    });
-  });
-
-  describe('changePassword', () => {
-    it('given correct input should change the password', async () => {
-      const user = await createFakeUser(UserRole.INTERVIEWER);
-
-      const newPassword = faker.internet.password();
-
-      const response = await graphqlCall({
-        source: changePasswordMutation,
-        variableValues: {
-          input: {
-            token: 'valid-token',
-            newPassword,
-          },
-        },
-        userId: user.id,
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          changePassword: {
-            errors: null,
-            user: {
-              id: user.id,
-            },
-          },
-        },
-      });
-    });
-
-    it('given short password should return error', async () => {
-      const user = await createFakeUser(UserRole.INTERVIEWER);
-
-      const response = await graphqlCall({
-        source: changePasswordMutation,
-        variableValues: {
-          input: {
-            token: 'valid-token',
-            newPassword: 'a'.repeat(PASSWORD_MIN_LENGTH - 1),
-          },
-        },
-        userId: user.id,
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          changePassword: {
-            errors: [
-              {
-                field: 'newPassword',
-                message: `Length must be at least ${PASSWORD_MIN_LENGTH} characters`,
-              },
-            ],
-            user: null,
-          },
-        },
-      });
-    });
-
-    it('given invalid token should return error', async () => {
-      const response = await graphqlCall({
-        source: changePasswordMutation,
-        variableValues: {
-          input: {
-            token: 'invalid-token',
-            newPassword: faker.internet.password(),
-          },
-        },
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          changePassword: {
-            errors: [
-              {
-                field: 'token',
-                message: 'Token expired or invalid',
-              },
-            ],
-            user: null,
-          },
-        },
-      });
-    });
-
-    it('given non-existent user should return error', async () => {
-      const response = await graphqlCall({
-        source: changePasswordMutation,
-        variableValues: {
-          input: {
-            token: 'valid-token',
-            newPassword: faker.internet.password(),
-          },
-        },
-        userId: -1, // Simulate a non-existent user
-      });
-      expect(response).toMatchObject({
-        data: {
-          changePassword: {
-            errors: [
-              {
-                field: 'token',
-                message: 'User no longer exists',
-              },
-            ],
-            user: null,
-          },
-        },
-      });
-    });
-  });
-
-  describe('forgotPassword', () => {
-    beforeEach(() => {
-      jest.clearAllMocks(); // Reset mock call history before each test
-    });
-    it('given a valid user should send a reset password email', async () => {
-      const user = await createFakeUser(UserRole.INTERVIEWER);
-
-      const response = await graphqlCall({
-        source: forgotPasswordMutation,
-        variableValues: {
-          email: user.email,
-        },
-      });
-
-      expect(sendEmail).toHaveBeenCalled();
-      expect(response).toMatchObject({
-        data: {
-          forgotPassword: true,
-        },
-      });
-    });
-
-    it('should ignore if user does not exist', async () => {
-      const response = await graphqlCall({
-        source: forgotPasswordMutation,
-        variableValues: {
-          email: 'nonexisting@email.it',
-        },
-      });
-
-      expect(sendEmail).not.toHaveBeenCalled();
-      expect(response).toMatchObject({
-        data: {
-          forgotPassword: true,
-        },
-      });
-    });
-  });
-
   describe('adminRegister', () => {
     it('should handle unexpected errors', async () => {
       // Simulate an unexpected error

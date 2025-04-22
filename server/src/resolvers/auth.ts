@@ -21,12 +21,33 @@ export class AuthInput {
 
 @Resolver()
 export class AuthResolver {
-  @Query(() => User, { nullable: true })
-  me(@Ctx() { req }: MyContext): Promise<User | null> {
+  @Query(() => AuthResponse, { nullable: true })
+  async me(@Ctx() { req }: MyContext): Promise<AuthResponse> {
     if (!req.session.userId) {
-      return Promise.resolve(null);
+      return {
+        errors: [
+          {
+            field: 'general',
+            message: 'not authenticated',
+          },
+        ],
+      };
     }
-    return User.findOne({ where: { id: req.session.userId } });
+    const user = await User.findOne({ where: { id: req.session.userId } });
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: 'general',
+            message: 'user not found',
+          },
+        ],
+      };
+    }
+    return {
+      user,
+    };
   }
 
   @Mutation(() => AuthResponse)

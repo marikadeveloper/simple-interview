@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { PASSWORD_MIN_LENGTH } from '../constants';
-import { UserRole } from '../entities/User';
+import { User, UserRole } from '../entities/User';
 import { graphqlCall } from '../test-utils/graphqlCall';
 import { createFakeUser } from '../test-utils/mockData';
 import { setupTestDB } from '../test-utils/testSetup';
@@ -12,9 +12,21 @@ jest.mock('../utils/sendEmail', () => ({
   }),
 }));
 
+// Track users created during tests for reliable cleanup
+let testUsers: User[] = [];
+
 // Set up the database connection before all tests
 beforeAll(async () => {
   await setupTestDB();
+});
+
+// Clean up after each test to prevent test pollution
+afterEach(async () => {
+  if (testUsers.length > 0) {
+    await Promise.all(testUsers.map((user) => User.delete(user.id)));
+    testUsers = [];
+  }
+  jest.clearAllMocks();
 });
 
 const changePasswordMutation = `
@@ -40,6 +52,7 @@ const forgotPasswordMutation = `
 describe('changePassword', () => {
   it('given correct input should change the password', async () => {
     const user = await createFakeUser(UserRole.INTERVIEWER);
+    testUsers.push(user); // Track for cleanup
 
     const newPassword = faker.internet.password();
 
@@ -64,13 +77,11 @@ describe('changePassword', () => {
         },
       },
     });
-
-    // clean up
-    await user.remove();
   });
 
   it('given short password should return error', async () => {
     const user = await createFakeUser(UserRole.INTERVIEWER);
+    testUsers.push(user); // Track for cleanup
 
     const response = await graphqlCall({
       source: changePasswordMutation,
@@ -96,9 +107,6 @@ describe('changePassword', () => {
         },
       },
     });
-
-    // clean up
-    await user.remove();
   });
 
   it('given invalid token should return error', async () => {
@@ -155,11 +163,9 @@ describe('changePassword', () => {
 });
 
 describe('forgotPassword', () => {
-  beforeEach(() => {
-    jest.clearAllMocks(); // Reset mock call history before each test
-  });
   it('given a valid user should send a reset password email', async () => {
     const user = await createFakeUser(UserRole.INTERVIEWER);
+    testUsers.push(user); // Track for cleanup
 
     const response = await graphqlCall({
       source: forgotPasswordMutation,
@@ -174,9 +180,6 @@ describe('forgotPassword', () => {
         forgotPassword: true,
       },
     });
-
-    // clean up
-    await user.remove();
   });
 
   it('should ignore if user does not exist', async () => {

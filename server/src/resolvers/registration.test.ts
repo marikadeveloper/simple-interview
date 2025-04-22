@@ -12,15 +12,29 @@ jest.mock('../utils/sendEmail', () => ({
   }),
 }));
 
+// Track entities created during tests for reliable cleanup
+let testUsers: User[] = [];
+let testInvitations: CandidateInvitation[] = [];
+
 // Set up the database connection before all tests
 beforeAll(async () => {
   await setupTestDB();
 });
 
 afterEach(async () => {
-  // Clear tables after each test
-  await CandidateInvitation.clear();
-  await User.clear();
+  // Clean up in reverse order (users first, then invitations)
+  // to avoid foreign key constraint issues
+  if (testUsers.length > 0) {
+    await Promise.all(testUsers.map((user) => User.delete(user.id)));
+    testUsers = [];
+  }
+
+  if (testInvitations.length > 0) {
+    await Promise.all(
+      testInvitations.map((invite) => CandidateInvitation.delete(invite.id)),
+    );
+    testInvitations = [];
+  }
 });
 
 const adminRegisterMutation = `
@@ -93,6 +107,9 @@ describe('UserResolver', () => {
           },
         },
       });
+
+      // Restore the original implementation
+      jest.restoreAllMocks();
     });
 
     it('should register a new admin', async () => {
@@ -114,17 +131,22 @@ describe('UserResolver', () => {
         },
       });
 
-      // clean up
+      // Add to cleanup list
       // @ts-ignore
       if (response?.data?.adminRegister?.user?.id) {
-        // @ts-ignore
-        await User.delete(response.data.adminRegister.user.id);
+        const user = await User.findOne({
+          // @ts-ignore
+          where: { id: response.data.adminRegister.user.id },
+        });
+        if (user) testUsers.push(user);
       }
     });
 
     it('should not register a new admin if one is already registered', async () => {
       const admin = await createFakeUser(UserRole.ADMIN);
-      // create a second admin
+      testUsers.push(admin);
+
+      // Try to create a second admin
       const response = await graphqlCall({
         source: adminRegisterMutation,
         variableValues: {
@@ -145,22 +167,20 @@ describe('UserResolver', () => {
           },
         },
       });
-
-      // clean up
-      await admin.remove();
     });
   });
 
   describe('candidateRegister', () => {
     it('given a correct input should register a new candidate', async () => {
-      // create an invite
+      // Create an invite
       const email = faker.internet.email();
       const candidateInvitation = await CandidateInvitation.create({
         email,
         used: false,
       }).save();
+      testInvitations.push(candidateInvitation);
 
-      // create the candidate
+      // Create the candidate
       const candidateInput = {
         ...fakeUserData(),
         email,
@@ -184,12 +204,14 @@ describe('UserResolver', () => {
         },
       });
 
-      // clean up
-      await candidateInvitation.remove();
+      // Add to cleanup list
       // @ts-ignore
       if (response?.data?.candidateRegister?.user?.id) {
-        // @ts-ignore
-        await User.delete(response.data.candidateRegister.user.id);
+        const user = await User.findOne({
+          // @ts-ignore
+          where: { id: response.data.candidateRegister.user.id },
+        });
+        if (user) testUsers.push(user);
       }
     });
 
@@ -307,8 +329,9 @@ describe('UserResolver', () => {
 
   describe('interviewerRegister', () => {
     it('given a correct input should register a new interviewer', async () => {
-      // get admin ID to log in
+      // Get admin ID to log in
       const admin = await createFakeUser(UserRole.ADMIN);
+      testUsers.push(admin);
 
       const interviewerInput = {
         ...fakeUserData(),
@@ -333,13 +356,15 @@ describe('UserResolver', () => {
         },
       });
 
-      // clean up
+      // Add to cleanup list
       // @ts-ignore
       if (response?.data?.interviewerRegister?.user?.id) {
-        // @ts-ignore
-        await User.delete(response.data.interviewerRegister.user.id);
+        const user = await User.findOne({
+          // @ts-ignore
+          where: { id: response.data.interviewerRegister.user.id },
+        });
+        if (user) testUsers.push(user);
       }
-      await admin.remove();
     });
 
     it('should return error trying to register an interviewer without sign in as admin', async () => {

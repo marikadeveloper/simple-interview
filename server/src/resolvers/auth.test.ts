@@ -1,4 +1,5 @@
 import { User, UserRole } from '../entities/User';
+import { dataSource } from '../index';
 import { graphqlCall } from '../test-utils/graphqlCall';
 import { createFakeUser } from '../test-utils/mockData';
 import { setupTestDB } from '../test-utils/testSetup';
@@ -14,6 +15,13 @@ let testUsers: User[] = [];
 
 beforeAll(async () => {
   await setupTestDB();
+});
+
+// Close database connections after all tests
+afterAll(async () => {
+  if (dataSource && dataSource.isInitialized) {
+    await dataSource.destroy();
+  }
 });
 
 afterEach(async () => {

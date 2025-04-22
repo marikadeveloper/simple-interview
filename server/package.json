@@ -55,6 +55,7 @@
     "start2": "ts-node src/index.ts",
     "db:setup": "ts-node ./src/test-utils/setup.ts",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch"
   }
 }

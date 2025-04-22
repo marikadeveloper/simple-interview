@@ -20,10 +20,10 @@ import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { User, UserRole } from '../entities/User';
 import { dataSource } from '../index';
 import { isAdmin } from '../middleware/isAdmin';
+import { isValidRegistrationData } from '../middleware/isValidRegistrationData';
 import { MyContext } from '../types';
 import { handleRegistrationErrors } from '../utils/handleRegistrationErrors';
 import { sendEmail } from '../utils/sendEmail';
-import { validateRegister } from '../utils/validateRegister';
 
 @InputType()
 export class AuthInput {
@@ -157,13 +157,27 @@ export class UserResolver {
   }
 
   @Mutation(() => AuthResponse)
+  @UseMiddleware(isValidRegistrationData)
   async adminRegister(
     @Arg('input', () => RegisterInput) input: RegisterInput,
     @Ctx() { req }: MyContext,
   ) {
-    const errors = await validateRegister(input, UserRole.ADMIN);
-    if (errors) {
-      return { errors };
+    // check if there is already an admin
+    const adminCount = await User.count({
+      where: {
+        role: UserRole.ADMIN,
+      },
+    });
+
+    if (adminCount > 0) {
+      return {
+        errors: [
+          {
+            field: 'role',
+            message: 'only one admin is allowed',
+          },
+        ],
+      };
     }
 
     const hashedPassword = await argon2.hash(input.password);
@@ -186,15 +200,11 @@ export class UserResolver {
   }
 
   @Mutation(() => AuthResponse)
+  @UseMiddleware(isValidRegistrationData)
   async candidateRegister(
     @Arg('input', () => RegisterInput) input: RegisterInput,
     @Ctx() { req }: MyContext,
   ): Promise<AuthResponse> {
-    const errors = await validateRegister(input, UserRole.CANDIDATE);
-    if (errors) {
-      return { errors };
-    }
-
     const hashedPassword = await argon2.hash(input.password);
 
     try {
@@ -234,14 +244,10 @@ export class UserResolver {
 
   @Mutation(() => AuthResponse)
   @UseMiddleware(isAdmin)
+  @UseMiddleware(isValidRegistrationData)
   async interviewerRegister(
     @Arg('input', () => RegisterInput) input: RegisterInput,
   ): Promise<AuthResponse> {
-    const errors = await validateRegister(input, UserRole.INTERVIEWER);
-    if (errors) {
-      return { errors };
-    }
-
     const hashedPassword = await argon2.hash(input.password);
 
     try {
@@ -250,7 +256,7 @@ export class UserResolver {
         password: hashedPassword,
         fullName: input.fullName,
         role: UserRole.INTERVIEWER,
-      });
+      }).save();
 
       // send email to interviewer
       const anchorTag = `<a href="${process.env.CLIENT_URL}/login">Login</a>`;
@@ -264,8 +270,6 @@ export class UserResolver {
         <p>Thank you for joining us!</p>
         `,
       );
-
-      console.log('mokoko', user);
 
       return { user };
     } catch (err) {

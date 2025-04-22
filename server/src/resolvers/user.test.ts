@@ -105,6 +105,7 @@ const fakeUserData = () => ({
   fullName: faker.person.fullName(),
   password: faker.internet.password(),
 });
+
 const createFakeUser = async (role: UserRole) => {
   const user = await User.create({
     ...fakeUserData(),
@@ -532,8 +533,6 @@ describe('UserResolver', () => {
         },
         userId: admin.id,
       });
-
-      // TODO: response returns user as null
 
       expect(response).toMatchObject({
         data: {

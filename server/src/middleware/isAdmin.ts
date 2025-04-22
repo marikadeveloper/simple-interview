@@ -1,20 +1,23 @@
 import { MiddlewareFn } from 'type-graphql';
-import { dataSource } from '../index';
+import { User, UserRole } from '../entities/User';
 import { MyContext } from '../types';
 
 export const isAdmin: MiddlewareFn<MyContext> = async ({ context }, next) => {
-  const user = context.req.session.userId;
+  const userId = context.req.session.userId;
 
-  if (!user) {
-    throw new Error('not authenticated');
-  }
+  const admin = await User.findOne({
+    where: { id: userId, role: UserRole.ADMIN },
+  });
 
-  const userRole = await dataSource
-    .getRepository('User')
-    .findOne({ where: { id: user } });
-
-  if (!userRole || userRole.role !== 'ADMIN') {
-    throw new Error('not authorized');
+  if (!admin) {
+    return {
+      errors: [
+        {
+          field: 'general',
+          message: 'User is not an admin',
+        },
+      ],
+    };
   }
 
   return next();

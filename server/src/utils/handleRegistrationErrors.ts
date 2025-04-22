@@ -13,12 +13,11 @@ export const handleRegistrationErrors = (
       ],
     };
   }
-  console.error(err.message);
   return {
     errors: [
       {
         field: 'general',
-        message: 'An unexpected error occurred',
+        message: err.message,
       },
     ],
   };

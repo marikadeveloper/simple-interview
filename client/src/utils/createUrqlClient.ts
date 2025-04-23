@@ -91,7 +91,7 @@ export const createUrqlClient = () => {
                 cache,
                 { query: MeDocument },
                 _result,
-                () => ({ me: null }),
+                () => ({ me: { user: null } }),
               );
             },
 

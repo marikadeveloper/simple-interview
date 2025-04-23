@@ -30,7 +30,7 @@ export const Header = () => {
             <Link
               to='/dashboard'
               className='text-xl font-bold'>
-              Interview Platform
+              Simple Interview
             </Link>
 
             {/* Desktop navigation */}

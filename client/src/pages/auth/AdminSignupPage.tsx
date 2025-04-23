@@ -1,6 +1,6 @@
 import { useAdminRegisterMutation } from '@/generated/graphql';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 export default function AdminSignupPage() {
@@ -12,6 +12,10 @@ export default function AdminSignupPage() {
 
   const [, adminRegister] = useAdminRegisterMutation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,9 +55,9 @@ export default function AdminSignupPage() {
           </p>
         </div>
 
-        {errors.general && (
+        {(errors.general || errors.role) && (
           <div className='rounded border border-destructive bg-destructive/10 p-3 text-center text-sm text-destructive'>
-            {errors.general}
+            {errors.general || errors.role}
           </div>
         )}
 

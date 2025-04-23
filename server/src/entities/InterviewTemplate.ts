@@ -9,46 +9,30 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Interview } from './Interview';
-
-export enum UserRole {
-  ADMIN = 'admin',
-  INTERVIEWER = 'interviewer',
-  CANDIDATE = 'candidate',
-}
+import { Question } from './Question';
 
 @ObjectType()
 @Entity()
-export class User extends BaseEntity {
+export class InterviewTemplate extends BaseEntity {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Field(() => String)
   @Column()
-  fullName!: string;
+  name!: string;
 
   @Field(() => String)
-  @Column({ unique: true })
-  email!: string;
-
-  @Column()
-  password!: string;
-
-  @Field(() => String)
-  @Column({
-    type: 'enum',
-    enum: UserRole,
-  })
-  role!: UserRole;
+  @UpdateDateColumn({ type: 'date' })
+  updatedAt: Date;
 
   @Field(() => String)
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @Field(() => String)
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @OneToMany(() => Question, (question) => question.interviewTemplate)
+  questions: Question[];
 
-  @OneToMany(() => Interview, (interview) => interview.user)
+  @OneToMany(() => Interview, (interview) => interview.interviewTemplate)
   interviews: Interview[];
 }

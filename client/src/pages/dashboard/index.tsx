@@ -1,27 +1,21 @@
+import { PageTitle } from '@/components/PageTitle';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <div className='min-h-screen bg-background p-8'>
-      <div className='mx-auto max-w-5xl'>
-        <div className='mb-8 flex items-center justify-between'>
-          <div>
-            <h1 className='text-3xl font-bold tracking-tight'>Dashboard</h1>
-            <p className='text-muted-foreground'>
-              Welcome back, {user?.fullName}
-            </p>
-          </div>
-
-          <button
-            onClick={() => logout()}
-            className='rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90'>
-            Logout
-          </button>
+    <>
+      <div className='mb-8 flex items-center justify-between'>
+        <div>
+          <PageTitle>Dashboard</PageTitle>
+          <p className='text-muted-foreground'>
+            Welcome back, {user?.fullName}
+          </p>
         </div>
+      </div>
 
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+      {/* <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
           <div className='rounded-lg border bg-card p-6 shadow-sm'>
             <h2 className='mb-2 text-xl font-semibold'>Account Information</h2>
             <div className='space-y-2'>
@@ -57,8 +51,7 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </div> */}
+    </>
   );
 }

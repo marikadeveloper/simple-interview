@@ -12,11 +12,12 @@ import {
   useMeQuery,
 } from '../generated/graphql';
 
+export type UserRole = 'admin' | 'interviewer' | 'candidate';
 type User = {
   id: string;
   email: string;
   fullName: string;
-  role: string;
+  role: UserRole;
 };
 
 interface AuthContextType {

@@ -1,15 +1,22 @@
-import { PropsWithChildren } from 'react';
 import { Navigate } from 'react-router';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, UserRole } from '../contexts/AuthContext';
 
-export const ProtectedRoute: React.FC<PropsWithChildren> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedUserRoles?: UserRole[];
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  allowedUserRoles,
+}) => {
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated) {
+  if (!user || (allowedUserRoles && !allowedUserRoles.includes(user.role))) {
     return (
       <Navigate
         to='/login'

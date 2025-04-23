@@ -1,0 +1,17 @@
+mutation AdminRegister($input: RegisterInput!) {
+  adminRegister(input: $input) {
+    ...AuthResponse
+  }
+}
+
+mutation InterviewerRegister($input: RegisterInput!) {
+  interviewerRegister(input: $input) {
+    ...AuthResponse
+  }
+}
+
+mutation CandidateRegister($input: RegisterInput!) {
+  candidateRegister(input: $input) {
+    ...AuthResponse
+  }
+}

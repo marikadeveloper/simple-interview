@@ -1,0 +1,15 @@
+mutation SaveKeystrokes($input: SaveKeystrokesInput!) {
+  saveKeystrokes(input: $input)
+}
+
+query GetKeystrokes($answerId: Float!) {
+  getKeystrokes(answerId: $answerId) {
+    id
+    type
+    value
+    position
+    length
+    timestamp
+    relativeTimestamp
+  }
+}

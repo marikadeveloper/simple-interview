@@ -1,8 +1,8 @@
 import { Arg, Mutation, Resolver, UseMiddleware } from 'type-graphql';
-import { CandidateInvitation } from '../entities/CandidateInvitation';
-import { isAdminOrInterviewer } from '../middleware/isAdminOrInterviewer';
-import { isAuth } from '../middleware/isAuth';
-import { sendEmail } from '../utils/sendEmail';
+import { CandidateInvitation } from '../../entities/CandidateInvitation';
+import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
+import { isAuth } from '../../middleware/isAuth';
+import { sendEmail } from '../../utils/sendEmail';
 
 const CLIENT_URL = process.env.CLIENT_URL;
 

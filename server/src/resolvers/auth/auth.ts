@@ -1,23 +1,10 @@
 import argon2 from 'argon2';
-import {
-  Arg,
-  Ctx,
-  Field,
-  InputType,
-  Mutation,
-  Query,
-  Resolver,
-} from 'type-graphql';
-import { COOKIE_NAME } from '../constants';
-import { User } from '../entities/User';
-import { MyContext } from '../types';
-import { AuthResponse } from './user';
-
-@InputType()
-export class AuthInput {
-  @Field() email: string;
-  @Field() password: string;
-}
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import { COOKIE_NAME } from '../../constants';
+import { User } from '../../entities/User';
+import { MyContext } from '../../types';
+import { AuthResponse } from '../user';
+import { AuthInput } from './auth-types';
 
 @Resolver()
 export class AuthResolver {

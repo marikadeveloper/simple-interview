@@ -1,30 +1,16 @@
 import argon2 from 'argon2';
-import {
-  Arg,
-  Ctx,
-  Field,
-  InputType,
-  Mutation,
-  Resolver,
-  UseMiddleware,
-} from 'type-graphql';
-import { CandidateInvitation } from '../entities/CandidateInvitation';
-import { User, UserRole } from '../entities/User';
-import { dataSource } from '../index';
-import { isAdmin } from '../middleware/isAdmin';
-import { isAuth } from '../middleware/isAuth';
-import { isValidRegistrationData } from '../middleware/isValidRegistrationData';
-import { MyContext } from '../types';
-import { handleRegistrationErrors } from '../utils/handleRegistrationErrors';
-import { sendEmail } from '../utils/sendEmail';
-import { AuthResponse } from './user';
-
-@InputType()
-export class RegisterInput {
-  @Field() email: string;
-  @Field() password: string;
-  @Field() fullName: string;
-}
+import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
+import { dataSource } from '../..';
+import { CandidateInvitation } from '../../entities/CandidateInvitation';
+import { User, UserRole } from '../../entities/User';
+import { isAdmin } from '../../middleware/isAdmin';
+import { isAuth } from '../../middleware/isAuth';
+import { isValidRegistrationData } from '../../middleware/isValidRegistrationData';
+import { MyContext } from '../../types';
+import { handleRegistrationErrors } from '../../utils/handleRegistrationErrors';
+import { sendEmail } from '../../utils/sendEmail';
+import { AuthResponse } from '../user';
+import { RegisterInput } from './registration-types';
 
 @Resolver()
 export class RegistrationResolver {

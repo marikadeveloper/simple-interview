@@ -1,8 +1,9 @@
 import { buildSchema } from 'type-graphql';
-import { AuthResolver } from '../resolvers/auth';
-import { CandidateInvitationResolver } from '../resolvers/candidateInvitation';
-import { PasswordResolver } from '../resolvers/password';
-import { RegistrationResolver } from '../resolvers/registration';
+import { AuthResolver } from '../resolvers/auth/auth';
+import { CandidateInvitationResolver } from '../resolvers/candidateInvitation/candidateInvitation';
+import { KeystrokeResolver } from '../resolvers/keystroke/keystroke';
+import { PasswordResolver } from '../resolvers/password/password';
+import { RegistrationResolver } from '../resolvers/registration/registration';
 
 export const createSchema = () =>
   buildSchema({
@@ -11,6 +12,7 @@ export const createSchema = () =>
       AuthResolver,
       PasswordResolver,
       RegistrationResolver,
+      KeystrokeResolver,
     ],
     validate: false,
   });

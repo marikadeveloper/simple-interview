@@ -4,9 +4,11 @@ import {
   Column,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Interview } from './Interview';
+import { Keystroke } from './Keystroke';
 import { Question } from './Question';
 
 @ObjectType()
@@ -27,4 +29,12 @@ export class Answer extends BaseEntity {
   @Field(() => Interview)
   @ManyToOne(() => Interview, (interview) => interview.answers)
   interview!: Interview;
+
+  @Field(() => [Keystroke], { nullable: true })
+  @OneToMany(() => Keystroke, (keystroke) => keystroke.answer)
+  keystrokes: Keystroke[];
+
+  @Field(() => Boolean, { defaultValue: false })
+  @Column({ default: false })
+  hasReplay: boolean;
 }

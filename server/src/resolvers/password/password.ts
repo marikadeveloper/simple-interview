@@ -1,17 +1,12 @@
 import argon2 from 'argon2';
-import { Arg, Ctx, Field, InputType, Mutation, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
 import { v4 } from 'uuid';
-import { FORGET_PASSWORD_PREFIX, PASSWORD_MIN_LENGTH } from '../constants';
-import { User } from '../entities/User';
-import { MyContext } from '../types';
-import { sendEmail } from '../utils/sendEmail';
-import { AuthResponse } from './user';
-
-@InputType()
-export class ChangePasswordInput {
-  @Field() token: string;
-  @Field() newPassword: string;
-}
+import { FORGET_PASSWORD_PREFIX, PASSWORD_MIN_LENGTH } from '../../constants';
+import { User } from '../../entities/User';
+import { MyContext } from '../../types';
+import { sendEmail } from '../../utils/sendEmail';
+import { AuthResponse } from '../user';
+import { ChangePasswordInput } from './password-types';
 
 @Resolver()
 export class PasswordResolver {

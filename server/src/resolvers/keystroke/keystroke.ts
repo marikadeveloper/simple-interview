@@ -62,7 +62,6 @@ export class KeystrokeResolver {
   @UseMiddleware(isAuth)
   async getKeystrokes(
     @Arg('answerId') answerId: number,
-    @Ctx() { req }: MyContext,
   ): Promise<Keystroke[] | null> {
     try {
       const answer = await Answer.findOne({

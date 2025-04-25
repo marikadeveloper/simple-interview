@@ -9,7 +9,7 @@ import { isValidRegistrationData } from '../../middleware/isValidRegistrationDat
 import { MyContext } from '../../types';
 import { handleRegistrationErrors } from '../../utils/handleRegistrationErrors';
 import { sendEmail } from '../../utils/sendEmail';
-import { AuthResponse } from '../user';
+import { AuthResponse } from '../resolvers-types';
 import { RegisterInput } from './registration-types';
 
 @Resolver()

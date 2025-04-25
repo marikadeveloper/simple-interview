@@ -5,7 +5,7 @@ import { FORGET_PASSWORD_PREFIX, PASSWORD_MIN_LENGTH } from '../../constants';
 import { User } from '../../entities/User';
 import { MyContext } from '../../types';
 import { sendEmail } from '../../utils/sendEmail';
-import { AuthResponse } from '../user';
+import { AuthResponse } from '../resolvers-types';
 import { ChangePasswordInput } from './password-types';
 
 @Resolver()

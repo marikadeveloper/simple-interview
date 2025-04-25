@@ -4,10 +4,12 @@ import { CandidateInvitationResolver } from '../resolvers/candidateInvitation/ca
 import { KeystrokeResolver } from '../resolvers/keystroke/keystroke';
 import { PasswordResolver } from '../resolvers/password/password';
 import { RegistrationResolver } from '../resolvers/registration/registration';
+import { UserResolver } from '../resolvers/user/user';
 
 export const createSchema = () =>
   buildSchema({
     resolvers: [
+      UserResolver,
       CandidateInvitationResolver,
       AuthResolver,
       PasswordResolver,

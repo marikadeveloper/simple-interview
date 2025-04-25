@@ -3,7 +3,7 @@ import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { COOKIE_NAME } from '../../constants';
 import { User } from '../../entities/User';
 import { MyContext } from '../../types';
-import { AuthResponse } from '../user';
+import { AuthResponse } from '../resolvers-types';
 import { AuthInput } from './auth-types';
 
 @Resolver()

@@ -59,8 +59,6 @@ describe('candidateInvitation', () => {
       userId: testInterviewer.id,
     });
 
-    console.log(response);
-
     expect(response).toMatchObject({
       data: {
         createCandidateInvitation: true,

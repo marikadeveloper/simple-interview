@@ -1,4 +1,4 @@
-import { FieldError } from '../resolvers/user';
+import { FieldError } from '../resolvers/resolvers-types';
 
 export const handleRegistrationErrors = (
   err: any,

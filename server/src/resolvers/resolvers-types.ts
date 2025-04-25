@@ -1,4 +1,4 @@
-import { Field, ObjectType, Resolver } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import { User } from '../entities/User';
 
 @ObjectType()
@@ -14,9 +14,4 @@ export class AuthResponse {
 
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
-}
-
-@Resolver(User)
-export class UserResolver {
-  // This class can be used for field resolvers specific to the User object if needed in the future.
 }

@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker';
-import { FULL_NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '../constants';
-import { CandidateInvitation } from '../entities/CandidateInvitation';
-import { User, UserRole } from '../entities/User';
-import { dataSource } from '../index';
-import { graphqlCall } from '../test-utils/graphqlCall';
-import { createFakeUser, fakeUserData } from '../test-utils/mockData';
-import { setupTestDB } from '../test-utils/testSetup';
+import { FULL_NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '../../constants';
+import { CandidateInvitation } from '../../entities/CandidateInvitation';
+import { User, UserRole } from '../../entities/User';
+import { dataSource } from '../../index';
+import { graphqlCall } from '../../test-utils/graphqlCall';
+import { createFakeUser, fakeUserData } from '../../test-utils/mockData';
+import { setupTestDB } from '../../test-utils/testSetup';
 
 jest.mock('../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {

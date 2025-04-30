@@ -9,7 +9,11 @@ export class UsersFilters {
   @Field({ nullable: true })
   fullName?: string;
 
-  @Field({ nullable: true })
+  @Field({
+    nullable: true,
+    description:
+      "If logged in as Interviewer, this field will always have value 'candidate'",
+  })
   role?: UserRole;
 }
 

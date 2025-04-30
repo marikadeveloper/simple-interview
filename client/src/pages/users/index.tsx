@@ -1,15 +1,22 @@
-import { PageTitle } from '@/components/PageTitle';
+import { DataTable } from '@/components/ui/data-table';
+import { useGetUsersQuery, User } from '@/generated/graphql';
+import { columns } from './columns';
 
 export const Users = () => {
+  const [{ fetching, data }] = useGetUsersQuery({
+    variables: {
+      filters: {},
+    },
+  });
+
   return (
-    <div>
-      <div className='mb-8 flex items-center justify-between'>
-        <div>
-          <PageTitle>Users</PageTitle>
-          <p className='text-muted-foreground'>Handle user accounts here</p>
-        </div>
-      </div>
-      <p>List of users will be displayed here.</p>
+    <div className='container mx-auto py-10'>
+      <DataTable
+        columns={columns}
+        data={(data?.getUsers as User[]) || []}
+      />
     </div>
   );
 };
+
+export default Users;

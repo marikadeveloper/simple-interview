@@ -38,6 +38,11 @@ export type AuthResponse = {
   user?: Maybe<User>;
 };
 
+export type CandidatesFilters = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  fullName?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ChangePasswordInput = {
   newPassword: Scalars['String']['input'];
   token: Scalars['String']['input'];
@@ -143,13 +148,25 @@ export type MutationSaveKeystrokesArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  getCandidates: Array<User>;
   getKeystrokes?: Maybe<Array<Keystroke>>;
+  getUsers: Array<User>;
   me?: Maybe<AuthResponse>;
+};
+
+
+export type QueryGetCandidatesArgs = {
+  filters: CandidatesFilters;
 };
 
 
 export type QueryGetKeystrokesArgs = {
   answerId: Scalars['Float']['input'];
+};
+
+
+export type QueryGetUsersArgs = {
+  filters: UsersFilters;
 };
 
 export type Question = {
@@ -181,6 +198,12 @@ export type User = {
   id: Scalars['Int']['output'];
   role: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type UsersFilters = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  fullName?: InputMaybe<Scalars['String']['input']>;
+  role?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type AuthResponseFragment = { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null };
@@ -235,6 +258,13 @@ export type GetKeystrokesQueryVariables = Exact<{
 
 
 export type GetKeystrokesQuery = { __typename?: 'Query', getKeystrokes?: Array<{ __typename?: 'Keystroke', id: number, type: string, value?: string | null, position: number, length?: number | null, timestamp: string, relativeTimestamp: number }> | null };
+
+export type GetUsersQueryVariables = Exact<{
+  filters: UsersFilters;
+}>;
+
+
+export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', id: number, email: string, fullName: string, role: string }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -344,6 +374,17 @@ export const GetKeystrokesDocument = gql`
 
 export function useGetKeystrokesQuery(options: Omit<Urql.UseQueryArgs<GetKeystrokesQueryVariables>, 'query'>) {
   return Urql.useQuery<GetKeystrokesQuery, GetKeystrokesQueryVariables>({ query: GetKeystrokesDocument, ...options });
+};
+export const GetUsersDocument = gql`
+    query GetUsers($filters: UsersFilters!) {
+  getUsers(filters: $filters) {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+
+export function useGetUsersQuery(options: Omit<Urql.UseQueryArgs<GetUsersQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetUsersQuery, GetUsersQueryVariables>({ query: GetUsersDocument, ...options });
 };
 export const MeDocument = gql`
     query Me {

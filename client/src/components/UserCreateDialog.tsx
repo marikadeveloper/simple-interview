@@ -10,16 +10,17 @@ import {
 import { Input } from '@/components/ui/input';
 import {
   RegisterInput,
+  useCreateCandidateInvitationMutation,
   useInterviewerRegisterMutation,
   UserRole,
 } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from './ui/button';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -55,7 +56,16 @@ const formSchema = z.discriminatedUnion('role', [
 interface UserCreateDialogProps {}
 
 export const UserCreateDialog: React.FC<UserCreateDialogProps> = ({}) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [, interviewerRegister] = useInterviewerRegisterMutation();
+  const [, createCandidateInvitation] = useCreateCandidateInvitationMutation();
+
+  // reset form on close
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset();
+    }
+  }, [isOpen]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,27 +78,25 @@ export const UserCreateDialog: React.FC<UserCreateDialogProps> = ({}) => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
     const { role, ...rest } = values;
     if (role === UserRole.Interviewer) {
       interviewerRegister({
         input: {
           ...(rest as RegisterInput),
         },
-      })
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      }).then(() => setIsOpen(false));
     }
     if (role === UserRole.Candidate) {
+      createCandidateInvitation({
+        email: rest.email,
+      }).then(() => setIsOpen(false));
     }
   }
 
   return (
-    <Dialog>
+    <Dialog
+      open={isOpen}
+      onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>Add User</Button>
       </DialogTrigger>
@@ -194,13 +202,11 @@ export const UserCreateDialog: React.FC<UserCreateDialogProps> = ({}) => {
           </form>
         </Form>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button
-              type='submit'
-              form='user-create-form'>
-              Save
-            </Button>
-          </DialogClose>
+          <Button
+            type='submit'
+            form='user-create-form'>
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,3 +1,4 @@
+import { PendingInvitesDialog } from '@/components/PendingInvitesDialog';
 import { DataTable } from '@/components/ui/data-table';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
@@ -21,7 +22,10 @@ export const Users = () => {
             Here you can create, delete, and update users.
           </PageSubtitle>
         </div>
-        <UserCreateDialog />
+        <div className='flex items-center gap-2'>
+          <PendingInvitesDialog />
+          <UserCreateDialog />
+        </div>
       </div>
 
       <div className='py-4'>

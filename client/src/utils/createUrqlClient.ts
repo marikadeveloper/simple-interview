@@ -74,6 +74,17 @@ const invalidateAllUsers = (cache: Cache) => {
   });
 };
 
+// Invalidate all candidate invitations in the cache
+const invalidateAllCandidateInvitations = (cache: Cache) => {
+  const allFields = cache.inspectFields('Query');
+  const fieldInfos = allFields.filter(
+    (info) => info.fieldName === 'getCandidateInvitations',
+  );
+  fieldInfos.forEach((fi) => {
+    cache.invalidate('Query', 'getCandidateInvitations', fi.arguments || {});
+  });
+};
+
 export const createUrqlClient = () => {
   let cookie = '';
 
@@ -125,6 +136,10 @@ export const createUrqlClient = () => {
 
             interviewerRegister: (_result, args, cache, info) => {
               invalidateAllUsers(cache);
+            },
+
+            createCandidateInvitation: (_result, args, cache, info) => {
+              invalidateAllCandidateInvitations(cache);
             },
 
             // register: (_result, args, cache, info) => {

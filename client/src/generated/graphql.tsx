@@ -224,6 +224,13 @@ export type ErrorFragment = { __typename?: 'FieldError', field: string, message:
 
 export type UserFragment = { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole };
 
+export type CreateCandidateInvitationMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+}>;
+
+
+export type CreateCandidateInvitationMutation = { __typename?: 'Mutation', createCandidateInvitation: boolean };
+
 export type LoginMutationVariables = Exact<{
   input: AuthInput;
 }>;
@@ -315,6 +322,15 @@ export const AuthResponseFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${ErrorFragmentDoc}`;
+export const CreateCandidateInvitationDocument = gql`
+    mutation CreateCandidateInvitation($email: String!) {
+  createCandidateInvitation(email: $email)
+}
+    `;
+
+export function useCreateCandidateInvitationMutation() {
+  return Urql.useMutation<CreateCandidateInvitationMutation, CreateCandidateInvitationMutationVariables>(CreateCandidateInvitationDocument);
+};
 export const LoginDocument = gql`
     mutation Login($input: AuthInput!) {
   login(input: $input) {

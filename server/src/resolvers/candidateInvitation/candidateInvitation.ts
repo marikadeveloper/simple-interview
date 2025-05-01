@@ -4,7 +4,7 @@ import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { sendEmail } from '../../utils/sendEmail';
 
-const CLIENT_URL = process.env.CLIENT_URL;
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
 @Resolver(CandidateInvitation)
 export class CandidateInvitationResolver {
@@ -25,7 +25,7 @@ export class CandidateInvitationResolver {
         `
         <p>Hi!</p>
         <p>You have been invited to an interview. Please click the link and create an account:</p>
-        <a href="${CLIENT_URL}/sign-up?email=${email}">sign up</a>
+        <a href="${CLIENT_URL}/candidate-signup?email=${email}">sign up</a>
         <p>Thank you!</p>
         `,
       );

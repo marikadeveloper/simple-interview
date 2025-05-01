@@ -1,4 +1,4 @@
-import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
+import { Cache, cacheExchange, Resolver } from '@urql/exchange-graphcache';
 import { Exchange, fetchExchange } from 'urql';
 import { pipe, tap } from 'wonka';
 import {
@@ -65,6 +65,15 @@ const errorExchange: Exchange =
 //   };
 // };
 
+// Invalidate all users in the cache
+const invalidateAllUsers = (cache: Cache) => {
+  const allFields = cache.inspectFields('Query');
+  const fieldInfos = allFields.filter((info) => info.fieldName === 'getUsers');
+  fieldInfos.forEach((fi) => {
+    cache.invalidate('Query', 'getUsers', fi.arguments || {});
+  });
+};
+
 export const createUrqlClient = () => {
   let cookie = '';
 
@@ -112,6 +121,10 @@ export const createUrqlClient = () => {
                   }
                 },
               );
+            },
+
+            interviewerRegister: (_result, args, cache, info) => {
+              invalidateAllUsers(cache);
             },
 
             // register: (_result, args, cache, info) => {

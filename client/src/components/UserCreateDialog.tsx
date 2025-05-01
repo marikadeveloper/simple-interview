@@ -1,19 +1,25 @@
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { UserRole } from '@/generated/graphql';
+import {
+  RegisterInput,
+  useInterviewerRegisterMutation,
+  UserRole,
+} from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from './ui/button';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -31,32 +37,54 @@ const userRoles: {
   { value: UserRole.Candidate, label: 'Candidate' },
 ];
 
-const formSchema = z.object({
-  role: z.enum([UserRole.Interviewer, UserRole.Candidate]),
-  fullName: z.string().min(2).max(50),
+const interviewerSchema = z.object({
+  role: z.literal(UserRole.Interviewer),
   email: z.string().email(),
+  fullName: z.string().min(2).max(50),
   password: z.string().min(8).max(50),
 });
+const candidateSchema = z.object({
+  role: z.literal(UserRole.Candidate),
+  email: z.string().email(),
+});
+const formSchema = z.discriminatedUnion('role', [
+  interviewerSchema,
+  candidateSchema,
+]);
 
 interface UserCreateDialogProps {}
 
 export const UserCreateDialog: React.FC<UserCreateDialogProps> = ({}) => {
-  // 1. Define your form.
+  const [, interviewerRegister] = useInterviewerRegisterMutation();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
+      fullName: undefined,
+      email: undefined,
+      password: undefined,
       role: UserRole.Interviewer,
     },
   });
 
-  // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     console.log(values);
+    const { role, ...rest } = values;
+    if (role === UserRole.Interviewer) {
+      interviewerRegister({
+        input: {
+          ...(rest as RegisterInput),
+        },
+      })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+    if (role === UserRole.Candidate) {
+    }
   }
 
   return (
@@ -107,26 +135,15 @@ export const UserCreateDialog: React.FC<UserCreateDialogProps> = ({}) => {
             />
             <FormField
               control={form.control}
-              name='fullName'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='Jane Doe'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name='email'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
+                  {form.watch('role') === UserRole.Candidate && (
+                    <FormDescription>
+                      An email invitation will be sent to this email.
+                    </FormDescription>
+                  )}
                   <FormControl>
                     <Input
                       placeholder='jane@doe.it'
@@ -137,77 +154,53 @@ export const UserCreateDialog: React.FC<UserCreateDialogProps> = ({}) => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name='password'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='password'
-                      placeholder='********'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {form.watch('role') === UserRole.Interviewer && (
+              <>
+                <FormField
+                  control={form.control}
+                  name='fullName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder='Jane Doe'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='password'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='password'
+                          placeholder='********'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
           </form>
         </Form>
-        {/* <div className='grid gap-4 py-4'>
-          <div className='grid-grid-cols-4 items-center gap-4'>
-            <Label
-              htmlFor='role'
-              className='text-right mb-2'>
-              Role
-            </Label>
-            <RadioGroup>
-              {userRoles.map((role) => (
-                <div
-                  key={role.value}
-                  className='flex items-center space-x-2'>
-                  <RadioGroupItem
-                    value={role.value}
-                    id={role.label}
-                  />
-                  <Label htmlFor={role.label}>{role.label}</Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
-          <div className='grid gap-2'>
-            <Label
-              htmlFor='name'
-              className='text-right'>
-              Name
-            </Label>
-            <Input
-              id='name'
-              value=''
-              className='col-span-3'
-            />
-          </div>
-          <div className='grid gap-2'>
-            <Label
-              htmlFor='username'
-              className='text-right'>
-              Username
-            </Label>
-            <Input
-              id='username'
-              value=''
-              className='col-span-3'
-            />
-          </div>
-        </div> */}
         <DialogFooter>
-          <Button
-            type='submit'
-            form='user-create-form'>
-            Save
-          </Button>
+          <DialogClose asChild>
+            <Button
+              type='submit'
+              form='user-create-form'>
+              Save
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

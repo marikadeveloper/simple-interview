@@ -1,0 +1,8 @@
+query GetCandidateInvitations($used: Boolean) {
+  getCandidateInvitations(used: $used) {
+    id
+    email
+    used
+    createdAt
+  }
+}

@@ -38,6 +38,14 @@ export type AuthResponse = {
   user?: Maybe<User>;
 };
 
+export type CandidateInvitation = {
+  __typename?: 'CandidateInvitation';
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  used: Scalars['Boolean']['output'];
+};
+
 export type ChangePasswordInput = {
   newPassword: Scalars['String']['input'];
   token: Scalars['String']['input'];
@@ -143,10 +151,16 @@ export type MutationSaveKeystrokesArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  getCandidateInvitations: Array<CandidateInvitation>;
   getKeystrokes?: Maybe<Array<Keystroke>>;
   /** Returns all users except the logged in user, if logged in as Interviewer only candidates are returned */
   getUsers: Array<User>;
   me?: Maybe<AuthResponse>;
+};
+
+
+export type QueryGetCandidateInvitationsArgs = {
+  used?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -249,6 +263,13 @@ export type SaveKeystrokesMutationVariables = Exact<{
 
 
 export type SaveKeystrokesMutation = { __typename?: 'Mutation', saveKeystrokes: boolean };
+
+export type GetCandidateInvitationsQueryVariables = Exact<{
+  used?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GetCandidateInvitationsQuery = { __typename?: 'Query', getCandidateInvitations: Array<{ __typename?: 'CandidateInvitation', id: number, email: string, used: boolean, createdAt: string }> };
 
 export type GetKeystrokesQueryVariables = Exact<{
   answerId: Scalars['Float']['input'];
@@ -355,6 +376,20 @@ export const SaveKeystrokesDocument = gql`
 
 export function useSaveKeystrokesMutation() {
   return Urql.useMutation<SaveKeystrokesMutation, SaveKeystrokesMutationVariables>(SaveKeystrokesDocument);
+};
+export const GetCandidateInvitationsDocument = gql`
+    query GetCandidateInvitations($used: Boolean) {
+  getCandidateInvitations(used: $used) {
+    id
+    email
+    used
+    createdAt
+  }
+}
+    `;
+
+export function useGetCandidateInvitationsQuery(options?: Omit<Urql.UseQueryArgs<GetCandidateInvitationsQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetCandidateInvitationsQuery, GetCandidateInvitationsQueryVariables>({ query: GetCandidateInvitationsDocument, ...options });
 };
 export const GetKeystrokesDocument = gql`
     query GetKeystrokes($answerId: Float!) {

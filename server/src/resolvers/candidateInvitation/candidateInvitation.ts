@@ -1,4 +1,4 @@
-import { Arg, Mutation, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { CandidateInvitation } from '../../entities/CandidateInvitation';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
@@ -34,6 +34,24 @@ export class CandidateInvitationResolver {
     } catch (error) {
       console.error('Error creating candidate invitation:', error);
       return false;
+    }
+  }
+
+  @Query(() => [CandidateInvitation])
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async getCandidateInvitations(
+    @Arg('used', { nullable: true }) used: boolean,
+  ): Promise<CandidateInvitation[]> {
+    try {
+      const invitations = await CandidateInvitation.find({
+        where: { used: Boolean(used) },
+        order: { createdAt: 'DESC' },
+      });
+      return invitations;
+    } catch (error) {
+      console.error('Error fetching candidate invitations:', error);
+      return [];
     }
   }
 }

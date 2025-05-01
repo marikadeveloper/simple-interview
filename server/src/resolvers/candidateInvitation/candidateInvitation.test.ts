@@ -6,7 +6,7 @@ import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 
-jest.mock('../utils/sendEmail', () => ({
+jest.mock('../../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {
     return Promise.resolve(true);
   }),
@@ -14,7 +14,6 @@ jest.mock('../utils/sendEmail', () => ({
 
 // Set up the database connection before all tests
 let testUsers: User[] = [];
-let testCandidateInviations: CandidateInvitation[] = [];
 
 beforeAll(async () => {
   await setupTestDB();
@@ -28,13 +27,8 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
-  // Clean up any users created during the test
-  if (testCandidateInviations.length > 0) {
-    await Promise.all(
-      testCandidateInviations.map((ci) => CandidateInvitation.delete(ci.id)),
-    );
-    testCandidateInviations = [];
-  }
+  // Clean up any data created during the test
+  await CandidateInvitation.clear();
   if (testUsers.length > 0) {
     await Promise.all(testUsers.map((user) => User.delete(user.id)));
     testUsers = [];
@@ -47,10 +41,19 @@ const createCandidateInvitationMutation = `
   }
 `;
 
+const getCandidateInvitationsQuery = `
+  query GetCandidateInvitations {
+    getCandidateInvitations {
+      id
+      email
+      used
+    }
+  }
+`;
+
 describe('candidateInvitation', () => {
   it('should create a candidate invitation and send an email', async () => {
     const testInterviewer = await createFakeUser(UserRole.INTERVIEWER);
-    testUsers.push(testInterviewer);
     const email = faker.internet.email();
 
     const response = await graphqlCall({
@@ -62,6 +65,34 @@ describe('candidateInvitation', () => {
     expect(response).toMatchObject({
       data: {
         createCandidateInvitation: true,
+      },
+    });
+  });
+
+  it('should get all candidate invitations', async () => {
+    const testInterviewer = await createFakeUser(UserRole.INTERVIEWER);
+    testUsers.push(testInterviewer);
+
+    const email = faker.internet.email();
+    const candidateInvitation = await CandidateInvitation.create({
+      email,
+      used: false,
+    }).save();
+
+    const response = await graphqlCall({
+      source: getCandidateInvitationsQuery,
+      userId: testInterviewer.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getCandidateInvitations: [
+          {
+            id: candidateInvitation.id,
+            email: candidateInvitation.email,
+            used: candidateInvitation.used,
+          },
+        ],
       },
     });
   });

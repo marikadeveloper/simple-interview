@@ -4,7 +4,7 @@ import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 
-jest.mock('../utils/sendEmail', () => ({
+jest.mock('../../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {
     return Promise.resolve(true);
   }),

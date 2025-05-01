@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
+import { UserRole } from './generated/graphql';
 import AdminSignupPage from './pages/auth/AdminSignupPage';
 import CandidateSignupPage from './pages/auth/CandidateSignupPage';
 import LoginPage from './pages/auth/LoginPage';
@@ -50,7 +51,8 @@ export const AppRoutes = () => {
         <Route
           path='/users'
           element={
-            <ProtectedRoute allowedUserRoles={['admin', 'interviewer']}>
+            <ProtectedRoute
+              allowedUserRoles={[UserRole.Admin, UserRole.Interviewer]}>
               <Users />
             </ProtectedRoute>
           }

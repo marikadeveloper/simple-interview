@@ -10,9 +10,9 @@ import {
   useLoginMutation,
   useLogoutMutation,
   useMeQuery,
+  UserRole,
 } from '../generated/graphql';
 
-export type UserRole = 'admin' | 'interviewer' | 'candidate';
 type User = {
   id: string;
   email: string;

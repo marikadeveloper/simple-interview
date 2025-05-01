@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/generated/graphql';
 import { useMemo } from 'react';
 
 export type NavLink = {
@@ -26,7 +27,7 @@ export function useNavLinks() {
   const { user } = useAuth();
   const navLinks = useMemo(() => {
     const links: NavLink[] = [dashboard, interviews];
-    if (user?.role === 'interviewer' || user?.role === 'admin') {
+    if (user?.role === UserRole.Interviewer || user?.role === UserRole.Admin) {
       links.push(users);
     }
     return links;

@@ -38,11 +38,6 @@ export type AuthResponse = {
   user?: Maybe<User>;
 };
 
-export type CandidatesFilters = {
-  email?: InputMaybe<Scalars['String']['input']>;
-  fullName?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type ChangePasswordInput = {
   newPassword: Scalars['String']['input'];
   token: Scalars['String']['input'];
@@ -148,15 +143,10 @@ export type MutationSaveKeystrokesArgs = {
 
 export type Query = {
   __typename?: 'Query';
-  getCandidates: Array<User>;
   getKeystrokes?: Maybe<Array<Keystroke>>;
+  /** Returns all users except the logged in user, if logged in as Interviewer only candidates are returned */
   getUsers: Array<User>;
   me?: Maybe<AuthResponse>;
-};
-
-
-export type QueryGetCandidatesArgs = {
-  filters: CandidatesFilters;
 };
 
 
@@ -196,28 +186,36 @@ export type User = {
   email: Scalars['String']['output'];
   fullName: Scalars['String']['output'];
   id: Scalars['Int']['output'];
-  role: Scalars['String']['output'];
+  role: UserRole;
   updatedAt: Scalars['String']['output'];
 };
+
+/** User role enumeration */
+export enum UserRole {
+  Admin = 'ADMIN',
+  Candidate = 'CANDIDATE',
+  Interviewer = 'INTERVIEWER'
+}
 
 export type UsersFilters = {
   email?: InputMaybe<Scalars['String']['input']>;
   fullName?: InputMaybe<Scalars['String']['input']>;
+  /** If logged in as Interviewer, this field will always have value 'candidate' */
   role?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type AuthResponseFragment = { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null };
+export type AuthResponseFragment = { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null };
 
 export type ErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
-export type UserFragment = { __typename?: 'User', id: number, email: string, fullName: string, role: string };
+export type UserFragment = { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole };
 
 export type LoginMutationVariables = Exact<{
   input: AuthInput;
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -229,21 +227,21 @@ export type AdminRegisterMutationVariables = Exact<{
 }>;
 
 
-export type AdminRegisterMutation = { __typename?: 'Mutation', adminRegister: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+export type AdminRegisterMutation = { __typename?: 'Mutation', adminRegister: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
 export type InterviewerRegisterMutationVariables = Exact<{
   input: RegisterInput;
 }>;
 
 
-export type InterviewerRegisterMutation = { __typename?: 'Mutation', interviewerRegister: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+export type InterviewerRegisterMutation = { __typename?: 'Mutation', interviewerRegister: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
 export type CandidateRegisterMutationVariables = Exact<{
   input: RegisterInput;
 }>;
 
 
-export type CandidateRegisterMutation = { __typename?: 'Mutation', candidateRegister: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+export type CandidateRegisterMutation = { __typename?: 'Mutation', candidateRegister: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
 export type SaveKeystrokesMutationVariables = Exact<{
   input: SaveKeystrokesInput;
@@ -264,12 +262,12 @@ export type GetUsersQueryVariables = Exact<{
 }>;
 
 
-export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', id: number, email: string, fullName: string, role: string }> };
+export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'AuthResponse', user?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } | null };
 
 export const UserFragmentDoc = gql`
     fragment User on User {

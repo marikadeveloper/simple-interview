@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from 'type-graphql';
+import { Field, Int, ObjectType, registerEnumType } from 'type-graphql';
 import {
   BaseEntity,
   Column,
@@ -15,6 +15,12 @@ export enum UserRole {
   INTERVIEWER = 'interviewer',
   CANDIDATE = 'candidate',
 }
+
+// Register the enum with Type-GraphQL
+registerEnumType(UserRole, {
+  name: 'UserRole', // This is the name that will be used in the GraphQL schema
+  description: 'User role enumeration',
+});
 
 @ObjectType()
 @Entity()
@@ -34,7 +40,7 @@ export class User extends BaseEntity {
   @Column()
   password!: string;
 
-  @Field(() => String)
+  @Field(() => UserRole)
   @Column({
     type: 'enum',
     enum: UserRole,

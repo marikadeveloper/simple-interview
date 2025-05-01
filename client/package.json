@@ -11,6 +11,8 @@
     "gen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.2.2",
+    "@radix-ui/react-slot": "^1.2.0",
     "@tailwindcss/vite": "^4.1.4",
     "@tanstack/react-table": "^8.21.3",
     "@urql/exchange-graphcache": "^7.2.3",

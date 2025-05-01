@@ -8,26 +8,32 @@ import {
 } from '@/components/ui/table';
 import {
   ColumnDef,
+  ColumnFiltersState,
   SortingState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import { useState } from 'react';
 import { DataTablePagination } from './data-table-pagination';
+import { Input } from './input';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  filterableField?: keyof TData;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  filterableField,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
@@ -36,13 +42,36 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      columnFilters,
     },
   });
 
   return (
     <div>
+      {filterableField ? (
+        <div className='flex items-center py-4'>
+          <Input
+            placeholder='Filter...'
+            value={
+              (table
+                .getColumn(filterableField as string)
+                ?.getFilterValue() as string) ?? ''
+            }
+            onChange={(event) =>
+              table
+                .getColumn(filterableField as string)
+                ?.setFilterValue(event.target.value)
+            }
+            className='max-w-sm'
+          />
+        </div>
+      ) : (
+        ''
+      )}
       <div className='rounded-md border mb-2'>
         <Table>
           <TableHeader>

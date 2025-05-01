@@ -1,4 +1,5 @@
-import { PageTitle } from '@/components/PageTitle';
+import { PageSubtitle } from '@/components/ui/page-subtitle';
+import { PageTitle } from '@/components/ui/page-title';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Dashboard() {
@@ -9,9 +10,7 @@ export default function Dashboard() {
       <div className='mb-8 flex items-center justify-between'>
         <div>
           <PageTitle>Dashboard</PageTitle>
-          <p className='text-muted-foreground'>
-            Welcome back, {user?.fullName}
-          </p>
+          <PageSubtitle>Welcome back, {user?.fullName}</PageSubtitle>
         </div>
       </div>
 

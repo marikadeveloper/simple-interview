@@ -31,4 +31,21 @@ export class InterviewTemplateResolver {
     await interviewTemplate.save();
     return interviewTemplate;
   }
+
+  @Mutation(() => InterviewTemplate)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async updateInterviewTemplate(
+    @Arg('id', () => String) id: number,
+    @Arg('input', () => InterviewTemplateInput) input: InterviewTemplateInput,
+  ): Promise<InterviewTemplate | null> {
+    const interviewTemplate = await InterviewTemplate.findOneBy({ id });
+    if (!interviewTemplate) {
+      return null;
+    }
+    interviewTemplate.name = input.name;
+    interviewTemplate.description = input.description;
+    await interviewTemplate.save();
+    return interviewTemplate;
+  }
 }

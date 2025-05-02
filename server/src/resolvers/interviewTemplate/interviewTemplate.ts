@@ -48,4 +48,15 @@ export class InterviewTemplateResolver {
     await interviewTemplate.save();
     return interviewTemplate;
   }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async deleteInterviewTemplate(@Arg('id', () => String) id: number) {
+    const interviewTemplate = await InterviewTemplate.delete({ id });
+    if (!interviewTemplate.affected) {
+      return false;
+    }
+    return true;
+  }
 }

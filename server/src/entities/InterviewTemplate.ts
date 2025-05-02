@@ -23,6 +23,10 @@ export class InterviewTemplate extends BaseEntity {
   name!: string;
 
   @Field(() => String)
+  @Column()
+  description!: string;
+
+  @Field(() => String)
   @UpdateDateColumn({ type: 'date' })
   updatedAt: Date;
 

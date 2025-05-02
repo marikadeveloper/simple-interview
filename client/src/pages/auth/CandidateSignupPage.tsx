@@ -1,21 +1,44 @@
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { useCandidateRegisterMutation } from '@/generated/graphql';
-import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import { z } from 'zod';
+
+const formSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(50),
+  fullName: z.string().min(2).max(50),
+});
 
 export default function CandidateSignupPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [, candidateRegister] = useCandidateRegisterMutation();
+  const [queryParams] = useSearchParams();
+  const email = queryParams.get('email');
   const navigate = useNavigate();
+  const [, candidateRegister] = useCandidateRegisterMutation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: email || '',
+      password: '',
+      fullName: '',
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { email, password, fullName } = values;
     setErrors({});
 
     try {
@@ -34,10 +57,8 @@ export default function CandidateSignupPage() {
       }
     } catch (error) {
       setErrors({ general: 'An unexpected error occurred' });
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <div className='flex min-h-screen items-center justify-center bg-background p-4'>
@@ -57,99 +78,66 @@ export default function CandidateSignupPage() {
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className='space-y-4'>
-          <div className='space-y-2'>
-            <label
-              htmlFor='fullName'
-              className={cn(
-                'block text-sm font-medium',
-                errors.fullName ? 'text-destructive' : 'text-foreground',
-              )}>
-              Full Name
-            </label>
-            <input
-              id='fullName'
-              type='text'
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className={cn(
-                'w-full rounded-md border bg-background px-3 py-2 text-sm',
-                errors.fullName
-                  ? 'border-destructive text-destructive focus-visible:ring-destructive'
-                  : 'border-input focus-visible:ring-ring',
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='space-y-8'>
+            <FormField
+              control={form.control}
+              name='email'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='jane@doe.it'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-              placeholder='John Doe'
-              autoComplete='name'
             />
-            {errors.fullName && (
-              <p className='text-xs text-destructive'>{errors.fullName}</p>
-            )}
-          </div>
-
-          <div className='space-y-2'>
-            <label
-              htmlFor='email'
-              className={cn(
-                'block text-sm font-medium',
-                errors.email ? 'text-destructive' : 'text-foreground',
-              )}>
-              Email address
-            </label>
-            <input
-              id='email'
-              type='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={cn(
-                'w-full rounded-md border bg-background px-3 py-2 text-sm',
-                errors.email
-                  ? 'border-destructive text-destructive focus-visible:ring-destructive'
-                  : 'border-input focus-visible:ring-ring',
+            <FormField
+              control={form.control}
+              name='fullName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='John Doe'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-              placeholder='name@example.com'
-              autoComplete='email'
             />
-            {errors.email && (
-              <p className='text-xs text-destructive'>{errors.email}</p>
-            )}
-          </div>
-
-          <div className='space-y-2'>
-            <label
-              htmlFor='password'
-              className={cn(
-                'block text-sm font-medium',
-                errors.password ? 'text-destructive' : 'text-foreground',
-              )}>
-              Password
-            </label>
-            <input
-              id='password'
-              type='password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={cn(
-                'w-full rounded-md border bg-background px-3 py-2 text-sm',
-                errors.password
-                  ? 'border-destructive text-destructive focus-visible:ring-destructive'
-                  : 'border-input focus-visible:ring-ring',
+            <FormField
+              control={form.control}
+              name='password'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='password'
+                      placeholder='********'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-              autoComplete='new-password'
             />
-            {errors.password && (
-              <p className='text-xs text-destructive'>{errors.password}</p>
-            )}
-          </div>
-
-          <button
-            type='submit'
-            disabled={isSubmitting}
-            className='w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50'>
-            {isSubmitting ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
+            <Button
+              type='submit'
+              className='w-full'>
+              Submit
+            </Button>
+          </form>
+        </Form>
 
         <div className='mt-4 text-center text-sm'>
           <p className='text-muted-foreground'>

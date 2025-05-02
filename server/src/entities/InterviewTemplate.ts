@@ -38,6 +38,7 @@ export class InterviewTemplate extends BaseEntity {
   createdAt: Date;
 
   @OneToMany(() => Question, (question) => question.interviewTemplate)
+  @Field(() => [Question])
   questions: Question[];
 
   @OneToMany(() => Interview, (interview) => interview.interviewTemplate)
@@ -45,5 +46,6 @@ export class InterviewTemplate extends BaseEntity {
 
   @ManyToMany(() => Tag, (tag) => tag.interviewTemplates)
   @JoinTable()
+  @Field(() => [Tag])
   tags: Tag[];
 }

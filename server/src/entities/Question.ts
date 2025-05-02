@@ -37,6 +37,7 @@ export class Question extends BaseEntity {
   @ManyToOne(
     () => InterviewTemplate,
     (interviewTemplate) => interviewTemplate.questions,
+    { onDelete: 'CASCADE' },
   )
   interviewTemplate!: InterviewTemplate;
 }

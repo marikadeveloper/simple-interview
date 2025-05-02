@@ -3,6 +3,7 @@ import {
   Field,
   InputType,
   Mutation,
+  Query,
   Resolver,
   UseMiddleware,
 } from 'type-graphql';
@@ -18,6 +19,16 @@ class InterviewTemplateInput {
 
 @Resolver(InterviewTemplate)
 export class InterviewTemplateResolver {
+  @Query(() => [InterviewTemplate])
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async getInterviewTemplates(): Promise<InterviewTemplate[]> {
+    const interviewTemplates = await InterviewTemplate.find({
+      order: { createdAt: 'DESC' },
+    });
+    return interviewTemplates;
+  }
+
   @Mutation(() => InterviewTemplate)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)

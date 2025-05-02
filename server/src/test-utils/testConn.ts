@@ -6,6 +6,7 @@ import { Interview } from '../entities/Interview';
 import { InterviewTemplate } from '../entities/InterviewTemplate';
 import { Keystroke } from '../entities/Keystroke';
 import { Question } from '../entities/Question';
+import { Tag } from '../entities/Tag';
 import { User } from '../entities/User';
 
 export const testConn = (drop: boolean = false) => {
@@ -26,6 +27,7 @@ export const testConn = (drop: boolean = false) => {
       Keystroke,
       Question,
       Answer,
+      Tag,
     ],
   });
 };

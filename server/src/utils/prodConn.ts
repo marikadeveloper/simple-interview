@@ -6,6 +6,7 @@ import { Interview } from '../entities/Interview';
 import { InterviewTemplate } from '../entities/InterviewTemplate';
 import { Keystroke } from '../entities/Keystroke';
 import { Question } from '../entities/Question';
+import { Tag } from '../entities/Tag';
 import { User } from '../entities/User';
 
 export const prodConn = () =>
@@ -25,5 +26,6 @@ export const prodConn = () =>
       Keystroke,
       Question,
       Answer,
+      Tag,
     ],
   });

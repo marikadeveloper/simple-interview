@@ -4,12 +4,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Interview } from './Interview';
 import { Question } from './Question';
+import { Tag } from './Tag';
 
 @ObjectType()
 @Entity()
@@ -39,4 +42,8 @@ export class InterviewTemplate extends BaseEntity {
 
   @OneToMany(() => Interview, (interview) => interview.interviewTemplate)
   interviews: Interview[];
+
+  @ManyToMany(() => Tag, (tag) => tag.interviewTemplates)
+  @JoinTable()
+  tags: Tag[];
 }

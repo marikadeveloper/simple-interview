@@ -16,7 +16,7 @@ export class Tag extends BaseEntity {
   id!: number;
 
   @Field(() => String)
-  @Column()
+  @Column({ unique: true })
   text!: string;
 
   @ManyToMany(() => InterviewTemplate, (template) => template.tags)

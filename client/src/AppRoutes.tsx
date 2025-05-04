@@ -7,6 +7,8 @@ import AdminSignupPage from './pages/auth/AdminSignupPage';
 import CandidateSignupPage from './pages/auth/CandidateSignupPage';
 import LoginPage from './pages/auth/LoginPage';
 import Dashboard from './pages/dashboard';
+import { InterviewTemplates } from './pages/interview-templates';
+import { Interviews } from './pages/interviews';
 import { Users } from './pages/users';
 
 export const AppRoutes = () => {
@@ -45,6 +47,22 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/interview-templates'
+          element={
+            <ProtectedRoute>
+              <InterviewTemplates />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/interviews'
+          element={
+            <ProtectedRoute>
+              <Interviews />
             </ProtectedRoute>
           }
         />

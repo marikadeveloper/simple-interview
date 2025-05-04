@@ -1,7 +1,5 @@
 import {
   Arg,
-  Field,
-  InputType,
   Int,
   Mutation,
   Query,
@@ -10,14 +8,10 @@ import {
 } from 'type-graphql';
 import { In } from 'typeorm';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
+import { Tag } from '../../entities/Tag';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
-
-@InputType()
-class InterviewTemplateInput {
-  @Field(() => String) name!: string;
-  @Field(() => String) description!: string;
-}
+import { InterviewTemplateInput } from './interviewTemplate-types';
 
 @Resolver(InterviewTemplate)
 export class InterviewTemplateResolver {
@@ -90,6 +84,28 @@ export class InterviewTemplateResolver {
     if (!interviewTemplate.affected) {
       return false;
     }
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async updateInterviewTemplateTags(
+    @Arg('id', () => Int) id: number,
+    @Arg('tags', () => [String]) tags: string[],
+  ): Promise<boolean> {
+    const interviewTemplate = await InterviewTemplate.findOneBy({ id });
+    if (!interviewTemplate) {
+      return false;
+    }
+
+    const foundTags = await Tag.findBy({ text: In(tags) });
+    if (tags.length !== foundTags.length) {
+      return false;
+    }
+    interviewTemplate.tags = foundTags;
+
+    await interviewTemplate.save();
     return true;
   }
 }

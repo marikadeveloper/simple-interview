@@ -17,6 +17,10 @@ const users: NavLink = {
   label: 'Users',
   route: '/users',
 };
+const interviewTemplates: NavLink = {
+  label: 'Interview Templates',
+  route: '/interview-templates',
+};
 // everyone
 const interviews: NavLink = {
   label: 'Interviews',
@@ -28,6 +32,7 @@ export function useNavLinks() {
   const navLinks = useMemo(() => {
     const links: NavLink[] = [dashboard, interviews];
     if (user?.role === UserRole.Interviewer || user?.role === UserRole.Admin) {
+      links.push(interviewTemplates);
       links.push(users);
     }
     return links;

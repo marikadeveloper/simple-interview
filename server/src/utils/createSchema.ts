@@ -5,6 +5,7 @@ import { InterviewTemplateResolver } from '../resolvers/interviewTemplate/interv
 import { KeystrokeResolver } from '../resolvers/keystroke/keystroke';
 import { PasswordResolver } from '../resolvers/password/password';
 import { RegistrationResolver } from '../resolvers/registration/registration';
+import { TagResolver } from '../resolvers/tag/tag';
 import { UserResolver } from '../resolvers/user/user';
 
 export const createSchema = () =>
@@ -17,6 +18,7 @@ export const createSchema = () =>
       RegistrationResolver,
       KeystrokeResolver,
       InterviewTemplateResolver,
+      TagResolver,
     ],
     validate: false,
   });

@@ -1,0 +1,18 @@
+fragment Question on Question {
+  id
+  title
+  description
+  updatedAt
+  createdAt
+}
+
+fragment QuestionWithInterviewTemplate on Question {
+  id
+  title
+  description
+  updatedAt
+  createdAt
+  interviewTemplate {
+    ...InterviewTemplate
+  }
+}

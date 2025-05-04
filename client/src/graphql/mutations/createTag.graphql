@@ -1,0 +1,5 @@
+mutation CreateTag($text: String!) {
+  createTag(text: $text) {
+    ...Tag
+  }
+}

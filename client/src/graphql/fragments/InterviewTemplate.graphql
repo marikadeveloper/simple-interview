@@ -1,0 +1,17 @@
+fragment InterviewTemplate on InterviewTemplate {
+  id
+  name
+  description
+  updatedAt
+  createdAt
+}
+
+fragment InterviewTemplateWithTagsAndQuestions on InterviewTemplate {
+  ...InterviewTemplate
+  tags {
+    ...Tag
+  }
+  questions {
+    ...Question
+  }
+}

@@ -1,0 +1,5 @@
+mutation UpdateInterviewTemplate($id: Int!, $input: InterviewTemplateInput!) {
+  updateInterviewTemplate(id: $id, input: $input) {
+    ...InterviewTemplate
+  }
+}

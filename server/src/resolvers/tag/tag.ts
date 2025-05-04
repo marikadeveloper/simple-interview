@@ -1,5 +1,91 @@
-import { Resolver } from 'type-graphql';
+import {
+  Arg,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from 'type-graphql';
+import { Not } from 'typeorm';
 import { Tag } from '../../entities/Tag';
+import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
+import { isAuth } from '../../middleware/isAuth';
 
 @Resolver(Tag)
-export class TagResolver {}
+export class TagResolver {
+  @Query(() => [Tag])
+  @UseMiddleware(isAuth)
+  async getTags(): Promise<Tag[]> {
+    const tags = await Tag.find({
+      order: { text: 'ASC' },
+    });
+    return tags;
+  }
+
+  @Mutation(() => Tag)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async createTag(@Arg('text') text: string): Promise<Tag> {
+    // convert text to lowercase
+    text = text.toLowerCase();
+
+    // check if tag is empty
+    if (text.trim() === '') {
+      throw new Error('Tag cannot be empty');
+    }
+
+    const existingTag = await Tag.findOne({
+      where: { text },
+    });
+    if (existingTag) {
+      throw new Error('Tag already exists');
+    }
+
+    const tag = Tag.create({
+      text,
+    });
+    await tag.save();
+    return tag;
+  }
+
+  @Mutation(() => Tag)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async updateTag(
+    @Arg('id', () => Int) id: number,
+    @Arg('text') text: string,
+  ): Promise<Tag> {
+    // convert text to lowercase
+    text = text.toLowerCase();
+
+    // check if tag is empty
+    if (text.trim() === '') {
+      throw new Error('Tag cannot be empty');
+    }
+
+    const existingTag = await Tag.findOne({
+      where: { text, id: Not(id) },
+    });
+    if (existingTag) {
+      throw new Error('Tag already exists');
+    }
+
+    const tag = await Tag.findOneOrFail({
+      where: { id },
+    });
+    tag.text = text;
+    await tag.save();
+    return tag;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async deleteTag(@Arg('id', () => Int) id: number): Promise<boolean> {
+    const tag = await Tag.delete({ id });
+    if (!tag.affected) {
+      return false;
+    }
+    return true;
+  }
+}

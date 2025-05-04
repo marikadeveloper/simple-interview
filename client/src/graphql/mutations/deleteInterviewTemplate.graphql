@@ -1,0 +1,3 @@
+mutation DeleteInterviewTemplate($id: Int!) {
+  deleteInterviewTemplate(id: $id)
+}

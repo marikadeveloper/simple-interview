@@ -22,7 +22,7 @@ import {
   useGetTagsQuery,
 } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { formSchema } from '..';
@@ -52,14 +52,6 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
     },
   });
 
-  // console log form values when they  change
-  useEffect(() => {
-    const subscription = createForm.watch((value) => {
-      console.log('Form values:', value);
-    });
-    return () => subscription.unsubscribe();
-  }, [createForm]);
-
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
     await createInterviewTemplate({
       input: {
@@ -75,7 +67,6 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
   return (
     <>
       <Button onClick={() => setIsOpen(true)}>Add Template</Button>
-      {/* Create Template Dialog */}
       <Dialog
         open={isOpen}
         onOpenChange={setIsOpen}>

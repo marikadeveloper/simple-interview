@@ -22,7 +22,7 @@ export class InterviewTemplateResolver {
     @Arg('tagsIds', () => [Int], { nullable: true }) tagsIds: number[],
   ): Promise<InterviewTemplate[]> {
     const interviewTemplates = await InterviewTemplate.find({
-      where: tagsIds ? { tags: { id: In(tagsIds) } } : {},
+      where: tagsIds.length ? { tags: { id: In(tagsIds) } } : {},
       relations: ['tags'],
       order: { createdAt: 'DESC' },
     });

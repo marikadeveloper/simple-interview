@@ -44,8 +44,8 @@ export class InterviewTemplate extends BaseEntity {
   @OneToMany(() => Interview, (interview) => interview.interviewTemplate)
   interviews: Interview[];
 
-  @ManyToMany(() => Tag, (tag) => tag.interviewTemplates)
+  @ManyToMany(() => Tag, (tag) => tag.interviewTemplates, { nullable: true })
   @JoinTable()
-  @Field(() => [Tag])
-  tags: Tag[];
+  @Field(() => [Tag], { nullable: true })
+  tags?: Tag[];
 }

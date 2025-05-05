@@ -4,13 +4,13 @@ fragment InterviewTemplate on InterviewTemplate {
   description
   updatedAt
   createdAt
-}
-
-fragment InterviewTemplateWithTagsAndQuestions on InterviewTemplate {
-  ...InterviewTemplate
   tags {
     ...Tag
   }
+}
+
+fragment InterviewTemplateWithQuestions on InterviewTemplate {
+  ...InterviewTemplate
   questions {
     ...Question
   }

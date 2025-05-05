@@ -294,13 +294,13 @@ export type AuthResponseFragment = { __typename?: 'AuthResponse', user?: { __typ
 
 export type ErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
-export type InterviewTemplateFragment = { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string };
+export type InterviewTemplateFragment = { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags: Array<{ __typename?: 'Tag', id: number, text: string }> };
 
-export type InterviewTemplateWithTagsAndQuestionsFragment = { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags: Array<{ __typename?: 'Tag', id: number, text: string }>, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string }> };
+export type InterviewTemplateWithQuestionsFragment = { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string }>, tags: Array<{ __typename?: 'Tag', id: number, text: string }> };
 
 export type QuestionFragment = { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string };
 
-export type QuestionWithInterviewTemplateFragment = { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string } };
+export type QuestionWithInterviewTemplateFragment = { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags: Array<{ __typename?: 'Tag', id: number, text: string }> } };
 
 export type TagFragment = { __typename?: 'Tag', id: number, text: string };
 
@@ -318,7 +318,7 @@ export type CreateInterviewTemplateMutationVariables = Exact<{
 }>;
 
 
-export type CreateInterviewTemplateMutation = { __typename?: 'Mutation', createInterviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string } };
+export type CreateInterviewTemplateMutation = { __typename?: 'Mutation', createInterviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags: Array<{ __typename?: 'Tag', id: number, text: string }> } };
 
 export type CreateTagMutationVariables = Exact<{
   text: Scalars['String']['input'];
@@ -387,7 +387,7 @@ export type UpdateInterviewTemplateMutationVariables = Exact<{
 }>;
 
 
-export type UpdateInterviewTemplateMutation = { __typename?: 'Mutation', updateInterviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string } };
+export type UpdateInterviewTemplateMutation = { __typename?: 'Mutation', updateInterviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags: Array<{ __typename?: 'Tag', id: number, text: string }> } };
 
 export type UpdateInterviewTemplateTagsMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -417,14 +417,14 @@ export type GetInterviewTemplateQueryVariables = Exact<{
 }>;
 
 
-export type GetInterviewTemplateQuery = { __typename?: 'Query', getInterviewTemplate?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags: Array<{ __typename?: 'Tag', id: number, text: string }>, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string }> } | null };
+export type GetInterviewTemplateQuery = { __typename?: 'Query', getInterviewTemplate?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string }>, tags: Array<{ __typename?: 'Tag', id: number, text: string }> } | null };
 
 export type GetInterviewTemplatesQueryVariables = Exact<{
   tagsIds?: InputMaybe<Array<Scalars['Int']['input']> | Scalars['Int']['input']>;
 }>;
 
 
-export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTemplates: Array<{ __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string }> };
+export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTemplates: Array<{ __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags: Array<{ __typename?: 'Tag', id: number, text: string }> }> };
 
 export type GetKeystrokesQueryVariables = Exact<{
   answerId: Scalars['Float']['input'];
@@ -475,6 +475,12 @@ export const AuthResponseFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${ErrorFragmentDoc}`;
+export const TagFragmentDoc = gql`
+    fragment Tag on Tag {
+  id
+  text
+}
+    `;
 export const InterviewTemplateFragmentDoc = gql`
     fragment InterviewTemplate on InterviewTemplate {
   id
@@ -482,14 +488,11 @@ export const InterviewTemplateFragmentDoc = gql`
   description
   updatedAt
   createdAt
+  tags {
+    ...Tag
+  }
 }
-    `;
-export const TagFragmentDoc = gql`
-    fragment Tag on Tag {
-  id
-  text
-}
-    `;
+    ${TagFragmentDoc}`;
 export const QuestionFragmentDoc = gql`
     fragment Question on Question {
   id
@@ -499,18 +502,14 @@ export const QuestionFragmentDoc = gql`
   createdAt
 }
     `;
-export const InterviewTemplateWithTagsAndQuestionsFragmentDoc = gql`
-    fragment InterviewTemplateWithTagsAndQuestions on InterviewTemplate {
+export const InterviewTemplateWithQuestionsFragmentDoc = gql`
+    fragment InterviewTemplateWithQuestions on InterviewTemplate {
   ...InterviewTemplate
-  tags {
-    ...Tag
-  }
   questions {
     ...Question
   }
 }
     ${InterviewTemplateFragmentDoc}
-${TagFragmentDoc}
 ${QuestionFragmentDoc}`;
 export const QuestionWithInterviewTemplateFragmentDoc = gql`
     fragment QuestionWithInterviewTemplate on Question {
@@ -683,10 +682,10 @@ export function useGetCandidateInvitationsQuery(options?: Omit<Urql.UseQueryArgs
 export const GetInterviewTemplateDocument = gql`
     query GetInterviewTemplate($id: Int!) {
   getInterviewTemplate(id: $id) {
-    ...InterviewTemplateWithTagsAndQuestions
+    ...InterviewTemplateWithQuestions
   }
 }
-    ${InterviewTemplateWithTagsAndQuestionsFragmentDoc}`;
+    ${InterviewTemplateWithQuestionsFragmentDoc}`;
 
 export function useGetInterviewTemplateQuery(options: Omit<Urql.UseQueryArgs<GetInterviewTemplateQueryVariables>, 'query'>) {
   return Urql.useQuery<GetInterviewTemplateQuery, GetInterviewTemplateQueryVariables>({ query: GetInterviewTemplateDocument, ...options });

@@ -65,23 +65,11 @@ const errorExchange: Exchange =
 //   };
 // };
 
-// Invalidate all users in the cache
-const invalidateAllUsers = (cache: Cache) => {
+const invalidateAll = (cache: Cache, queryName: string) => {
   const allFields = cache.inspectFields('Query');
-  const fieldInfos = allFields.filter((info) => info.fieldName === 'getUsers');
+  const fieldInfos = allFields.filter((info) => info.fieldName === queryName);
   fieldInfos.forEach((fi) => {
-    cache.invalidate('Query', 'getUsers', fi.arguments || {});
-  });
-};
-
-// Invalidate all candidate invitations in the cache
-const invalidateAllCandidateInvitations = (cache: Cache) => {
-  const allFields = cache.inspectFields('Query');
-  const fieldInfos = allFields.filter(
-    (info) => info.fieldName === 'getCandidateInvitations',
-  );
-  fieldInfos.forEach((fi) => {
-    cache.invalidate('Query', 'getCandidateInvitations', fi.arguments || {});
+    cache.invalidate('Query', queryName, fi.arguments || {});
   });
 };
 
@@ -135,11 +123,27 @@ export const createUrqlClient = () => {
             },
 
             interviewerRegister: (_result, args, cache, info) => {
-              invalidateAllUsers(cache);
+              invalidateAll(cache, 'getUsers');
             },
 
             createCandidateInvitation: (_result, args, cache, info) => {
-              invalidateAllCandidateInvitations(cache);
+              invalidateAll(cache, 'getCandidateInvitations');
+            },
+
+            createInterviewTemplate: (_result, args, cache, info) => {
+              invalidateAll(cache, 'getInterviewTemplates');
+            },
+
+            updateInterviewTemplate: (_result, args, cache, info) => {
+              invalidateAll(cache, 'getInterviewTemplates');
+            },
+
+            updateInterviewTemplateTags: (_result, args, cache, info) => {
+              invalidateAll(cache, 'getInterviewTemplates');
+            },
+
+            deleteInterviewTemplate: (_result, args, cache, info) => {
+              invalidateAll(cache, 'getInterviewTemplates');
             },
 
             // register: (_result, args, cache, info) => {

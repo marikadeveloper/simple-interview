@@ -16,9 +16,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useCreateInterviewTemplateMutation } from '@/generated/graphql';
+import { MultiSelect } from '@/components/ui/multi-select';
+import {
+  useCreateInterviewTemplateMutation,
+  useGetTagsQuery,
+} from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { formSchema } from '..';
@@ -27,20 +31,41 @@ interface CreateTemplateDialogProps {}
 export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [, createInterviewTemplate] = useCreateInterviewTemplateMutation();
+  const [{ data: tagsData }] = useGetTagsQuery();
+  const tags = useMemo(
+    () =>
+      tagsData
+        ? tagsData.getTags.map((t) => ({
+            label: t.text,
+            value: t.id.toString(),
+          }))
+        : [],
+    [tagsData],
+  );
 
   const createForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
       description: '',
+      tags: [],
     },
   });
+
+  // console log form values when they  change
+  useEffect(() => {
+    const subscription = createForm.watch((value) => {
+      console.log('Form values:', value);
+    });
+    return () => subscription.unsubscribe();
+  }, [createForm]);
 
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
     await createInterviewTemplate({
       input: {
         name: values.name,
         description: values.description,
+        tagsIds: values.tags?.map((tag) => parseInt(tag)) || [],
       },
     });
     setIsOpen(false);
@@ -91,6 +116,26 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
                       <Input
                         placeholder='Enter template description'
                         {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createForm.control}
+                name='tags'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        modalPopover
+                        options={tags}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        placeholder='Select tags'
+                        variant='inverted'
                       />
                     </FormControl>
                     <FormMessage />

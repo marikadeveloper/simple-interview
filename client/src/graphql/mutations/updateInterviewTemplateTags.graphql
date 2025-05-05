@@ -1,3 +1,0 @@
-mutation UpdateInterviewTemplateTags($id: Int!, $tags: [String!]!) {
-  updateInterviewTemplateTags(id: $id, tags: $tags)
-}

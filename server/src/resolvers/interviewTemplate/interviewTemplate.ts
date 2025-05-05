@@ -55,6 +55,15 @@ export class InterviewTemplateResolver {
       name: input.name,
       description: input.description,
     });
+
+    // If tags are provided, set them
+    if (input.tagsIds) {
+      const tags = await Tag.findBy({
+        id: In(input.tagsIds),
+      });
+      interviewTemplate.tags = tags;
+    }
+
     await interviewTemplate.save();
     return interviewTemplate;
   }
@@ -72,6 +81,17 @@ export class InterviewTemplateResolver {
     }
     interviewTemplate.name = input.name;
     interviewTemplate.description = input.description;
+
+    // If tags are provided, update them
+    if (input.tagsIds) {
+      const tags = await Tag.findBy({
+        id: In(input.tagsIds),
+      });
+      interviewTemplate.tags = tags;
+    } else {
+      interviewTemplate.tags = [];
+    }
+
     await interviewTemplate.save();
     return interviewTemplate;
   }
@@ -84,28 +104,6 @@ export class InterviewTemplateResolver {
     if (!interviewTemplate.affected) {
       return false;
     }
-    return true;
-  }
-
-  @Mutation(() => Boolean)
-  @UseMiddleware(isAuth)
-  @UseMiddleware(isAdminOrInterviewer)
-  async updateInterviewTemplateTags(
-    @Arg('id', () => Int) id: number,
-    @Arg('tags', () => [String]) tags: string[],
-  ): Promise<boolean> {
-    const interviewTemplate = await InterviewTemplate.findOneBy({ id });
-    if (!interviewTemplate) {
-      return false;
-    }
-
-    const foundTags = await Tag.findBy({ text: In(tags) });
-    if (tags.length !== foundTags.length) {
-      return false;
-    }
-    interviewTemplate.tags = foundTags;
-
-    await interviewTemplate.save();
     return true;
   }
 }

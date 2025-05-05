@@ -1,38 +1,21 @@
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PageSubtitle } from '@/components/ui/page-subtitle';
+import { PageTitle } from '@/components/ui/page-title';
 import {
   InterviewTemplateFragment,
   Tag,
-  useCreateInterviewTemplateMutation,
   useCreateTagMutation,
   useDeleteTagMutation,
   useGetInterviewTemplatesQuery,
   useGetTagsQuery,
   useUpdateTagMutation,
 } from '@/generated/graphql';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus } from 'lucide-react';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { columns } from './columns';
+import { CreateTemplateDialog } from './components/CreateTemplateDialog';
 
 // Define form schema for interview template creation/editing
 export const formSchema = z.object({
@@ -50,38 +33,16 @@ export const InterviewTemplates = () => {
       tagsIds: [],
     },
   });
-  const [, createInterviewTemplate] = useCreateInterviewTemplateMutation();
   const [{ data: tagsData }] = useGetTagsQuery();
   const [, createTag] = useCreateTagMutation();
   const [, deleteTag] = useDeleteTagMutation();
   const [, updateTag] = useUpdateTagMutation();
 
   // State for dialogs
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newTagText, setNewTagText] = useState('');
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
 
-  // Forms
-  const createForm = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-    },
-  });
-
   // Handle form submissions
-  const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
-    await createInterviewTemplate({
-      input: {
-        name: values.name,
-        description: values.description,
-      },
-    });
-    setIsCreateDialogOpen(false);
-    createForm.reset();
-  };
-
   const handleCreateTag = async () => {
     if (newTagText.trim()) {
       await createTag({ text: newTagText.trim() });
@@ -99,12 +60,17 @@ export const InterviewTemplates = () => {
   };
 
   return (
-    <div className='container mx-auto py-10 space-y-8'>
-      <div className='flex justify-between items-center'>
-        <h1 className='text-3xl font-bold'>Interview Templates</h1>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className='mr-2 h-4 w-4' /> Create Template
-        </Button>
+    <div className='container mx-auto'>
+      <div className='flex items-center justify-between'>
+        <div>
+          <PageTitle>Interview Templates</PageTitle>
+          <PageSubtitle>
+            Here you can create, delete, and update interview templates.
+          </PageSubtitle>
+        </div>
+        <div className='flex items-center gap-2'>
+          <CreateTemplateDialog />
+        </div>
       </div>
 
       <div className='py-4'>
@@ -189,67 +155,6 @@ export const InterviewTemplates = () => {
           </Button>
         </div>
       </div>
-
-      {/* Create Template Dialog */}
-      <Dialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className='sm:max-w-[525px]'>
-          <DialogHeader>
-            <DialogTitle>Create Interview Template</DialogTitle>
-            <DialogDescription>
-              Create a new interview template. You can add tags later.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...createForm}>
-            <form
-              onSubmit={createForm.handleSubmit(handleCreateSubmit)}
-              className='space-y-4'>
-              <FormField
-                control={createForm.control}
-                name='name'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='Enter template name'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createForm.control}
-                name='description'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='Enter template description'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type='submit'>Create</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

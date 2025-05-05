@@ -1,3 +1,13 @@
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -15,20 +25,11 @@ import {
   UserRole,
 } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { RadioGroup } from '@radix-ui/react-dropdown-menu';
+import { RadioGroupItem } from '@radix-ui/react-radio-group';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Button } from './ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 
 const userRoles: {
   value: UserRole;
@@ -55,7 +56,7 @@ const formSchema = z.discriminatedUnion('role', [
 
 interface UserCreateDialogProps {}
 
-export const UserCreateDialog: React.FC<UserCreateDialogProps> = ({}) => {
+export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [, interviewerRegister] = useInterviewerRegisterMutation();
   const [, createCandidateInvitation] = useCreateCandidateInvitationMutation();

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { KeystrokeInput } from '../generated/graphql';
-import { useKeystrokeRecorder } from '../hooks/useKeystrokeRecorder';
+import { KeystrokeInput } from '../../../generated/graphql';
+import { useKeystrokeRecorder } from '../../../hooks/useKeystrokeRecorder';
 
 interface KeystrokeRecordingTextareaProps {
   value: string;

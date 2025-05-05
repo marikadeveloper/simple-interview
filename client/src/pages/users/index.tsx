@@ -1,10 +1,10 @@
-import { PendingInvitesDialog } from '@/components/PendingInvitesDialog';
 import { DataTable } from '@/components/ui/data-table';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
-import { UserCreateDialog } from '@/components/UserCreateDialog';
 import { useGetUsersQuery, User } from '@/generated/graphql';
 import { columns } from './columns';
+import { CreateUserDialog } from './components/CreateUserDialog';
+import { PendingInvitesDialog } from './components/PendingInvitesDialog';
 
 export const Users = () => {
   const [{ fetching, data }] = useGetUsersQuery({
@@ -24,7 +24,7 @@ export const Users = () => {
         </div>
         <div className='flex items-center gap-2'>
           <PendingInvitesDialog />
-          <UserCreateDialog />
+          <CreateUserDialog />
         </div>
       </div>
 

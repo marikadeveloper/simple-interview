@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Keystroke } from '../generated/graphql';
-import { reconstructText } from '../utils/keystrokeCapture';
+import { Keystroke } from '../../../generated/graphql';
+import { reconstructText } from '../../../utils/keystrokeCapture';
 
 interface KeystrokeReplayProps {
   keystrokes: Keystroke[];

@@ -146,6 +146,10 @@ export const createUrqlClient = () => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
 
+            createTag: (_result, args, cache, info) => {
+              invalidateAll(cache, 'getTags');
+            },
+
             // register: (_result, args, cache, info) => {
             //   betterUpdateQuery<RegisterMutation, MeQuery>(
             //     cache,

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,6 @@ import {
   useGetTagsQuery,
   useUpdateInterviewTemplateTagsMutation,
 } from '@/generated/graphql';
-import { Checkbox } from '@radix-ui/react-checkbox';
 import React from 'react';
 
 interface EditTemplateTagsDialogProps {

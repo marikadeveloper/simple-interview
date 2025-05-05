@@ -26,7 +26,6 @@ export const InterviewTemplateActions: React.FC<
     setIsEditDialogOpen(true);
   };
   const openTagDialog = () => {
-    // Set initially selected tags based on the template's current tags
     setIsTagDialogOpen(true);
   };
   const openDeleteConfirm = () => {

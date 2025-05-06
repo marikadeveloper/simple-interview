@@ -1,7 +1,9 @@
+import { Button } from '@/components/ui/button';
 import { InterviewTemplateFragment } from '@/generated/graphql';
+import { Pencil } from 'lucide-react';
 import React from 'react';
+import { Link } from 'react-router';
 import { DeleteTemplateConfirmationDialog } from './DeleteTemplateConfirmationDialog';
-import { EditTemplateDialog } from './EditTemplateDialog';
 
 interface InterviewTemplateActionsProps {
   template: InterviewTemplateFragment;
@@ -11,9 +13,14 @@ export const InterviewTemplateActions: React.FC<
 > = ({ template }) => {
   return (
     <>
-      {/* Edit Template Dialog */}
-      <EditTemplateDialog template={template} />
-      {/* Delete Template Confirmation Dialog */}
+      <Link to={`/interview-templates/${template.id}`}>
+        <Button
+          variant='outline'
+          size='icon'
+          className='mr-2'>
+          <Pencil />
+        </Button>
+      </Link>
       <DeleteTemplateConfirmationDialog template={template} />
     </>
   );

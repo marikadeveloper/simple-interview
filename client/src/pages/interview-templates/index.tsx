@@ -28,7 +28,7 @@ export const formSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
-export const InterviewTemplates = () => {
+const InterviewTemplates = () => {
   const [{ data: interviewTemplatesData }] = useGetInterviewTemplatesQuery({
     variables: {
       tagsIds: [],
@@ -159,3 +159,5 @@ export const InterviewTemplates = () => {
     </div>
   );
 };
+
+export default InterviewTemplates;

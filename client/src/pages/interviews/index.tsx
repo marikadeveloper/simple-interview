@@ -1,3 +1,5 @@
-export const Interviews = () => {
+const Interviews = () => {
   return <></>;
 };
+
+export default Interviews;

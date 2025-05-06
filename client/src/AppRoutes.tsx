@@ -1,15 +1,20 @@
+import { lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { UserRole } from './generated/graphql';
-import AdminSignupPage from './pages/auth/AdminSignupPage';
-import CandidateSignupPage from './pages/auth/CandidateSignupPage';
-import LoginPage from './pages/auth/LoginPage';
-import Dashboard from './pages/dashboard';
-import { InterviewTemplates } from './pages/interview-templates';
-import { Interviews } from './pages/interviews';
-import { Users } from './pages/users';
+
+const AdminSignupPage = lazy(() => import('./pages/auth/AdminSignupPage'));
+const CandidateSignupPage = lazy(
+  () => import('./pages/auth/CandidateSignupPage'),
+);
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const Dashboard = lazy(() => import('./pages/dashboard'));
+const InterviewTemplate = lazy(() => import('./pages/interview-template'));
+const InterviewTemplates = lazy(() => import('./pages/interview-templates'));
+const Interviews = lazy(() => import('./pages/interviews'));
+const Users = lazy(() => import('./pages/users'));
 
 export const AppRoutes = () => {
   return (
@@ -53,8 +58,18 @@ export const AppRoutes = () => {
         <Route
           path='/interview-templates'
           element={
-            <ProtectedRoute>
+            <ProtectedRoute
+              allowedUserRoles={[UserRole.Admin, UserRole.Interviewer]}>
               <InterviewTemplates />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/interview-templates/:id'
+          element={
+            <ProtectedRoute
+              allowedUserRoles={[UserRole.Admin, UserRole.Interviewer]}>
+              <InterviewTemplate />
             </ProtectedRoute>
           }
         />

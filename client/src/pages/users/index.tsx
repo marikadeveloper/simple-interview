@@ -30,7 +30,7 @@ export const formSchema = z.discriminatedUnion('role', [
   candidateSchema,
 ]);
 
-export const Users = () => {
+const Users = () => {
   const [{ data }] = useGetUsersQuery({
     variables: {
       filters: {},

@@ -55,6 +55,7 @@ export class User extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Field(() => [Interview], { nullable: true })
   @OneToMany(() => Interview, (interview) => interview.user)
-  interviews: Interview[];
+  interviews?: Interview[];
 }

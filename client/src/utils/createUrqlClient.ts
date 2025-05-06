@@ -126,23 +126,22 @@ export const createUrqlClient = () => {
             interviewerRegister: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getUsers');
             },
-
             createCandidateInvitation: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getCandidateInvitations');
+            },
+            deleteUser: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getUsers');
             },
 
             createInterviewTemplate: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
-
             updateInterviewTemplate: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
-
             updateInterviewTemplateTags: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
-
             deleteInterviewTemplate: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
@@ -150,11 +149,9 @@ export const createUrqlClient = () => {
             createTag: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getTags');
             },
-
             updateTag: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getTags');
             },
-
             deleteTag: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getTags');
             },

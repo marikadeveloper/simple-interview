@@ -1,4 +1,12 @@
-import { Arg, Ctx, Query, Resolver, UseMiddleware } from 'type-graphql';
+import {
+  Arg,
+  Ctx,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from 'type-graphql';
 import { User, UserRole } from '../../entities/User';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
@@ -49,5 +57,35 @@ export class UserResolver {
     }
     const users = await query.getMany();
     return users;
+  }
+
+  @Query(() => User, { nullable: true })
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async getUser(@Arg('id', () => Int) id: number): Promise<User | null> {
+    const user = await User.findOne({
+      where: { id },
+      relations: ['interviews'],
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    return user;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async deleteUser(@Arg('id', () => Int) id: number): Promise<boolean> {
+    const user = await User.findOne({
+      where: { id },
+    });
+    if (!user) {
+      return false;
+    }
+    await User.delete({ id });
+    return true;
   }
 }

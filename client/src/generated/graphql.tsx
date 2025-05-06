@@ -115,6 +115,7 @@ export type Mutation = {
   createTag: Tag;
   deleteInterviewTemplate: Scalars['Boolean']['output'];
   deleteTag: Scalars['Boolean']['output'];
+  deleteUser: Scalars['Boolean']['output'];
   forgotPassword: Scalars['Boolean']['output'];
   interviewerRegister: AuthResponse;
   login: AuthResponse;
@@ -165,6 +166,11 @@ export type MutationDeleteTagArgs = {
 };
 
 
+export type MutationDeleteUserArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationForgotPasswordArgs = {
   email: Scalars['String']['input'];
 };
@@ -203,6 +209,7 @@ export type Query = {
   getInterviewTemplates: Array<InterviewTemplate>;
   getKeystrokes?: Maybe<Array<Keystroke>>;
   getTags: Array<Tag>;
+  getUser?: Maybe<User>;
   /** Returns all users except the logged in user, if logged in as Interviewer only candidates are returned */
   getUsers: Array<User>;
   me?: Maybe<AuthResponse>;
@@ -226,6 +233,11 @@ export type QueryGetInterviewTemplatesArgs = {
 
 export type QueryGetKeystrokesArgs = {
   answerId: Scalars['Float']['input'];
+};
+
+
+export type QueryGetUserArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -266,6 +278,7 @@ export type User = {
   email: Scalars['String']['output'];
   fullName: Scalars['String']['output'];
   id: Scalars['Int']['output'];
+  interviews?: Maybe<Array<Interview>>;
   role: UserRole;
   updatedAt: Scalars['String']['output'];
 };
@@ -334,6 +347,13 @@ export type DeleteTagMutationVariables = Exact<{
 
 
 export type DeleteTagMutation = { __typename?: 'Mutation', deleteTag: boolean };
+
+export type DeleteUserMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
 
 export type LoginMutationVariables = Exact<{
   input: AuthInput;
@@ -557,6 +577,15 @@ export const DeleteTagDocument = gql`
 
 export function useDeleteTagMutation() {
   return Urql.useMutation<DeleteTagMutation, DeleteTagMutationVariables>(DeleteTagDocument);
+};
+export const DeleteUserDocument = gql`
+    mutation DeleteUser($id: Int!) {
+  deleteUser(id: $id)
+}
+    `;
+
+export function useDeleteUserMutation() {
+  return Urql.useMutation<DeleteUserMutation, DeleteUserMutationVariables>(DeleteUserDocument);
 };
 export const LoginDocument = gql`
     mutation Login($input: AuthInput!) {

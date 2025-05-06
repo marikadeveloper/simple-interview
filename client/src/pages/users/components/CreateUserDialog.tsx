@@ -30,29 +30,7 @@ import { RadioGroupItem } from '@radix-ui/react-radio-group';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
-const userRoles: {
-  value: UserRole;
-  label: string;
-}[] = [
-  { value: UserRole.Interviewer, label: 'Interviewer' },
-  { value: UserRole.Candidate, label: 'Candidate' },
-];
-
-const interviewerSchema = z.object({
-  role: z.literal(UserRole.Interviewer),
-  email: z.string().email(),
-  fullName: z.string().min(2).max(50),
-  password: z.string().min(8).max(50),
-});
-const candidateSchema = z.object({
-  role: z.literal(UserRole.Candidate),
-  email: z.string().email(),
-});
-const formSchema = z.discriminatedUnion('role', [
-  interviewerSchema,
-  candidateSchema,
-]);
+import { formSchema, userRoles } from '..';
 
 interface UserCreateDialogProps {}
 

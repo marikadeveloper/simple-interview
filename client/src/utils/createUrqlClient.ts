@@ -86,6 +86,7 @@ export const createUrqlClient = () => {
       cacheExchange({
         keys: {
           // PaginatedPosts: () => null,
+          Tag: (data) => data.id?.toString() || null,
         },
         resolvers: {
           Query: {
@@ -94,7 +95,7 @@ export const createUrqlClient = () => {
         },
         updates: {
           Mutation: {
-            logout: (_result, args, cache, info) => {
+            logout: (_result, _args, cache, _info) => {
               betterUpdateQuery<LogoutMutation, MeQuery>(
                 cache,
                 { query: MeDocument },
@@ -103,7 +104,7 @@ export const createUrqlClient = () => {
               );
             },
 
-            login: (_result, args, cache, info) => {
+            login: (_result, _args, cache, _info) => {
               betterUpdateQuery<LoginMutation, MeQuery>(
                 cache,
                 { query: MeDocument },
@@ -122,35 +123,43 @@ export const createUrqlClient = () => {
               );
             },
 
-            interviewerRegister: (_result, args, cache, info) => {
+            interviewerRegister: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getUsers');
             },
 
-            createCandidateInvitation: (_result, args, cache, info) => {
+            createCandidateInvitation: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getCandidateInvitations');
             },
 
-            createInterviewTemplate: (_result, args, cache, info) => {
+            createInterviewTemplate: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
 
-            updateInterviewTemplate: (_result, args, cache, info) => {
+            updateInterviewTemplate: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
 
-            updateInterviewTemplateTags: (_result, args, cache, info) => {
+            updateInterviewTemplateTags: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
 
-            deleteInterviewTemplate: (_result, args, cache, info) => {
+            deleteInterviewTemplate: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplates');
             },
 
-            createTag: (_result, args, cache, info) => {
+            createTag: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getTags');
             },
 
-            // register: (_result, args, cache, info) => {
+            updateTag: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getTags');
+            },
+
+            deleteTag: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getTags');
+            },
+
+            // register: (_result, _args, cache, _info) => {
             //   betterUpdateQuery<RegisterMutation, MeQuery>(
             //     cache,
             //     { query: MeDocument },

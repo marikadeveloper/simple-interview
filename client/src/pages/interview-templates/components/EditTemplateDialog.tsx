@@ -24,7 +24,7 @@ import {
 } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pencil } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { formSchema } from '..';
@@ -37,7 +37,7 @@ export const EditTemplateDialog: React.FC<EditTemplateDialogProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [, updateInterviewTemplate] = useUpdateInterviewTemplateMutation();
-  const [{ data: tagsData }] = useGetTagsQuery();
+  const [{ data: tagsData }] = useGetTagsQuery({ pause: !isOpen });
   const tags = useMemo(
     () =>
       tagsData
@@ -57,6 +57,13 @@ export const EditTemplateDialog: React.FC<EditTemplateDialogProps> = ({
       tags: template.tags?.map((tag) => tag.id.toString()),
     },
   });
+
+  // reset form on close
+  useEffect(() => {
+    if (!isOpen) {
+      editForm.reset();
+    }
+  }, [isOpen]);
 
   const handleEditSubmit = async (values: z.infer<typeof formSchema>) => {
     await updateInterviewTemplate({
@@ -134,7 +141,6 @@ export const EditTemplateDialog: React.FC<EditTemplateDialogProps> = ({
                     <FormLabel>Tags</FormLabel>
                     <FormControl>
                       <MultiSelect
-                        modalPopover
                         options={tags}
                         onValueChange={field.onChange}
                         defaultValue={field.value}

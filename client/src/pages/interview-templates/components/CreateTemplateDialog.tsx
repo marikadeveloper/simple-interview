@@ -22,7 +22,7 @@ import {
   useGetTagsQuery,
 } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { formSchema } from '..';
@@ -31,7 +31,7 @@ interface CreateTemplateDialogProps {}
 export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [, createInterviewTemplate] = useCreateInterviewTemplateMutation();
-  const [{ data: tagsData }] = useGetTagsQuery();
+  const [{ data: tagsData }] = useGetTagsQuery({ pause: !isOpen });
   const tags = useMemo(
     () =>
       tagsData
@@ -51,6 +51,13 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
       tags: [],
     },
   });
+
+  // reset form on close
+  useEffect(() => {
+    if (!isOpen) {
+      createForm.reset();
+    }
+  }, [isOpen]);
 
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
     await createInterviewTemplate({

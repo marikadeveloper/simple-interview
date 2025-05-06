@@ -112,8 +112,10 @@ export type Mutation = {
   changePassword: AuthResponse;
   createCandidateInvitation: Scalars['Boolean']['output'];
   createInterviewTemplate: InterviewTemplate;
+  createQuestion: Question;
   createTag: Tag;
   deleteInterviewTemplate: Scalars['Boolean']['output'];
+  deleteQuestion: Scalars['Boolean']['output'];
   deleteTag: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   forgotPassword: Scalars['Boolean']['output'];
@@ -122,6 +124,7 @@ export type Mutation = {
   logout: Scalars['Boolean']['output'];
   saveKeystrokes: Scalars['Boolean']['output'];
   updateInterviewTemplate: InterviewTemplate;
+  updateQuestion: Question;
   updateTag: Tag;
 };
 
@@ -151,12 +154,23 @@ export type MutationCreateInterviewTemplateArgs = {
 };
 
 
+export type MutationCreateQuestionArgs = {
+  input: QuestionInput;
+  interviewTemplateId: Scalars['Int']['input'];
+};
+
+
 export type MutationCreateTagArgs = {
   text: Scalars['String']['input'];
 };
 
 
 export type MutationDeleteInterviewTemplateArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteQuestionArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -197,6 +211,12 @@ export type MutationUpdateInterviewTemplateArgs = {
 };
 
 
+export type MutationUpdateQuestionArgs = {
+  id: Scalars['Int']['input'];
+  input: QuestionInput;
+};
+
+
 export type MutationUpdateTagArgs = {
   id: Scalars['Int']['input'];
   text: Scalars['String']['input'];
@@ -208,6 +228,7 @@ export type Query = {
   getInterviewTemplate?: Maybe<InterviewTemplate>;
   getInterviewTemplates: Array<InterviewTemplate>;
   getKeystrokes?: Maybe<Array<Keystroke>>;
+  getQuestions: Array<Question>;
   getTags: Array<Tag>;
   getUser?: Maybe<User>;
   /** Returns all users except the logged in user, if logged in as Interviewer only candidates are returned */
@@ -236,6 +257,11 @@ export type QueryGetKeystrokesArgs = {
 };
 
 
+export type QueryGetQuestionsArgs = {
+  interviewTemplateId: Scalars['Int']['input'];
+};
+
+
 export type QueryGetUserArgs = {
   id: Scalars['Int']['input'];
 };
@@ -253,6 +279,11 @@ export type Question = {
   interviewTemplate: InterviewTemplate;
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type QuestionInput = {
+  description: Scalars['String']['input'];
+  title: Scalars['String']['input'];
 };
 
 export type RegisterInput = {
@@ -326,6 +357,14 @@ export type CreateInterviewTemplateMutationVariables = Exact<{
 
 
 export type CreateInterviewTemplateMutation = { __typename?: 'Mutation', createInterviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } };
+
+export type CreateQuestionMutationVariables = Exact<{
+  interviewTemplateId: Scalars['Int']['input'];
+  input: QuestionInput;
+}>;
+
+
+export type CreateQuestionMutation = { __typename?: 'Mutation', createQuestion: { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string } };
 
 export type CreateTagMutationVariables = Exact<{
   text: Scalars['String']['input'];
@@ -439,6 +478,13 @@ export type GetKeystrokesQueryVariables = Exact<{
 
 export type GetKeystrokesQuery = { __typename?: 'Query', getKeystrokes?: Array<{ __typename?: 'Keystroke', id: number, type: string, value?: string | null, position: number, length?: number | null, timestamp: string, relativeTimestamp: number }> | null };
 
+export type GetQuestionsQueryVariables = Exact<{
+  interviewTemplateId: Scalars['Int']['input'];
+}>;
+
+
+export type GetQuestionsQuery = { __typename?: 'Query', getQuestions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string }> };
+
 export type GetTagsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -548,6 +594,17 @@ export const CreateInterviewTemplateDocument = gql`
 
 export function useCreateInterviewTemplateMutation() {
   return Urql.useMutation<CreateInterviewTemplateMutation, CreateInterviewTemplateMutationVariables>(CreateInterviewTemplateDocument);
+};
+export const CreateQuestionDocument = gql`
+    mutation CreateQuestion($interviewTemplateId: Int!, $input: QuestionInput!) {
+  createQuestion(interviewTemplateId: $interviewTemplateId, input: $input) {
+    ...Question
+  }
+}
+    ${QuestionFragmentDoc}`;
+
+export function useCreateQuestionMutation() {
+  return Urql.useMutation<CreateQuestionMutation, CreateQuestionMutationVariables>(CreateQuestionDocument);
 };
 export const CreateTagDocument = gql`
     mutation CreateTag($text: String!) {
@@ -723,6 +780,17 @@ export const GetKeystrokesDocument = gql`
 
 export function useGetKeystrokesQuery(options: Omit<Urql.UseQueryArgs<GetKeystrokesQueryVariables>, 'query'>) {
   return Urql.useQuery<GetKeystrokesQuery, GetKeystrokesQueryVariables>({ query: GetKeystrokesDocument, ...options });
+};
+export const GetQuestionsDocument = gql`
+    query GetQuestions($interviewTemplateId: Int!) {
+  getQuestions(interviewTemplateId: $interviewTemplateId) {
+    ...Question
+  }
+}
+    ${QuestionFragmentDoc}`;
+
+export function useGetQuestionsQuery(options: Omit<Urql.UseQueryArgs<GetQuestionsQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetQuestionsQuery, GetQuestionsQueryVariables>({ query: GetQuestionsDocument, ...options });
 };
 export const GetTagsDocument = gql`
     query GetTags {

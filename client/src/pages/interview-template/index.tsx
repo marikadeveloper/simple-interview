@@ -1,32 +1,9 @@
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import { useGetInterviewTemplateQuery } from '@/generated/graphql';
 import { useParams } from 'react-router';
-import { z } from 'zod';
-
-export const formSchema = z.object({});
-const CreateQuestionCard = ({ templateId }: { templateId: string }) => {
-  return (
-    <Card className='w-full'>
-      <CardHeader>
-        <CardTitle>Create question</CardTitle>
-      </CardHeader>
-      <CardContent></CardContent>
-      <CardFooter className='flex justify-between'>
-        <Button variant='outline'>Cancel</Button>
-        <Button>Save</Button>
-      </CardFooter>
-    </Card>
-  );
-};
+import { CreateQuestionCard } from './components/CreateQuestionCard';
 
 const InterviewTemplate = () => {
   const { id } = useParams();
@@ -39,7 +16,7 @@ const InterviewTemplate = () => {
     return <div>Loading...</div>;
   }
 
-  if (!data?.getInterviewTemplate) {
+  if (!data?.getInterviewTemplate || !id) {
     return <div>No template found</div>;
   }
 
@@ -65,8 +42,18 @@ const InterviewTemplate = () => {
         </div>
       </div>
 
-      <div className='py-4'>
+      <div className='py-6'>
         <CreateQuestionCard templateId={id} />
+        <div className='mt-4'>
+          {interviewTemplate.questions?.map((question) => (
+            <Card key={question.id}>
+              <CardHeader>
+                <CardTitle>{question.title}</CardTitle>
+              </CardHeader>
+              <CardContent>{question.description}</CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );

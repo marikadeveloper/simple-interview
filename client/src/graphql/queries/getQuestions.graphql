@@ -1,0 +1,5 @@
+query GetQuestions($interviewTemplateId: Int!) {
+  getQuestions(interviewTemplateId: $interviewTemplateId) {
+    ...Question
+  }
+}

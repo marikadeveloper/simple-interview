@@ -1,8 +1,32 @@
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import { useGetInterviewTemplateQuery } from '@/generated/graphql';
 import { useParams } from 'react-router';
+import { z } from 'zod';
+
+export const formSchema = z.object({});
+const CreateQuestionCard = ({ templateId }: { templateId: string }) => {
+  return (
+    <Card className='w-full'>
+      <CardHeader>
+        <CardTitle>Create question</CardTitle>
+      </CardHeader>
+      <CardContent></CardContent>
+      <CardFooter className='flex justify-between'>
+        <Button variant='outline'>Cancel</Button>
+        <Button>Save</Button>
+      </CardFooter>
+    </Card>
+  );
+};
 
 const InterviewTemplate = () => {
   const { id } = useParams();
@@ -37,11 +61,13 @@ const InterviewTemplate = () => {
           </div>
         </div>
         <div className='flex items-center gap-2'>
-          <Button>Smth</Button>
+          {/* <Button>Smth</Button> */}
         </div>
       </div>
 
-      <div className='py-4'></div>
+      <div className='py-4'>
+        <CreateQuestionCard templateId={id} />
+      </div>
     </div>
   );
 };

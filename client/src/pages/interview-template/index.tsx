@@ -1,9 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import { useGetInterviewTemplateQuery } from '@/generated/graphql';
 import { useParams } from 'react-router';
-import { CreateQuestionCard } from './components/CreateQuestionCard';
+import { QuestionCard } from './components/QuestionCard';
 
 const InterviewTemplate = () => {
   const { id } = useParams();
@@ -42,16 +41,16 @@ const InterviewTemplate = () => {
         </div>
       </div>
 
+      {/* TODO: update and edit question */}
       <div className='py-6'>
-        <CreateQuestionCard templateId={id} />
+        <QuestionCard templateId={id} />
         <div className='mt-4'>
           {interviewTemplate.questions?.map((question) => (
-            <Card key={question.id}>
-              <CardHeader>
-                <CardTitle>{question.title}</CardTitle>
-              </CardHeader>
-              <CardContent>{question.description}</CardContent>
-            </Card>
+            <QuestionCard
+              key={question.id}
+              templateId={id}
+              question={question}
+            />
           ))}
         </div>
       </div>

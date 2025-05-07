@@ -10,6 +10,10 @@ import {
 } from 'typeorm';
 import { InterviewTemplate } from './InterviewTemplate';
 
+/**
+ * TODO: add sort order
+ */
+
 @ObjectType()
 @Entity()
 export class Question extends BaseEntity {

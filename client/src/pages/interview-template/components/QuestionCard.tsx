@@ -15,12 +15,18 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useCreateQuestionMutation } from '@/generated/graphql';
+import {
+  QuestionFragment,
+  QuestionInput,
+  useCreateQuestionMutation,
+  useUpdateQuestionMutation,
+} from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-const formSchema = z.object({
+export const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.',
   }),
@@ -28,40 +34,57 @@ const formSchema = z.object({
     message: 'Description must be at least 5 characters.',
   }),
 });
-export const CreateQuestionCard = ({ templateId }: { templateId: string }) => {
+interface QuestionCardProps {
+  templateId: string;
+  question?: QuestionFragment;
+}
+export const QuestionCard: React.FC<QuestionCardProps> = ({
+  templateId,
+  question,
+}) => {
   const [, createQuestion] = useCreateQuestionMutation();
-  const createForm = useForm<z.infer<typeof formSchema>>({
+  const [, updateQuestion] = useUpdateQuestionMutation();
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      description: '',
+      title: question?.title || '',
+      description: question?.description || '',
     },
   });
 
-  const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
-    await createQuestion({
-      interviewTemplateId: parseInt(templateId),
-      input: {
-        title: values.title,
-        description: values.description,
-      },
-    });
-    createForm.reset();
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    const input: QuestionInput = {
+      title: values.title,
+      description: values.description,
+    };
+    if (question) {
+      await updateQuestion({
+        id: question.id,
+        input,
+      });
+    } else {
+      await createQuestion({
+        interviewTemplateId: parseInt(templateId),
+        input,
+      });
+    }
+
+    form.reset();
   };
 
   return (
     <Card className='w-full'>
       <CardHeader>
-        <CardTitle>Create question</CardTitle>
+        <CardTitle>{question ? question.title : 'Create Question'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <Form {...createForm}>
+        <Form {...form}>
           <form
-            id='create-question-form'
-            onSubmit={createForm.handleSubmit(handleCreateSubmit)}
+            id={`question-form-${question?.id || 'new'}`}
+            onSubmit={form.handleSubmit(handleSubmit)}
             className='space-y-4'>
             <FormField
-              control={createForm.control}
+              control={form.control}
               name='title'
               render={({ field }) => (
                 <FormItem>
@@ -77,7 +100,7 @@ export const CreateQuestionCard = ({ templateId }: { templateId: string }) => {
               )}
             />
             <FormField
-              control={createForm.control}
+              control={form.control}
               name='description'
               render={({ field }) => (
                 <FormItem>
@@ -96,10 +119,14 @@ export const CreateQuestionCard = ({ templateId }: { templateId: string }) => {
         </Form>
       </CardContent>
       <CardFooter className='flex justify-between'>
-        <Button variant='outline'>Cancel</Button>
+        <Button
+          variant='outline'
+          onClick={() => form.reset()}>
+          Cancel
+        </Button>
         <Button
           type='submit'
-          form='create-question-form'>
+          form={`question-form-${question?.id || 'new'}`}>
           Save
         </Button>
       </CardFooter>

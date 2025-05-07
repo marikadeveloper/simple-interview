@@ -442,6 +442,14 @@ export type UpdateInterviewTemplateMutationVariables = Exact<{
 
 export type UpdateInterviewTemplateMutation = { __typename?: 'Mutation', updateInterviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } };
 
+export type UpdateQuestionMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: QuestionInput;
+}>;
+
+
+export type UpdateQuestionMutation = { __typename?: 'Mutation', updateQuestion: { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string } };
+
 export type UpdateTagMutationVariables = Exact<{
   id: Scalars['Int']['input'];
   text: Scalars['String']['input'];
@@ -716,6 +724,17 @@ export const UpdateInterviewTemplateDocument = gql`
 
 export function useUpdateInterviewTemplateMutation() {
   return Urql.useMutation<UpdateInterviewTemplateMutation, UpdateInterviewTemplateMutationVariables>(UpdateInterviewTemplateDocument);
+};
+export const UpdateQuestionDocument = gql`
+    mutation UpdateQuestion($id: Int!, $input: QuestionInput!) {
+  updateQuestion(id: $id, input: $input) {
+    ...Question
+  }
+}
+    ${QuestionFragmentDoc}`;
+
+export function useUpdateQuestionMutation() {
+  return Urql.useMutation<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument);
 };
 export const UpdateTagDocument = gql`
     mutation UpdateTag($id: Int!, $text: String!) {

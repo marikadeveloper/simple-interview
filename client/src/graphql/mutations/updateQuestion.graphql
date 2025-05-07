@@ -1,0 +1,5 @@
+mutation UpdateQuestion($id: Int!, $input: QuestionInput!) {
+  updateQuestion(id: $id, input: $input) {
+    ...Question
+  }
+}

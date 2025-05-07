@@ -38,6 +38,7 @@ export class InterviewTemplateResolver {
     const interviewTemplate = await InterviewTemplate.findOne({
       where: { id },
       relations: ['questions', 'tags'],
+      order: { questions: { sortOrder: 'ASC' } },
     });
     if (!interviewTemplate) {
       return null;

@@ -1,4 +1,8 @@
-import { QuestionFragment } from '@/generated/graphql';
+import {
+  QuestionFragment,
+  UpdateQuestionSortOrderInput,
+  useUpdateQuestionSortOrderMutation,
+} from '@/generated/graphql';
 import { triggerPostMoveFlash } from '@atlaskit/pragmatic-drag-and-drop-flourish/trigger-post-move-flash';
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { reorderWithEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/reorder-with-edge';
@@ -14,6 +18,7 @@ export const QuestionList = ({
   questions: QuestionFragment[];
 }) => {
   const [questions, setQuestions] = useState<QuestionFragment[]>(dataQuestions);
+  const [, updateQuestionSortOrder] = useUpdateQuestionSortOrderMutation();
 
   useEffect(() => {
     return monitorForElements({
@@ -68,6 +73,16 @@ export const QuestionList = ({
         if (element instanceof HTMLElement) {
           triggerPostMoveFlash(element);
         }
+
+        // Update the sort order in the backend
+        const mutationInput: UpdateQuestionSortOrderInput = {
+          questionId: sourceData.questionId,
+          newSortOrder: indexOfTarget,
+        };
+
+        updateQuestionSortOrder({
+          input: mutationInput,
+        });
       },
     });
   }, [questions]);

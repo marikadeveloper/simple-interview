@@ -196,15 +196,15 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         id: question.id,
         input,
       });
+      setFormVisible(false);
     } else if (mode === 'create') {
       if (!templateId) return; // Ensures templateId is defined
       await createQuestion({
         interviewTemplateId: parseInt(templateId),
         input,
       });
+      form.reset();
     }
-
-    form.reset();
   };
 
   const handleQuestionDelete = async () => {
@@ -217,7 +217,9 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   const handleCancel = () => {
-    setFormVisible(false);
+    if (mode === 'edit') {
+      setFormVisible(false);
+    }
     form.reset();
   };
 
@@ -239,7 +241,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               <div className='flex items-center gap-2'>
                 {mode === 'edit' && <GripVertical size={16} />}
                 <CardTitle>
-                  {question ? question.title : 'Create Question'}
+                  {question ? form.watch('title') : 'Create Question'}
                 </CardTitle>
               </div>
               {question && formVisible && (
@@ -260,7 +262,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           </CardHeader>
           <CardContent>
             <p className={formVisible ? 'hidden' : 'block'}>
-              {question?.description}
+              {form.watch('description')}
             </p>
             <div className={!formVisible ? `hidden` : ''}>
               <Form {...form}>

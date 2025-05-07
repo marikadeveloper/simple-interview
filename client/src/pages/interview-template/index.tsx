@@ -3,14 +3,13 @@ import { PageTitle } from '@/components/ui/page-title';
 import { useGetInterviewTemplateQuery } from '@/generated/graphql';
 import { useParams } from 'react-router';
 import { QuestionCard } from './components/QuestionCard';
+import { QuestionList } from './components/QuestionList';
 
 const InterviewTemplate = () => {
   const { id } = useParams();
   const [{ fetching, data }] = useGetInterviewTemplateQuery({
     variables: { id: parseInt(id as string) },
   });
-  console.log(data);
-
   if (fetching) {
     return <div>Loading...</div>;
   }
@@ -44,13 +43,7 @@ const InterviewTemplate = () => {
       <div className='py-6'>
         <QuestionCard templateId={id} />
         <div className='mt-4'>
-          {interviewTemplate.questions?.map((question) => (
-            <QuestionCard
-              key={question.id}
-              templateId={id}
-              question={question}
-            />
-          ))}
+          <QuestionList questions={interviewTemplate.questions} />
         </div>
       </div>
     </div>

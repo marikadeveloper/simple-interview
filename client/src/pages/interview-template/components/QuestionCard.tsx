@@ -37,7 +37,7 @@ import {
 import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { GripVertical, Trash } from 'lucide-react';
+import { GripVertical, Pencil, Trash } from 'lucide-react';
 import React, { HTMLAttributes, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
@@ -91,6 +91,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   //
   const ref = useRef<HTMLDivElement | null>(null);
   const [state, setState] = useState<CardState>(idle);
+  const [formVisible, setFormVisible] = useState(!!templateId);
   //
   const [, createQuestion] = useCreateQuestionMutation();
   const [, updateQuestion] = useUpdateQuestionMutation();
@@ -215,6 +216,11 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     }
   };
 
+  const handleCancel = () => {
+    setFormVisible(false);
+    form.reset();
+  };
+
   return (
     <>
       <div className='relative'>
@@ -223,76 +229,89 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           ref={ref}
           className={cn(
             'w-full bg-white',
+            formVisible ? 'gap-6' : 'gap-2',
             mode === 'create' && 'border-dashed border-2 shadow-none',
             mode === 'edit' && 'hover:bg-slate-50 hover:cursor-grab',
             stateStyles[state.type] ?? '',
           )}>
           <CardHeader>
-            {mode === 'edit' && (
-              <div className='w-6 flex justify-center'>
-                <GripVertical size={10} />
-              </div>
-            )}
             <div className='flex items-center justify-between'>
-              <CardTitle>
-                {question ? question.title : 'Create Question'}
-              </CardTitle>
-              {question ? (
+              <div className='flex items-center gap-2'>
+                {mode === 'edit' && <GripVertical size={16} />}
+                <CardTitle>
+                  {question ? question.title : 'Create Question'}
+                </CardTitle>
+              </div>
+              {question && formVisible && (
                 <Button
                   variant='outline'
                   onClick={handleQuestionDelete}>
                   <Trash />
                 </Button>
-              ) : (
-                ''
+              )}
+              {question && !formVisible && (
+                <Button
+                  variant='outline'
+                  onClick={() => setFormVisible(true)}>
+                  <Pencil />
+                </Button>
               )}
             </div>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form
-                id={`question-form-${question?.id || 'new'}`}
-                onSubmit={form.handleSubmit(handleSubmit)}
-                className='space-y-4'>
-                <FormField
-                  control={form.control}
-                  name='title'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Enter question title'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='description'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Enter question description'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
+            <p className={formVisible ? 'hidden' : 'block'}>
+              {question?.description}
+            </p>
+            <div className={!formVisible ? `hidden` : ''}>
+              <Form {...form}>
+                <form
+                  id={`question-form-${question?.id || 'new'}`}
+                  onSubmit={form.handleSubmit(handleSubmit)}
+                  className='space-y-4'>
+                  <FormField
+                    control={form.control}
+                    name='title'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder='Enter question title'
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name='description'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder='Enter question description'
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </div>
           </CardContent>
-          <CardFooter className='flex justify-between'>
+          <CardFooter
+            className={cn(
+              'flex justify-between',
+              !formVisible ? `hidden` : '',
+            )}>
             <Button
               variant='outline'
-              onClick={() => form.reset()}>
+              onClick={handleCancel}>
               Cancel
             </Button>
             <Button

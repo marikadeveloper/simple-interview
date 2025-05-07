@@ -8,6 +8,8 @@ import {
   Resolver,
   UseMiddleware,
 } from 'type-graphql';
+import { EntityManager } from 'typeorm'; // Corrected imports
+import { dataSource } from '../../';
 import { Question } from '../../entities/Question';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
@@ -18,6 +20,15 @@ class QuestionInput {
   title: string;
   @Field(() => String)
   description: string;
+}
+
+@InputType() // New InputType for updating sort order
+class UpdateQuestionSortOrderInput {
+  @Field(() => Int)
+  questionId: number;
+
+  @Field(() => Int)
+  newSortOrder: number; // The new 0-based index for the question
 }
 
 @Resolver(Question)
@@ -107,5 +118,113 @@ export class QuestionResolver {
       .execute();
 
     return true;
+  }
+
+  @Mutation(() => Boolean) // New mutation for updating sort order
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async updateQuestionSortOrder(
+    @Arg('input', () => UpdateQuestionSortOrderInput)
+    { questionId, newSortOrder }: UpdateQuestionSortOrderInput,
+  ): Promise<boolean> {
+    // Use getManager() to correctly access the transaction method
+    return dataSource.transaction(
+      async (transactionalEntityManager: EntityManager) => {
+        const question = await transactionalEntityManager.findOne(Question, {
+          where: { id: questionId },
+          relations: ['interviewTemplate'],
+        });
+
+        if (!question) {
+          // throw new Error('Question not found'); // Optional: throw for specific error handling
+          return false;
+        }
+
+        const oldSortOrder = question.sortOrder;
+        // Ensure interviewTemplate is loaded and has an id
+        if (
+          !question.interviewTemplate ||
+          typeof question.interviewTemplate.id === 'undefined'
+        ) {
+          // throw new Error('Interview template not found for the question');
+          return false;
+        }
+        const interviewTemplateId = question.interviewTemplate.id;
+
+        if (oldSortOrder === newSortOrder) {
+          return true; // No change needed
+        }
+
+        // Basic validation for newSortOrder (e.g., non-negative)
+        // More comprehensive validation (e.g., within bounds of actual question count) can be added
+        if (newSortOrder < 0) {
+          // throw new Error('New sort order cannot be negative');
+          return false;
+        }
+
+        // Determine the maximum sort order for this template to prevent out-of-bounds newSortOrder
+        const maxSortOrderQueryResult = await transactionalEntityManager
+          .createQueryBuilder(Question, 'question')
+          .select('MAX(question.sortOrder)', 'maxSortOrder')
+          .where('question.interviewTemplate.id = :interviewTemplateId', {
+            interviewTemplateId,
+          })
+          .getRawOne();
+
+        const maxSortOrder = maxSortOrderQueryResult?.maxSortOrder ?? -1; // if no questions, maxSortOrder is -1
+
+        if (newSortOrder > maxSortOrder + 1 && oldSortOrder > maxSortOrder) {
+          // if trying to move a non-existent item to a new non-existent place
+          // this case might indicate an issue or an attempt to place it far out of bounds
+          // if it was an existing item, newSortOrder > maxSortOrder would be handled below
+        } else if (
+          newSortOrder > maxSortOrder &&
+          oldSortOrder <= maxSortOrder
+        ) {
+          // If newSortOrder is beyond the current max, cap it to be the last item
+          // This handles dragging to the very end or beyond
+          newSortOrder = maxSortOrder;
+        }
+
+        // Re-check if change is still needed after potential capping
+        if (oldSortOrder === newSortOrder) {
+          return true;
+        }
+
+        if (newSortOrder < oldSortOrder) {
+          // Question moved up (e.g., from sortOrder 5 to 2)
+          // Increment sortOrder for questions that were between newSortOrder (inclusive)
+          // and oldSortOrder (exclusive)
+          await transactionalEntityManager
+            .createQueryBuilder()
+            .update(Question)
+            .set({ sortOrder: () => '"sortOrder" + 1' })
+            .where(
+              '"interviewTemplateId" = :interviewTemplateId AND "sortOrder" >= :newSortOrder AND "sortOrder" < :oldSortOrder',
+              { interviewTemplateId, newSortOrder, oldSortOrder },
+            )
+            .execute();
+        } else {
+          // Question moved down (e.g., from sortOrder 2 to 5)
+          // Decrement sortOrder for questions that were between oldSortOrder (exclusive)
+          // and newSortOrder (inclusive)
+          await transactionalEntityManager
+            .createQueryBuilder()
+            .update(Question)
+            .set({ sortOrder: () => '"sortOrder" - 1' })
+            .where(
+              '"interviewTemplateId" = :interviewTemplateId AND "sortOrder" > :oldSortOrder AND "sortOrder" <= :newSortOrder',
+              { interviewTemplateId, oldSortOrder, newSortOrder },
+            )
+            .execute();
+        }
+
+        // Update the target question's sortOrder
+        question.sortOrder = newSortOrder;
+        await transactionalEntityManager.save(question);
+
+        return true;
+      },
+    );
   }
 }

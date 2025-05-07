@@ -125,6 +125,7 @@ export type Mutation = {
   saveKeystrokes: Scalars['Boolean']['output'];
   updateInterviewTemplate: InterviewTemplate;
   updateQuestion: Question;
+  updateQuestionSortOrder: Scalars['Boolean']['output'];
   updateTag: Tag;
 };
 
@@ -217,6 +218,11 @@ export type MutationUpdateQuestionArgs = {
 };
 
 
+export type MutationUpdateQuestionSortOrderArgs = {
+  input: UpdateQuestionSortOrderInput;
+};
+
+
 export type MutationUpdateTagArgs = {
   id: Scalars['Int']['input'];
   text: Scalars['String']['input'];
@@ -302,6 +308,11 @@ export type Tag = {
   __typename?: 'Tag';
   id: Scalars['Int']['output'];
   text: Scalars['String']['output'];
+};
+
+export type UpdateQuestionSortOrderInput = {
+  newSortOrder: Scalars['Int']['input'];
+  questionId: Scalars['Int']['input'];
 };
 
 export type User = {
@@ -457,6 +468,13 @@ export type UpdateQuestionMutationVariables = Exact<{
 
 
 export type UpdateQuestionMutation = { __typename?: 'Mutation', updateQuestion: { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number } };
+
+export type UpdateQuestionSortOrderMutationVariables = Exact<{
+  input: UpdateQuestionSortOrderInput;
+}>;
+
+
+export type UpdateQuestionSortOrderMutation = { __typename?: 'Mutation', updateQuestionSortOrder: boolean };
 
 export type UpdateTagMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -753,6 +771,15 @@ export const UpdateQuestionDocument = gql`
 
 export function useUpdateQuestionMutation() {
   return Urql.useMutation<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument);
+};
+export const UpdateQuestionSortOrderDocument = gql`
+    mutation UpdateQuestionSortOrder($input: UpdateQuestionSortOrderInput!) {
+  updateQuestionSortOrder(input: $input)
+}
+    `;
+
+export function useUpdateQuestionSortOrderMutation() {
+  return Urql.useMutation<UpdateQuestionSortOrderMutation, UpdateQuestionSortOrderMutationVariables>(UpdateQuestionSortOrderDocument);
 };
 export const UpdateTagDocument = gql`
     mutation UpdateTag($id: Int!, $text: String!) {

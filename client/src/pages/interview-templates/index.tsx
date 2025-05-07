@@ -4,21 +4,11 @@ import { PageTitle } from '@/components/ui/page-title';
 import {
   InterviewTemplateFragment,
   useGetInterviewTemplatesQuery,
+  useGetTagsQuery,
 } from '@/generated/graphql';
-import { z } from 'zod';
+import { useMemo } from 'react';
 import { columns } from './columns';
 import { CreateTemplateDialog } from './components/CreateTemplateDialog';
-
-// Define form schema for interview template creation/editing
-export const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.',
-  }),
-  description: z.string().min(5, {
-    message: 'Description must be at least 5 characters.',
-  }),
-  tags: z.array(z.string()).optional(),
-});
 
 const InterviewTemplates = () => {
   const [{ data: interviewTemplatesData }] = useGetInterviewTemplatesQuery({
@@ -26,6 +16,17 @@ const InterviewTemplates = () => {
       tagsIds: [],
     },
   });
+  const [{ data: tagsData }] = useGetTagsQuery();
+  const tags = useMemo(
+    () =>
+      tagsData
+        ? tagsData.getTags.map((t) => ({
+            label: t.text,
+            value: t.id.toString(),
+          }))
+        : [],
+    [tagsData],
+  );
   return (
     <div className='container mx-auto'>
       <div className='flex items-center justify-between'>
@@ -36,7 +37,7 @@ const InterviewTemplates = () => {
           </PageSubtitle>
         </div>
         <div className='flex items-center gap-2'>
-          <CreateTemplateDialog />
+          <CreateTemplateDialog tags={tags} />
         </div>
       </div>
 

@@ -11,7 +11,8 @@ import {
 import { InterviewTemplate } from './InterviewTemplate';
 
 /**
- * TODO: add sort order
+ * TODO:
+ * - add a "hint" field
  */
 
 @ObjectType()

@@ -17,33 +17,23 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
-import {
-  useCreateInterviewTemplateMutation,
-  useGetTagsQuery,
-} from '@/generated/graphql';
+import { useCreateInterviewTemplateMutation } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { formSchema } from '..';
+import { interviewTemplateFormSchema as formSchema } from '../schema';
 
-interface CreateTemplateDialogProps {}
-export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
+interface CreateTemplateDialogProps {
+  tags: { label: string; value: string }[];
+}
+export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
+  tags,
+}) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [, createInterviewTemplate] = useCreateInterviewTemplateMutation();
-  const [{ data: tagsData }] = useGetTagsQuery({ pause: !isOpen });
-  const tags = useMemo(
-    () =>
-      tagsData
-        ? tagsData.getTags.map((t) => ({
-            label: t.text,
-            value: t.id.toString(),
-          }))
-        : [],
-    [tagsData],
-  );
 
-  const createForm = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -55,7 +45,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
   // reset form on close
   useEffect(() => {
     if (!isOpen) {
-      createForm.reset();
+      form.reset();
     }
   }, [isOpen]);
 
@@ -68,7 +58,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
       },
     });
     setIsOpen(false);
-    createForm.reset();
+    form.reset();
   };
 
   return (
@@ -84,12 +74,12 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
               Create a new interview template. You can add tags later.
             </DialogDescription>
           </DialogHeader>
-          <Form {...createForm}>
+          <Form {...form}>
             <form
-              onSubmit={createForm.handleSubmit(handleCreateSubmit)}
+              onSubmit={form.handleSubmit(handleCreateSubmit)}
               className='space-y-4'>
               <FormField
-                control={createForm.control}
+                control={form.control}
                 name='name'
                 render={({ field }) => (
                   <FormItem>
@@ -105,7 +95,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
                 )}
               />
               <FormField
-                control={createForm.control}
+                control={form.control}
                 name='description'
                 render={({ field }) => (
                   <FormItem>
@@ -121,7 +111,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = () => {
                 )}
               />
               <FormField
-                control={createForm.control}
+                control={form.control}
                 name='tags'
                 render={({ field }) => (
                   <FormItem>

@@ -1,15 +1,32 @@
-import { PageSubtitle } from '@/components/ui/page-subtitle';
-import { PageTitle } from '@/components/ui/page-title';
-import { useGetInterviewTemplateQuery } from '@/generated/graphql';
+import {
+  useGetInterviewTemplateQuery,
+  useGetTagsQuery,
+} from '@/generated/graphql';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
+import { FormHeading } from './components/FormHeading';
 import { QuestionCard } from './components/QuestionCard';
 import { QuestionList } from './components/QuestionList';
+import { ReadonlyHeading } from './components/ReadonlyHeading';
 
 const InterviewTemplate = () => {
   const { id } = useParams();
+  const [formVisible, setFormVisible] = useState(false);
   const [{ fetching, data }] = useGetInterviewTemplateQuery({
     variables: { id: parseInt(id as string) },
   });
+  const [{ data: tagsData }] = useGetTagsQuery();
+  const tags = useMemo(
+    () =>
+      tagsData
+        ? tagsData.getTags.map((t) => ({
+            label: t.text,
+            value: t.id.toString(),
+          }))
+        : [],
+    [tagsData],
+  );
+
   if (fetching) {
     return <div>Loading...</div>;
   }
@@ -21,29 +38,29 @@ const InterviewTemplate = () => {
   const { getInterviewTemplate: interviewTemplate } = data;
   return (
     <div className='container mx-auto'>
-      <div className='flex items-center justify-between'>
-        <div>
-          <PageTitle>{interviewTemplate.name}</PageTitle>
-          <PageSubtitle>{interviewTemplate.description}</PageSubtitle>
-          <div className='mt-2'>
-            {interviewTemplate.tags?.map((tag) => (
-              <span
-                key={tag.id}
-                className='inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-sm font-medium text-gray-800 mr-2'>
-                {tag.text}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className='flex items-center gap-2'>
-          {/* <Button>Smth</Button> */}
-        </div>
+      <div className='flex align-top justify-between'>
+        {!formVisible && (
+          <ReadonlyHeading
+            interviewTemplate={interviewTemplate}
+            setFormVisible={setFormVisible}
+          />
+        )}
+        {formVisible && (
+          <FormHeading
+            interviewTemplate={interviewTemplate}
+            tags={tags}
+            setFormVisible={setFormVisible}
+          />
+        )}
       </div>
 
-      <div className='py-6'>
+      <div className='py-14'>
         <QuestionCard templateId={id} />
         <div className='mt-4'>
-          <QuestionList questions={interviewTemplate.questions} />
+          <QuestionList
+            key={interviewTemplate.questions?.length}
+            questions={interviewTemplate.questions}
+          />
         </div>
       </div>
     </div>
@@ -51,3 +68,9 @@ const InterviewTemplate = () => {
 };
 
 export default InterviewTemplate;
+
+/**
+ * TODO:
+ * - If you click on a tag, it should show all templates with that tag
+ *
+ */

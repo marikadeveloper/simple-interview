@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   QuestionFragment,
   QuestionInput,
@@ -293,7 +294,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Input
+                          <Textarea
                             placeholder='Enter question description'
                             {...field}
                           />

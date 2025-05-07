@@ -19,9 +19,11 @@ import {
   QuestionFragment,
   QuestionInput,
   useCreateQuestionMutation,
+  useDeleteQuestionMutation,
   useUpdateQuestionMutation,
 } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Trash } from 'lucide-react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -44,6 +46,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const [, createQuestion] = useCreateQuestionMutation();
   const [, updateQuestion] = useUpdateQuestionMutation();
+  const [, deleteQuestion] = useDeleteQuestionMutation();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -72,10 +76,29 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     form.reset();
   };
 
+  const handleQuestionDelete = async () => {
+    if (question) {
+      await deleteQuestion({
+        id: question.id,
+      });
+    }
+  };
+
   return (
     <Card className='w-full'>
       <CardHeader>
-        <CardTitle>{question ? question.title : 'Create Question'}</CardTitle>
+        <div className='flex items-center justify-between'>
+          <CardTitle>{question ? question.title : 'Create Question'}</CardTitle>
+          {question ? (
+            <Button
+              variant='outline'
+              onClick={handleQuestionDelete}>
+              <Trash />
+            </Button>
+          ) : (
+            ''
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>

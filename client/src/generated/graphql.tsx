@@ -380,6 +380,13 @@ export type DeleteInterviewTemplateMutationVariables = Exact<{
 
 export type DeleteInterviewTemplateMutation = { __typename?: 'Mutation', deleteInterviewTemplate: boolean };
 
+export type DeleteQuestionMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteQuestionMutation = { __typename?: 'Mutation', deleteQuestion: boolean };
+
 export type DeleteTagMutationVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
@@ -633,6 +640,15 @@ export const DeleteInterviewTemplateDocument = gql`
 
 export function useDeleteInterviewTemplateMutation() {
   return Urql.useMutation<DeleteInterviewTemplateMutation, DeleteInterviewTemplateMutationVariables>(DeleteInterviewTemplateDocument);
+};
+export const DeleteQuestionDocument = gql`
+    mutation DeleteQuestion($id: Int!) {
+  deleteQuestion(id: $id)
+}
+    `;
+
+export function useDeleteQuestionMutation() {
+  return Urql.useMutation<DeleteQuestionMutation, DeleteQuestionMutationVariables>(DeleteQuestionDocument);
 };
 export const DeleteTagDocument = gql`
     mutation DeleteTag($id: Int!) {

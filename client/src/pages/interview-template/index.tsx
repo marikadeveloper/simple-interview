@@ -41,7 +41,6 @@ const InterviewTemplate = () => {
         </div>
       </div>
 
-      {/* TODO: update and edit question */}
       <div className='py-6'>
         <QuestionCard templateId={id} />
         <div className='mt-4'>

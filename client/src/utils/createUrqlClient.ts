@@ -156,6 +156,16 @@ export const createUrqlClient = () => {
               invalidateAll(cache, 'getTags');
             },
 
+            createQuestion: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getInterviewTemplate');
+            },
+            updateQuestion: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getInterviewTemplate');
+            },
+            deleteQuestion: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getInterviewTemplate');
+            },
+
             // register: (_result, _args, cache, _info) => {
             //   betterUpdateQuery<RegisterMutation, MeQuery>(
             //     cache,

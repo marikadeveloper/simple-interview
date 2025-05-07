@@ -4,6 +4,7 @@ fragment Question on Question {
   description
   updatedAt
   createdAt
+  sortOrder
 }
 
 fragment QuestionWithInterviewTemplate on Question {

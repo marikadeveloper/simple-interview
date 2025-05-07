@@ -30,6 +30,7 @@ export class QuestionResolver {
     const questions = await Question.find({
       where: { interviewTemplate: { id: interviewTemplateId } },
       relations: ['interviewTemplate'],
+      order: { sortOrder: 'ASC' }, // Add order by sortOrder
     });
 
     return questions;
@@ -42,10 +43,17 @@ export class QuestionResolver {
     @Arg('interviewTemplateId', () => Int) interviewTemplateId: number,
     @Arg('input', () => QuestionInput) input: QuestionInput,
   ): Promise<Question> {
+    // Get existing questions for the template to determine sortOrder
+    const existingQuestions = await Question.find({
+      where: { interviewTemplate: { id: interviewTemplateId } },
+    });
+    const sortOrder = existingQuestions.length;
+
     const question = await Question.create({
       title: input.title,
       description: input.description,
       interviewTemplate: { id: interviewTemplateId },
+      sortOrder, // Set sortOrder
     }).save();
 
     return question;
@@ -72,11 +80,32 @@ export class QuestionResolver {
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async deleteQuestion(@Arg('id', () => Int) id: number): Promise<boolean> {
-    const question = await Question.findOne({ where: { id } });
+    const question = await Question.findOne({
+      where: { id },
+      relations: ['interviewTemplate'],
+    });
     if (!question) {
       return false;
     }
+
+    const interviewTemplateId = question.interviewTemplate.id;
+    const deletedSortOrder = question.sortOrder;
+
     await Question.delete({ id });
+
+    // Update sortOrder of subsequent questions
+    await Question.createQueryBuilder()
+      .update(Question)
+      .set({ sortOrder: () => '"sortOrder" - 1' })
+      .where(
+        '"interviewTemplateId" = :interviewTemplateId AND "sortOrder" > :deletedSortOrder',
+        {
+          interviewTemplateId,
+          deletedSortOrder,
+        },
+      )
+      .execute();
+
     return true;
   }
 }

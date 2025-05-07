@@ -37,6 +37,10 @@ export class Question extends BaseEntity {
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
+  @Field(() => Int)
+  @Column()
+  sortOrder: number;
+
   @Field(() => InterviewTemplate)
   @ManyToOne(
     () => InterviewTemplate,

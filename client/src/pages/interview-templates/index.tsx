@@ -1,4 +1,5 @@
 import { DataTable } from '@/components/ui/data-table';
+import { MultiSelect } from '@/components/ui/multi-select'; // Assuming you have a MultiSelect component
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import {
@@ -7,7 +8,7 @@ import {
   useGetTagsQuery,
 } from '@/generated/graphql';
 import { useQueryParam } from '@/hooks/useQueryParam';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { columns } from './columns';
 import { CreateTemplateDialog } from './components/CreateTemplateDialog';
 
@@ -16,13 +17,19 @@ import { CreateTemplateDialog } from './components/CreateTemplateDialog';
 const InterviewTemplates = () => {
   // if you click on a tag inside the interview template detail, it will take you here with the tag id preselected
   const queryParamsTag = useQueryParam('tags');
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    queryParamsTag ? [queryParamsTag as string] : [],
+  );
 
-  const [{ data: interviewTemplatesData }] = useGetInterviewTemplatesQuery({
-    variables: {
-      tagsIds: queryParamsTag ? [parseInt(queryParamsTag as string)] : [],
-    },
-  });
+  const [{ data: interviewTemplatesData }, refetchInterviewTemplates] =
+    useGetInterviewTemplatesQuery({
+      variables: {
+        tagsIds: selectedTags ? selectedTags.map((id) => parseInt(id), []) : [],
+      },
+      requestPolicy: 'network-only',
+    });
   const [{ data: tagsData }] = useGetTagsQuery();
+
   const tags = useMemo(
     () =>
       tagsData
@@ -33,6 +40,20 @@ const InterviewTemplates = () => {
         : [],
     [tagsData],
   );
+
+  useEffect(() => {
+    console.log('🚀 ~ InterviewTemplates ~ selectedTags:', selectedTags);
+  }, [selectedTags]);
+
+  const handleTagsChange = (tagIds: string[]) => {
+    console.log('🚀 ~ handleTagsChange ~ tagIds:', tagIds);
+    setSelectedTags(tagIds);
+
+    refetchInterviewTemplates({
+      requestPolicy: 'network-only',
+    });
+  };
+
   return (
     <div className='container mx-auto'>
       <div className='flex items-center justify-between'>
@@ -48,13 +69,19 @@ const InterviewTemplates = () => {
       </div>
 
       <div className='py-4'>
+        <MultiSelect
+          className='mb-4'
+          options={tags}
+          value={selectedTags}
+          onValueChange={(values) => handleTagsChange(values)}
+          placeholder='Filter by tags'
+        />
         <DataTable
           columns={columns}
           data={
             (interviewTemplatesData?.getInterviewTemplates as InterviewTemplateFragment[]) ||
             []
           }
-          filterableField='name'
         />
       </div>
     </div>

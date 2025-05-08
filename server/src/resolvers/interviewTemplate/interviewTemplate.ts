@@ -27,14 +27,16 @@ export class InterviewTemplateResolver {
       .leftJoinAndSelect('interviewTemplate.tags', 'tag')
       .orderBy('interviewTemplate.createdAt', 'DESC');
 
-    if (tagsIds.length) {
+    if (tagsIds && tagsIds.length) {
       queryBuilder.where(
         `interviewTemplate.id IN (
           SELECT it.id FROM interview_template it
           LEFT JOIN interview_template_tags_tag itt ON it.id = itt."interviewTemplateId"
           WHERE itt."tagId" IN (:...tagsIds)
+          GROUP BY it.id
+          HAVING COUNT(DISTINCT itt."tagId") = :tagsCount
         )`,
-        { tagsIds },
+        { tagsIds, tagsCount: tagsIds.length },
       );
     }
 

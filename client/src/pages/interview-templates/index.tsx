@@ -6,14 +6,20 @@ import {
   useGetInterviewTemplatesQuery,
   useGetTagsQuery,
 } from '@/generated/graphql';
+import { useQueryParam } from '@/hooks/useQueryParam';
 import { useMemo } from 'react';
 import { columns } from './columns';
 import { CreateTemplateDialog } from './components/CreateTemplateDialog';
 
+// TODO: maybe support a more complex filter, like searching by tag name
+
 const InterviewTemplates = () => {
+  // if you click on a tag inside the interview template detail, it will take you here with the tag id preselected
+  const queryParamsTag = useQueryParam('tags');
+
   const [{ data: interviewTemplatesData }] = useGetInterviewTemplatesQuery({
     variables: {
-      tagsIds: [],
+      tagsIds: queryParamsTag ? [parseInt(queryParamsTag as string)] : [],
     },
   });
   const [{ data: tagsData }] = useGetTagsQuery();

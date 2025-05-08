@@ -21,11 +21,25 @@ export class InterviewTemplateResolver {
   async getInterviewTemplates(
     @Arg('tagsIds', () => [Int], { nullable: true }) tagsIds: number[],
   ): Promise<InterviewTemplate[]> {
-    const interviewTemplates = await InterviewTemplate.find({
-      where: tagsIds.length ? { tags: { id: In(tagsIds) } } : {},
-      relations: ['tags'],
-      order: { createdAt: 'DESC' },
-    });
+    const queryBuilder = InterviewTemplate.createQueryBuilder(
+      'interviewTemplate',
+    )
+      .leftJoinAndSelect('interviewTemplate.tags', 'tag')
+      .orderBy('interviewTemplate.createdAt', 'DESC');
+
+    if (tagsIds.length) {
+      queryBuilder.where(
+        `interviewTemplate.id IN (
+          SELECT it.id FROM interview_template it
+          LEFT JOIN interview_template_tags_tag itt ON it.id = itt."interviewTemplateId"
+          WHERE itt."tagId" IN (:...tagsIds)
+        )`,
+        { tagsIds },
+      );
+    }
+
+    const interviewTemplates = await queryBuilder.getMany();
+
     return interviewTemplates;
   }
 

@@ -68,9 +68,3 @@ const InterviewTemplate = () => {
 };
 
 export default InterviewTemplate;
-
-/**
- * TODO:
- * - If you click on a tag, it should show all templates with that tag
- *
- */

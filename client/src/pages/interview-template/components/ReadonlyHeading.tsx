@@ -4,6 +4,7 @@ import { PageTitle } from '@/components/ui/page-title';
 import { InterviewTemplateFragment } from '@/generated/graphql';
 import { Pencil } from 'lucide-react';
 import React from 'react';
+import { Link } from 'react-router';
 
 interface ReadonlyHeadingProps {
   interviewTemplate: InterviewTemplateFragment;
@@ -19,11 +20,12 @@ export const ReadonlyHeading: React.FC<ReadonlyHeadingProps> = ({
       <PageSubtitle>{interviewTemplate.description}</PageSubtitle>
       <div className='mt-3'>
         {interviewTemplate.tags?.map((tag) => (
-          <span
+          <Link
+            to={`/interview-templates?tags=${tag.id}`}
             key={tag.id}
             className='inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-sm font-medium text-gray-800 mr-2'>
             {tag.text}
-          </span>
+          </Link>
         ))}
       </div>
     </div>

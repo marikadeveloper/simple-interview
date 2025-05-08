@@ -1,7 +1,5 @@
 import {
   Arg,
-  Field,
-  InputType,
   Int,
   Mutation,
   Query,
@@ -13,47 +11,36 @@ import { dataSource } from '../../';
 import { Question } from '../../entities/Question';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
-
-@InputType()
-class QuestionInput {
-  @Field(() => String)
-  title: string;
-  @Field(() => String)
-  description: string;
-}
-
-@InputType() // New InputType for updating sort order
-class UpdateQuestionSortOrderInput {
-  @Field(() => Int)
-  questionId: number;
-
-  @Field(() => Int)
-  newSortOrder: number; // The new 0-based index for the question
-}
+import {
+  QuestionInput,
+  QuestionMultipleResponse,
+  QuestionSingleResponse,
+  UpdateQuestionSortOrderInput,
+} from './question-types';
 
 @Resolver(Question)
 export class QuestionResolver {
-  @Query(() => [Question])
+  @Query(() => QuestionMultipleResponse)
   @UseMiddleware(isAuth)
   async getQuestions(
     @Arg('interviewTemplateId', () => Int) interviewTemplateId: number,
-  ): Promise<Question[]> {
+  ): Promise<QuestionMultipleResponse> {
     const questions = await Question.find({
       where: { interviewTemplate: { id: interviewTemplateId } },
       relations: ['interviewTemplate'],
       order: { sortOrder: 'ASC' }, // Add order by sortOrder
     });
 
-    return questions;
+    return { questions };
   }
 
-  @Mutation(() => Question)
+  @Mutation(() => QuestionSingleResponse)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async createQuestion(
     @Arg('interviewTemplateId', () => Int) interviewTemplateId: number,
     @Arg('input', () => QuestionInput) input: QuestionInput,
-  ): Promise<Question> {
+  ): Promise<QuestionSingleResponse> {
     // Get existing questions for the template to determine sortOrder
     const existingQuestions = await Question.find({
       where: { interviewTemplate: { id: interviewTemplateId } },
@@ -67,24 +54,31 @@ export class QuestionResolver {
       sortOrder, // Set sortOrder
     }).save();
 
-    return question;
+    return { question };
   }
 
-  @Mutation(() => Question)
+  @Mutation(() => QuestionSingleResponse)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async updateQuestion(
     @Arg('id', () => Int) id: number,
     @Arg('input', () => QuestionInput) input: QuestionInput,
-  ): Promise<Question | null> {
+  ): Promise<QuestionSingleResponse> {
     const question = await Question.findOne({ where: { id } });
     if (!question) {
-      return null;
+      return {
+        errors: [
+          {
+            field: 'id',
+            message: 'Question not found',
+          },
+        ],
+      };
     }
     question.title = input.title;
     question.description = input.description;
     await question.save();
-    return question;
+    return { question };
   }
 
   @Mutation(() => Boolean)

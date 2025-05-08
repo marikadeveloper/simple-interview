@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import argon2 from 'argon2';
+import { Question } from '../entities/Question';
 import { User, UserRole } from '../entities/User';
 
 export const fakeUserData = (): Partial<User> => ({
@@ -24,4 +25,24 @@ export const createFakeUser = async (
     role,
   }).save()) as User;
   return user;
+};
+
+export const fakeQuestionData = (): Partial<Question> => ({
+  title: faker.lorem.sentence(),
+  description: faker.lorem.paragraph(),
+});
+
+export const createFakeQuestion = async (
+  interviewTemplateId: number,
+  overrides?: Partial<Question>,
+): Promise<Question> => {
+  const data: Omit<Question, 'id'> = {
+    ...fakeQuestionData(),
+    ...overrides,
+  } as Omit<Question, 'id'>;
+  const question = (await Question.create({
+    ...data,
+    interviewTemplate: { id: interviewTemplateId },
+  }).save()) as Question;
+  return question;
 };

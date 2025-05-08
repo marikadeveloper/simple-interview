@@ -3,7 +3,11 @@ import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
 import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
-import { createFakeUser, fakeQuestionData } from '../../test-utils/mockData';
+import {
+  createFakeQuestion,
+  createFakeUser,
+  fakeQuestionData,
+} from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 
 // Track entities created during tests for reliable cleanup
@@ -44,6 +48,23 @@ const createQuestionMutation = `
   mutation CreateQuestion($interviewTemplateId: Int!, $input: QuestionInput!) {
     createQuestion(interviewTemplateId: $interviewTemplateId, input: $input) {
       question {
+        id
+        title
+        description
+        sortOrder
+      }
+      errors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const getQuestionsQuery = `
+  query GetQuestions($interviewTemplateId: Int!) {
+    getQuestions(interviewTemplateId: $interviewTemplateId) {
+      questions {
         id
         title
         description
@@ -242,6 +263,58 @@ describe('QuestionResolver', () => {
             description: questionInput2.description,
             sortOrder: 1,
           },
+        },
+      },
+    });
+
+    // Store the created questions for cleanup
+    // @ts-ignore
+    const createdQuestion1 = response1.data?.createQuestion?.question;
+    // @ts-ignore
+    const createdQuestion2 = response2.data?.createQuestion?.question;
+    testQuestions.push(
+      await Question.findOneOrFail({ where: { id: createdQuestion1.id } }),
+      await Question.findOneOrFail({ where: { id: createdQuestion2.id } }),
+    );
+  });
+
+  it('given a correct interview template id, should return the questions', async () => {
+    // create questions
+    const question1 = await createFakeQuestion(interviewTemplateId, {
+      sortOrder: 0,
+    });
+    const question2 = await createFakeQuestion(interviewTemplateId, {
+      sortOrder: 1,
+    });
+    testQuestions.push(question1, question2);
+
+    // get them
+    const response = await graphqlCall({
+      source: getQuestionsQuery,
+      variableValues: { interviewTemplateId },
+      userId: adminUser.id,
+    });
+
+    // @ts-ignore
+    expect(response.data.getQuestions.questions).toHaveLength(2);
+    expect(response).toMatchObject({
+      data: {
+        getQuestions: {
+          questions: [
+            {
+              id: question1.id,
+              title: question1.title,
+              description: question1.description,
+              sortOrder: question1.sortOrder,
+            },
+            {
+              id: question2.id,
+              title: question2.title,
+              description: question2.description,
+              sortOrder: question2.sortOrder,
+            },
+          ],
+          errors: null,
         },
       },
     });

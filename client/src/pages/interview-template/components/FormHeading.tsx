@@ -11,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import {
   InterviewTemplateFragment,
+  useCreateTagMutation,
   useUpdateInterviewTemplateMutation,
 } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { interviewTemplateFormSchema as formSchema } from '../../interview-templates/schema';
@@ -25,11 +26,13 @@ interface FormHeadingProps {
   setFormVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const FormHeading: React.FC<FormHeadingProps> = ({
-  tags,
+  tags: initialTags,
   interviewTemplate,
   setFormVisible,
 }) => {
+  const [tags, setTags] = useState(initialTags);
   const [, updateInterviewTemplate] = useUpdateInterviewTemplateMutation();
+  const [, createTag] = useCreateTagMutation();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,6 +61,35 @@ export const FormHeading: React.FC<FormHeadingProps> = ({
       description: interviewTemplate.description || '',
       tags: interviewTemplate.tags?.map((t) => t.id.toString()),
     });
+  };
+
+  const handleCreateTag = async (newTagName: string) => {
+    try {
+      // Call your create tag mutation
+      const response = await createTag({
+        text: newTagName,
+      });
+
+      if (response.data?.createTag) {
+        const newTag = {
+          label: newTagName,
+          value: response.data.createTag.id.toString(),
+        };
+
+        // Add the new tag to the tags list
+        setTags((prevTags) => [...prevTags, newTag]);
+
+        // Add the newly created tag to the selected values
+        const currentTags = form.getValues('tags') || [];
+        form.setValue('tags', [...currentTags, newTag.value]);
+
+        return newTag;
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to create new tag:', error);
+      return null;
+    }
   };
 
   return (
@@ -112,6 +144,8 @@ export const FormHeading: React.FC<FormHeadingProps> = ({
                     defaultValue={field.value}
                     placeholder='Select tags'
                     variant='inverted'
+                    allowCreate
+                    onCreateOption={handleCreateTag}
                   />
                 </FormControl>
                 <FormMessage />

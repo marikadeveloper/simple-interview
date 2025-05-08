@@ -68,7 +68,7 @@ const InterviewTemplates = () => {
         </div>
       </div>
 
-      <div className='py-4'>
+      <div className='py-8'>
         <MultiSelect
           className='mb-4'
           options={tags}

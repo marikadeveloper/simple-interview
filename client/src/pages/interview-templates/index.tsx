@@ -8,11 +8,9 @@ import {
   useGetTagsQuery,
 } from '@/generated/graphql';
 import { useQueryParam } from '@/hooks/useQueryParam';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { columns } from './columns';
 import { CreateTemplateDialog } from './components/CreateTemplateDialog';
-
-// TODO: maybe support a more complex filter, like searching by tag name
 
 const InterviewTemplates = () => {
   // if you click on a tag inside the interview template detail, it will take you here with the tag id preselected
@@ -41,12 +39,7 @@ const InterviewTemplates = () => {
     [tagsData],
   );
 
-  useEffect(() => {
-    console.log('🚀 ~ InterviewTemplates ~ selectedTags:', selectedTags);
-  }, [selectedTags]);
-
   const handleTagsChange = (tagIds: string[]) => {
-    console.log('🚀 ~ handleTagsChange ~ tagIds:', tagIds);
     setSelectedTags(tagIds);
 
     refetchInterviewTemplates({

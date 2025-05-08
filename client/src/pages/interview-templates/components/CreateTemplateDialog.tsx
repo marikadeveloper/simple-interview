@@ -17,9 +17,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { useCreateInterviewTemplateMutation } from '@/generated/graphql';
+import {
+  useCreateInterviewTemplateMutation,
+  useCreateTagMutation,
+} from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { interviewTemplateFormSchema as formSchema } from '../schema';
@@ -28,10 +31,12 @@ interface CreateTemplateDialogProps {
   tags: { label: string; value: string }[];
 }
 export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
-  tags,
+  tags: initialTags,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [tags, setTags] = useState(initialTags);
   const [, createInterviewTemplate] = useCreateInterviewTemplateMutation();
+  const [, createTag] = useCreateTagMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,8 +51,10 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
   useEffect(() => {
     if (!isOpen) {
       form.reset();
+      // Reset tags to initial state when modal closes
+      setTags(initialTags);
     }
-  }, [isOpen]);
+  }, [isOpen, initialTags]);
 
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
     await createInterviewTemplate({
@@ -61,6 +68,35 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
     form.reset();
   };
 
+  const handleCreateTag = async (newTagName: string) => {
+    try {
+      // Call your create tag mutation
+      const response = await createTag({
+        text: newTagName,
+      });
+
+      if (response.data?.createTag) {
+        const newTag = {
+          label: newTagName,
+          value: response.data.createTag.id.toString(),
+        };
+
+        // Add the new tag to the tags list
+        setTags((prevTags) => [...prevTags, newTag]);
+
+        // Add the newly created tag to the selected values
+        const currentTags = form.getValues('tags') || [];
+        form.setValue('tags', [...currentTags, newTag.value]);
+
+        return newTag;
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to create new tag:', error);
+      return null;
+    }
+  };
+
   return (
     <>
       <Button onClick={() => setIsOpen(true)}>Add Template</Button>
@@ -71,7 +107,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
           <DialogHeader>
             <DialogTitle>Create Interview Template</DialogTitle>
             <DialogDescription>
-              Create a new interview template. You can add tags later.
+              Create a new interview template. You can add or create tags.
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -124,6 +160,8 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
                         defaultValue={field.value}
                         placeholder='Select tags'
                         variant='inverted'
+                        allowCreate
+                        onCreateOption={handleCreateTag}
                       />
                     </FormControl>
                     <FormMessage />

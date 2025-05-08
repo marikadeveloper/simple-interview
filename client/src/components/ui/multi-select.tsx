@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import {
   CheckIcon,
   ChevronDown,
+  PlusCircle,
   WandSparkles,
   XCircle,
   XIcon,
@@ -117,6 +118,20 @@ interface MultiSelectProps
    * Optional, can be used to add custom styles.
    */
   className?: string;
+
+  /**
+   * If true, allows the user to create new options that are not in the list.
+   * Optional, defaults to false.
+   */
+  allowCreate?: boolean;
+
+  /**
+   * Callback function triggered when a new option is created.
+   * Receives the new option value as an argument.
+   */
+  onCreateOption?: (
+    inputValue: string,
+  ) => Promise<{ label: string; value: string } | null>;
 }
 
 export const MultiSelect = React.forwardRef<
@@ -135,6 +150,8 @@ export const MultiSelect = React.forwardRef<
       modalPopover = false,
       asChild = false,
       className,
+      allowCreate = false,
+      onCreateOption,
       ...props
     },
     ref,
@@ -143,6 +160,8 @@ export const MultiSelect = React.forwardRef<
       React.useState<string[]>(defaultValue);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
     const [isAnimating, setIsAnimating] = React.useState(false);
+    const [inputValue, setInputValue] = React.useState('');
+    const [isCreating, setIsCreating] = React.useState(false);
 
     const handleInputKeyDown = (
       event: React.KeyboardEvent<HTMLInputElement>,
@@ -155,6 +174,10 @@ export const MultiSelect = React.forwardRef<
         setSelectedValues(newSelectedValues);
         onValueChange(newSelectedValues);
       }
+    };
+
+    const handleInputChange = (value: string) => {
+      setInputValue(value);
     };
 
     const toggleOption = (option: string) => {
@@ -189,6 +212,34 @@ export const MultiSelect = React.forwardRef<
         onValueChange(allValues);
       }
     };
+
+    const handleCreateOption = async () => {
+      if (!allowCreate || !onCreateOption || !inputValue.trim()) return;
+
+      setIsCreating(true);
+      try {
+        const newOption = await onCreateOption(inputValue);
+        if (newOption) {
+          // Add the new option to options list (Note: since options is a prop, we can't modify it directly)
+          // Instead, we just add the value to selectedValues, and the parent component should update options
+          toggleOption(newOption.value);
+          setInputValue('');
+        }
+      } catch (error) {
+        console.error('Error creating new option:', error);
+      } finally {
+        setIsCreating(false);
+      }
+    };
+
+    // Check if current input doesn't match any existing option
+    const shouldShowCreateOption =
+      allowCreate &&
+      inputValue.trim() !== '' &&
+      !options.some(
+        (option) =>
+          option.label.toLowerCase() === inputValue.trim().toLowerCase(),
+      );
 
     return (
       <Popover
@@ -284,9 +335,24 @@ export const MultiSelect = React.forwardRef<
             <CommandInput
               placeholder='Search...'
               onKeyDown={handleInputKeyDown}
+              value={inputValue}
+              onValueChange={handleInputChange}
             />
             <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>
+                {shouldShowCreateOption ? (
+                  <CommandItem
+                    onSelect={handleCreateOption}
+                    className='cursor-pointer'
+                    disabled={isCreating}>
+                    <PlusCircle className='mr-2 h-4 w-4' />
+                    Create "{inputValue}"
+                    {isCreating && <span className='ml-2'>...</span>}
+                  </CommandItem>
+                ) : (
+                  'No results found.'
+                )}
+              </CommandEmpty>
               <CommandGroup>
                 <CommandItem
                   key='all'
@@ -326,6 +392,16 @@ export const MultiSelect = React.forwardRef<
                     </CommandItem>
                   );
                 })}
+                {shouldShowCreateOption && (
+                  <CommandItem
+                    onSelect={handleCreateOption}
+                    className='cursor-pointer'
+                    disabled={isCreating}>
+                    <PlusCircle className='mr-2 h-4 w-4' />
+                    Create "{inputValue}"
+                    {isCreating && <span className='ml-2'>...</span>}
+                  </CommandItem>
+                )}
               </CommandGroup>
               <CommandSeparator />
               <CommandGroup>

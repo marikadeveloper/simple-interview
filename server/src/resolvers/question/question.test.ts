@@ -3,7 +3,7 @@ import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
 import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
-import { createFakeUser } from '../../test-utils/mockData';
+import { createFakeUser, fakeQuestionData } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 
 // Track entities created during tests for reliable cleanup
@@ -108,6 +108,13 @@ describe('QuestionResolver', () => {
           },
         },
       });
+
+      // Store the created question for cleanup
+      // @ts-ignore
+      const createdQuestion = response.data?.createQuestion?.question;
+      testQuestions.push(
+        await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
+      );
     });
 
     it('as an interviewer', async () => {
@@ -130,6 +137,13 @@ describe('QuestionResolver', () => {
           },
         },
       });
+
+      // Store the created question for cleanup
+      // @ts-ignore
+      const createdQuestion = response.data?.createQuestion?.question;
+      testQuestions.push(
+        await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
+      );
     });
   });
 
@@ -155,6 +169,79 @@ describe('QuestionResolver', () => {
               message: 'not authorized',
             },
           ],
+        },
+      },
+    });
+  });
+
+  it('should not be able to create a question without authentication', async () => {
+    const questionInput = {
+      title: 'Test Question',
+      description: 'This is a test question',
+    };
+
+    const response = await graphqlCall({
+      source: createQuestionMutation,
+      variableValues: { interviewTemplateId, input: questionInput },
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        createQuestion: {
+          question: null,
+          errors: [
+            {
+              field: 'general',
+              message: 'User not logged in',
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should create a question with the correct sort order', async () => {
+    const questionInput1 = fakeQuestionData();
+    const questionInput2 = fakeQuestionData();
+
+    // Create the first question
+    const response1 = await graphqlCall({
+      source: createQuestionMutation,
+      variableValues: { interviewTemplateId, input: questionInput1 },
+      userId: adminUser.id,
+    });
+
+    expect(response1).toMatchObject({
+      data: {
+        createQuestion: {
+          errors: null,
+          question: {
+            id: expect.any(Number),
+            title: questionInput1.title,
+            description: questionInput1.description,
+            sortOrder: 0,
+          },
+        },
+      },
+    });
+
+    // Create the second question
+    const response2 = await graphqlCall({
+      source: createQuestionMutation,
+      variableValues: { interviewTemplateId, input: questionInput2 },
+      userId: adminUser.id,
+    });
+
+    expect(response2).toMatchObject({
+      data: {
+        createQuestion: {
+          errors: null,
+          question: {
+            id: expect.any(Number),
+            title: questionInput2.title,
+            description: questionInput2.description,
+            sortOrder: 1,
+          },
         },
       },
     });

@@ -101,6 +101,12 @@ const updateQuestionSortOrderMutation = `
   }
 `;
 
+const deleteQuestionMutation = `
+  mutation DeleteQuestion($id: Int!) {
+    deleteQuestion(id: $id)
+  }
+`;
+
 const createInterviewTemplate = () => {
   return InterviewTemplate.create({
     name: 'Test Interview Template',
@@ -373,6 +379,29 @@ describe('QuestionResolver', () => {
         },
       },
     });
+  });
+
+  it('should delete a question', async () => {
+    const question = await createFakeQuestion(interviewTemplateId, {
+      sortOrder: 0,
+    });
+
+    const response = await graphqlCall({
+      source: deleteQuestionMutation,
+      variableValues: { id: question.id },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        deleteQuestion: true,
+      },
+    });
+
+    // Check if the question is deleted
+    const deletedQuestion = await Question.findOneBy({ id: question.id });
+
+    expect(deletedQuestion).toBeNull();
   });
 
   describe('should update the sort order of questions correctly', () => {

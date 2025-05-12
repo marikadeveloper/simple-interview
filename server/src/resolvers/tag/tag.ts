@@ -65,14 +65,18 @@ export class TagResolver {
 
     // check if tag is empty
     if (text.trim() === '') {
-      throw new Error('Tag cannot be empty');
+      return {
+        errors: [{ field: 'text', message: 'Tag cannot be empty' }],
+      };
     }
 
     const existingTag = await Tag.findOne({
       where: { text, id: Not(id) },
     });
     if (existingTag) {
-      throw new Error('Tag already exists');
+      return {
+        errors: [{ field: 'text', message: 'Tag already exists' }],
+      };
     }
 
     const tag = await Tag.findOneOrFail({

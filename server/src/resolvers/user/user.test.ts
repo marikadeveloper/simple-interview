@@ -28,9 +28,32 @@ afterEach(async () => {
 const getUsersQuery = `
   query GetUsers($filters: UsersFilters!) {
     getUsers(filters: $filters) {
-      id
-      email
+      users {
+        id
+        email
+      }
     }
+  }
+`;
+
+const getUserQuery = `
+  query GetUser($id: Int!) {
+    getUser(id: $id) {
+      user {
+        id
+        email
+      }
+      errors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const deleteUserMutation = `
+  mutation DeleteUser($id: Int!) {
+    deleteUser(id: $id)
   }
 `;
 
@@ -52,17 +75,97 @@ describe('users', () => {
 
     expect(response).toMatchObject({
       data: {
-        getUsers: [
-          {
-            id: user1.id,
-            email: user1.email,
-          },
-          {
-            id: user2.id,
-            email: user2.email,
-          },
-        ],
+        getUsers: {
+          users: [
+            {
+              id: user1.id,
+              email: user1.email,
+            },
+            {
+              id: user2.id,
+              email: user2.email,
+            },
+          ],
+        },
       },
     });
+  });
+
+  it('should get a user by id', async () => {
+    const admin = await createFakeUser(UserRole.ADMIN);
+    const user = await createFakeUser(UserRole.CANDIDATE);
+    testUsers.push(admin, user);
+
+    const response = await graphqlCall({
+      source: getUserQuery,
+      variableValues: {
+        id: user.id,
+      },
+      userId: admin.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getUser: {
+          user: {
+            id: user.id,
+            email: user.email,
+          },
+          errors: null,
+        },
+      },
+    });
+  });
+
+  it('a candidate should not be able to get any user', async () => {
+    const candidate = await createFakeUser(UserRole.CANDIDATE);
+    const user = await createFakeUser(UserRole.CANDIDATE);
+    testUsers.push(candidate, user);
+
+    const response = await graphqlCall({
+      source: getUserQuery,
+      variableValues: {
+        id: user.id,
+      },
+      userId: candidate.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getUser: {
+          user: null,
+          errors: [
+            {
+              field: 'general',
+              message: 'not authorized',
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should delete a user', async () => {
+    const admin = await createFakeUser(UserRole.ADMIN);
+    const user = await createFakeUser(UserRole.CANDIDATE);
+    testUsers.push(admin);
+
+    const response = await graphqlCall({
+      source: deleteUserMutation,
+      variableValues: {
+        id: user.id,
+      },
+      userId: admin.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        deleteUser: true,
+      },
+    });
+
+    // Check if the user is deleted
+    const deletedUser = await User.findOneBy({ id: user.id });
+    expect(deletedUser).toBeNull();
   });
 });

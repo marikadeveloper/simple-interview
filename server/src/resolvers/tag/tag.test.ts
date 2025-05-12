@@ -1,5 +1,4 @@
 import { dataSource } from '../../';
-import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Tag } from '../../entities/Tag';
 import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
@@ -7,7 +6,6 @@ import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 
 let testUsers: User[] = [];
-let testInterviewTemplate: InterviewTemplate;
 let testTags: Tag[] = [];
 
 // Set up the database connection before all tests
@@ -29,20 +27,11 @@ afterAll(async () => {
     await Promise.all(testUsers.map((user) => User.delete(user.id)));
     testUsers = [];
   }
-  // Clean up test template
-  await testInterviewTemplate?.remove();
 
   if (dataSource && dataSource.isInitialized) {
     await dataSource.destroy();
   }
 });
-
-const createInterviewTemplate = () => {
-  return InterviewTemplate.create({
-    name: 'Test Interview Template',
-    description: 'This is a test interview template',
-  }).save();
-};
 
 const createTagMutation = `
   mutation CreateTag($text: String!) {
@@ -59,11 +48,42 @@ const createTagMutation = `
   }
 `;
 
+const getTagsQuery = `
+  query GetTags {
+    getTags {
+      tags {
+        id
+        text
+      }
+    }
+  }
+`;
+
+const updateTagMutation = `
+  mutation UpdateTag($id: Int!, $text: String!) {
+    updateTag(id: $id, text: $text) {
+      tag {
+        id
+        text
+      }
+      errors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const deleteTagMutation = `
+  mutation DeleteTag($id: Int!) {
+    deleteTag(id: $id)
+  }
+`;
+
 describe('TagResolver', () => {
   let adminUser: User;
   let interviewerUser: User;
   let candidateUser: User;
-  let interviewTemplateId: number;
 
   beforeAll(async () => {
     // Create test users
@@ -71,11 +91,6 @@ describe('TagResolver', () => {
     interviewerUser = await createFakeUser(UserRole.INTERVIEWER);
     candidateUser = await createFakeUser(UserRole.CANDIDATE);
     testUsers.push(adminUser, interviewerUser, candidateUser);
-
-    // Create a test interview template
-    testInterviewTemplate = await createInterviewTemplate();
-    interviewTemplateId = testInterviewTemplate.id;
-    console.log(interviewTemplateId);
   });
 
   describe('should be able to create a tag', () => {
@@ -200,6 +215,97 @@ describe('TagResolver', () => {
           tag: null,
           errors: [{ message: 'Tag already exists', field: 'text' }],
         },
+      },
+    });
+  });
+
+  it('should be able to get all tags', async () => {
+    const tag = await Tag.create({
+      text: 'test tag',
+    }).save();
+    testTags.push(tag);
+
+    const response = await graphqlCall({
+      source: getTagsQuery,
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getTags: {
+          tags: [
+            {
+              id: expect.any(Number),
+              text: tag.text,
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should be able to update a tag', async () => {
+    const tag = await Tag.create({
+      text: 'test tag',
+    }).save();
+
+    testTags.push(tag);
+
+    const response = await graphqlCall({
+      source: updateTagMutation,
+      variableValues: { id: tag.id, text: 'updated tag' },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        updateTag: {
+          tag: {
+            id: tag.id,
+            text: 'updated tag',
+          },
+          errors: null,
+        },
+      },
+    });
+  });
+
+  it('should not be able to update a tag with an empty text', async () => {
+    const tag = await Tag.create({
+      text: 'test tag',
+    }).save();
+
+    testTags.push(tag);
+
+    const response = await graphqlCall({
+      source: updateTagMutation,
+      variableValues: { id: tag.id, text: '' },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        updateTag: {
+          tag: null,
+          errors: [{ message: 'Tag cannot be empty', field: 'text' }],
+        },
+      },
+    });
+  });
+
+  it('should be able to delete a tag', async () => {
+    const tag = await Tag.create({
+      text: 'test tag',
+    }).save();
+
+    const response = await graphqlCall({
+      source: deleteTagMutation,
+      variableValues: { id: tag.id },
+      userId: adminUser.id,
+    });
+    expect(response).toMatchObject({
+      data: {
+        deleteTag: true,
       },
     });
   });

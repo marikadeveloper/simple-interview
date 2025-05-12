@@ -37,7 +37,6 @@ const getUsersQuery = `
 describe('users', () => {
   it('should return all users', async () => {
     const admin = await createFakeUser(UserRole.ADMIN);
-
     const user1 = await createFakeUser(UserRole.CANDIDATE);
     const user2 = await createFakeUser(UserRole.CANDIDATE);
 

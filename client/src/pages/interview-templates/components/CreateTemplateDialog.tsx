@@ -78,10 +78,10 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
         text: newTagName,
       });
 
-      if (response.data?.createTag) {
+      if (response.data?.createTag?.tag) {
         const newTag = {
           label: newTagName,
-          value: response.data.createTag.id.toString(),
+          value: response.data.createTag.tag.id.toString(),
         };
 
         // Add the new tag to the tags list

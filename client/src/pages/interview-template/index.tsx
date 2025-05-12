@@ -18,8 +18,8 @@ const InterviewTemplate = () => {
   const [{ data: tagsData }] = useGetTagsQuery();
   const tags = useMemo(
     () =>
-      tagsData
-        ? tagsData.getTags.map((t) => ({
+      tagsData?.getTags.tags
+        ? tagsData.getTags.tags.map((t) => ({
             label: t.text,
             value: t.id.toString(),
           }))

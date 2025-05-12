@@ -55,7 +55,7 @@ const Users = () => {
       <div className='py-4'>
         <DataTable
           columns={columns}
-          data={(data?.getUsers as User[]) || []}
+          data={(data?.getUsers.users as User[]) || []}
           filterableField='fullName'
         />
       </div>

@@ -1,5 +1,10 @@
 query GetQuestions($interviewTemplateId: Int!) {
   getQuestions(interviewTemplateId: $interviewTemplateId) {
-    ...Question
+    questions {
+      ...Question
+    }
+    errors {
+      ...Error
+    }
   }
 }

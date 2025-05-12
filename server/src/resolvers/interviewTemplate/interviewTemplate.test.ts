@@ -1,11 +1,13 @@
 import { dataSource } from '../../';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
+import { Tag } from '../../entities/Tag';
 import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 
 let testUsers: User[] = [];
+let testTags: Tag[] = [];
 
 beforeAll(async () => {
   await setupTestDB();
@@ -25,6 +27,10 @@ afterEach(async () => {
     await Promise.all(testUsers.map((user) => User.delete(user.id)));
     testUsers = [];
   }
+  if (testTags.length > 0) {
+    await Promise.all(testTags.map((tag) => Tag.delete(tag.id)));
+    testTags = [];
+  }
 });
 
 const createInterviewTemplateMutation = `
@@ -33,6 +39,10 @@ const createInterviewTemplateMutation = `
       id
       name
       description
+      tags {
+        id
+        text
+      }
     }
   }
 `;
@@ -86,10 +96,14 @@ describe('interviewTemplate', () => {
   it('should create an interview template', async () => {
     const testInterviewer = await createFakeUser(UserRole.INTERVIEWER);
     testUsers.push(testInterviewer);
+    const testTag = await Tag.create({ text: 'tag1' }).save();
+    const testTag2 = await Tag.create({ text: 'tag2' }).save();
+    testTags.push(testTag, testTag2);
 
     const input = {
       name: 'Test Interview Template',
       description: 'This is a test interview template',
+      tagsIds: [testTag.id, testTag2.id],
     };
 
     const response = await graphqlCall({
@@ -104,6 +118,16 @@ describe('interviewTemplate', () => {
           id: expect.any(Number),
           name: input.name,
           description: input.description,
+          tags: [
+            {
+              id: testTag.id,
+              text: testTag.text,
+            },
+            {
+              id: testTag2.id,
+              text: testTag2.text,
+            },
+          ],
         },
       },
     });

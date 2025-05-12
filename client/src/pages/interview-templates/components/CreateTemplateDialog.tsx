@@ -24,6 +24,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router';
 import { z } from 'zod';
 import { interviewTemplateFormSchema as formSchema } from '../schema';
 
@@ -37,6 +38,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
   const [tags, setTags] = useState(initialTags);
   const [, createInterviewTemplate] = useCreateInterviewTemplateMutation();
   const [, createTag] = useCreateTagMutation();
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,7 +59,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
   }, [isOpen, initialTags]);
 
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
-    await createInterviewTemplate({
+    const data = await createInterviewTemplate({
       input: {
         name: values.name,
         description: values.description,
@@ -65,6 +67,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
       },
     });
     setIsOpen(false);
+    navigate(`/interview-templates/${data.data?.createInterviewTemplate?.id}`);
     form.reset();
   };
 

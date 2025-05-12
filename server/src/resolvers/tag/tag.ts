@@ -10,51 +10,56 @@ import { Not } from 'typeorm';
 import { Tag } from '../../entities/Tag';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
+import { TagMultipleResponse, TagSingleResponse } from './tag-types';
 
 @Resolver(Tag)
 export class TagResolver {
-  @Query(() => [Tag])
+  @Query(() => TagMultipleResponse)
   @UseMiddleware(isAuth)
-  async getTags(): Promise<Tag[]> {
+  async getTags(): Promise<TagMultipleResponse> {
     const tags = await Tag.find({
       order: { text: 'ASC' },
     });
-    return tags;
+    return { tags };
   }
 
-  @Mutation(() => Tag)
+  @Mutation(() => TagSingleResponse)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
-  async createTag(@Arg('text') text: string): Promise<Tag> {
+  async createTag(@Arg('text') text: string): Promise<TagSingleResponse> {
     // convert text to lowercase
     text = text.toLowerCase();
 
     // check if tag is empty
     if (text.trim() === '') {
-      throw new Error('Tag cannot be empty');
+      return {
+        errors: [{ field: 'text', message: 'Tag cannot be empty' }],
+      };
     }
 
     const existingTag = await Tag.findOne({
       where: { text },
     });
     if (existingTag) {
-      throw new Error('Tag already exists');
+      return {
+        errors: [{ field: 'text', message: 'Tag already exists' }],
+      };
     }
 
     const tag = Tag.create({
       text,
     });
     await tag.save();
-    return tag;
+    return { tag };
   }
 
-  @Mutation(() => Tag)
+  @Mutation(() => TagSingleResponse)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async updateTag(
     @Arg('id', () => Int) id: number,
     @Arg('text') text: string,
-  ): Promise<Tag> {
+  ): Promise<TagSingleResponse> {
     // convert text to lowercase
     text = text.toLowerCase();
 
@@ -75,7 +80,7 @@ export class TagResolver {
     });
     tag.text = text;
     await tag.save();
-    return tag;
+    return { tag };
   }
 
   @Mutation(() => Boolean)

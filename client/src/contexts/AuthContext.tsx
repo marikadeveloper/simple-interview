@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { Navigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import {
   useLoginMutation,
   useLogoutMutation,
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [{ data, fetching }] = useMeQuery();
   const [, loginMutation] = useLoginMutation();
   const [, logoutMutation] = useLogoutMutation();
-  const navigate = Navigate;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!fetching) {
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     await logoutMutation({});
     setUser(null);
-    navigate({ to: '/login' });
+    navigate('/login');
   };
 
   const value = {

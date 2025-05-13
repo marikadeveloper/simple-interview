@@ -20,6 +20,12 @@ export const Header = () => {
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
   };
+
+  const handleLogout = () => {
+    logout();
+    closeMobileMenu();
+  };
+
   return (
     <>
       {/* Navigation bar */}
@@ -110,7 +116,7 @@ export const Header = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => logout()}
+                  onClick={handleLogout}
                   className='hidden md:block rounded-md bg-primary/10 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/20'>
                   Logout
                 </button>

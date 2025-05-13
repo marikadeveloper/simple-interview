@@ -8,6 +8,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useGetCandidateInvitationsQuery } from '@/generated/graphql';
+import { formatDateRelative } from '@/utils/dates';
 
 export function PendingInvitesDialog() {
   const [{ fetching, data }] = useGetCandidateInvitationsQuery({
@@ -38,7 +39,7 @@ export function PendingInvitesDialog() {
                 key={invite.id}
                 className='flex items-center justify-between p-2 border-b'>
                 <span>{invite.email}</span>
-                <span>{invite.createdAt}</span>
+                <span>{formatDateRelative(invite.createdAt)}</span>
               </div>
             ))
           )}

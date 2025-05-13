@@ -85,13 +85,12 @@ export const createUrqlClient = () => {
     exchanges: [
       cacheExchange({
         keys: {
-          // PaginatedPosts: () => null,
-          Tag: (data) => data.id?.toString() || null,
+          Tag: () => null,
+          AuthResponse: () => null,
+          UserMultipleResponse: () => null,
         },
         resolvers: {
-          Query: {
-            // posts: cursorPagination(),
-          },
+          Query: {},
         },
         updates: {
           Mutation: {

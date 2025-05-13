@@ -19,17 +19,19 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   RegisterInput,
   useCreateCandidateInvitationMutation,
   useInterviewerRegisterMutation,
   UserRole,
 } from '@/generated/graphql';
+import NotAuthorizedPage from '@/pages/auth/NotAuthorizedPage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { formSchema, userRoles } from '..';
+import { formSchema } from '..';
 
 interface UserCreateDialogProps {}
 
@@ -37,6 +39,7 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [, interviewerRegister] = useInterviewerRegisterMutation();
   const [, createCandidateInvitation] = useCreateCandidateInvitationMutation();
+  const { user } = useAuth();
 
   // reset form on close
   useEffect(() => {
@@ -51,7 +54,10 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
       fullName: undefined,
       email: undefined,
       password: undefined,
-      role: UserRole.Interviewer,
+      role:
+        user?.role === UserRole.Interviewer
+          ? UserRole.Candidate
+          : UserRole.Interviewer,
     },
   });
 
@@ -71,54 +77,87 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
     }
   }
 
+  if (!user) {
+    return <NotAuthorizedPage />;
+  }
+
+  const renderTrigger = () => {
+    if (user.role === UserRole.Interviewer) {
+      return 'Invite Candidate';
+    }
+    return 'Add User';
+  };
+
+  const renderTitle = () => {
+    if (user.role === UserRole.Interviewer) {
+      return 'Invite Candidate';
+    }
+    return 'Create User';
+  };
+
+  const renderDescription = () => {
+    if (user.role === UserRole.Interviewer) {
+      return 'Create a candidate invitation for the application.';
+    }
+    return 'Create a user account for the application.';
+  };
+
   return (
     <Dialog
       open={isOpen}
       onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Add User</Button>
+        <Button>{renderTrigger()}</Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Create User</DialogTitle>
-          <DialogDescription>
-            Create a user account for the application.
-          </DialogDescription>
+          <DialogTitle>{renderTitle()}</DialogTitle>
+          <DialogDescription>{renderDescription()}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form
             id='user-create-form'
             onSubmit={form.handleSubmit(onSubmit)}
             className='space-y-6'>
-            <FormField
-              control={form.control}
-              name='role'
-              render={({ field }) => (
-                <FormItem className='space-y-3'>
-                  <FormLabel>Role</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className='flex flex-col space-y-1'>
-                      {userRoles.map((role) => (
+            {user.role === UserRole.Admin && (
+              <FormField
+                control={form.control}
+                name='role'
+                render={({ field }) => (
+                  <FormItem className='space-y-3'>
+                    <FormLabel>Role</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className='flex flex-col space-y-1'>
                         <FormItem
-                          key={role.value}
+                          key={UserRole.Interviewer}
                           className='flex items-center space-x-3 space-y-0'>
                           <FormControl>
-                            <RadioGroupItem value={role.value} />
+                            <RadioGroupItem value={UserRole.Interviewer} />
                           </FormControl>
                           <FormLabel className='font-normal'>
-                            {role.label}
+                            Interviewer
                           </FormLabel>
                         </FormItem>
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        <FormItem
+                          key={UserRole.Candidate}
+                          className='flex items-center space-x-3 space-y-0'>
+                          <FormControl>
+                            <RadioGroupItem value={UserRole.Candidate} />
+                          </FormControl>
+                          <FormLabel className='font-normal'>
+                            Candidate
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name='email'

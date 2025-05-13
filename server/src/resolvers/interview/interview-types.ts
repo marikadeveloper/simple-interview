@@ -1,6 +1,15 @@
-import { Field, ObjectType } from 'type-graphql';
+import { Field, InputType, Int, ObjectType } from 'type-graphql';
 import { Interview } from '../../entities/Interview';
 import { FieldError } from '../resolvers-types';
+
+@InputType()
+export class InterviewInput {
+  @Field(() => Int)
+  interviewTemplateId: number;
+
+  @Field(() => Int)
+  candidateId: number;
+}
 
 @ObjectType()
 export class InterviewSingleResponse {

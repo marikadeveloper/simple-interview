@@ -1,7 +1,97 @@
-import { Resolver } from 'type-graphql';
+import {
+  Arg,
+  Ctx,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from 'type-graphql';
 import { Interview } from '../../entities/Interview';
+import { InterviewTemplate } from '../../entities/InterviewTemplate';
+import { User, UserRole } from '../../entities/User';
+import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
+import { isAuth } from '../../middleware/isAuth';
+import { MyContext } from '../../types';
+import {
+  InterviewInput,
+  InterviewMultipleResponse,
+  InterviewSingleResponse,
+} from './interview-types';
 
 @Resolver(Interview)
 export class InterviewResolver {
-  // Add your resolver methods here
+  @Mutation(() => InterviewSingleResponse)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async createInterview(
+    @Arg('input', () => InterviewInput) input: InterviewInput,
+  ) {
+    const { interviewTemplateId, candidateId } = input;
+
+    // Check if interview template exists
+    const interviewTemplate = await InterviewTemplate.findOneBy({
+      id: interviewTemplateId,
+    });
+
+    if (!interviewTemplate) {
+      return {
+        errors: [
+          {
+            field: 'interviewTemplateId',
+            message: 'Interview template not found',
+          },
+        ],
+      };
+    }
+
+    // Check if candidate exists
+    const candidate = await User.findOneBy({
+      id: candidateId,
+      role: UserRole.CANDIDATE,
+    });
+
+    if (!candidate) {
+      return {
+        errors: [
+          {
+            field: 'candidateId',
+            message: 'Candidate not found or not a candidate role',
+          },
+        ],
+      };
+    }
+
+    const interview = await Interview.create({
+      interviewTemplate: { id: interviewTemplateId },
+      user: { id: candidateId },
+    }).save();
+
+    return { interview };
+  }
+
+  @Query(() => InterviewMultipleResponse)
+  @UseMiddleware(isAuth)
+  async getInterviews(@Ctx() { req }: MyContext) {
+    // admin and interviewer can see all interviews
+    // candidate can only see their own interviews
+    const userId = req.session.userId;
+    // I am sure I have a valid user here
+    const user: User = (await User.findOneBy({ id: userId })) as User;
+
+    if (user.role === UserRole.CANDIDATE) {
+      const interviews = await Interview.find({
+        where: { user: { id: userId } },
+        relations: ['interviewTemplate', 'user'],
+        order: { createdAt: 'DESC' },
+      });
+
+      return { interviews };
+    } else {
+      const interviews = await Interview.find({
+        relations: ['interviewTemplate', 'user'],
+        order: { createdAt: 'DESC' },
+      });
+      return { interviews };
+    }
+  }
 }

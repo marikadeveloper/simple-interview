@@ -1,6 +1,7 @@
 import { buildSchema } from 'type-graphql';
 import { AuthResolver } from '../resolvers/auth/auth';
 import { CandidateInvitationResolver } from '../resolvers/candidateInvitation/candidateInvitation';
+import { InterviewResolver } from '../resolvers/interview/interview';
 import { InterviewTemplateResolver } from '../resolvers/interviewTemplate/interviewTemplate';
 import { KeystrokeResolver } from '../resolvers/keystroke/keystroke';
 import { PasswordResolver } from '../resolvers/password/password';
@@ -21,6 +22,7 @@ export const createSchema = () =>
       InterviewTemplateResolver,
       TagResolver,
       QuestionResolver,
+      InterviewResolver,
     ],
     validate: false,
   });

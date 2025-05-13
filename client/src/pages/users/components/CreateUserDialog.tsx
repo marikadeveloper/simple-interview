@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   RegisterInput,
   useCreateCandidateInvitationMutation,
@@ -25,8 +26,6 @@ import {
   UserRole,
 } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { RadioGroup } from '@radix-ui/react-dropdown-menu';
-import { RadioGroupItem } from '@radix-ui/react-radio-group';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';

@@ -85,6 +85,18 @@ export type InterviewTemplateInput = {
   tagsIds?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
+export type InterviewTemplateMultipleResponse = {
+  __typename?: 'InterviewTemplateMultipleResponse';
+  errors?: Maybe<Array<FieldError>>;
+  interviewTemplates?: Maybe<Array<InterviewTemplate>>;
+};
+
+export type InterviewTemplateSingleResponse = {
+  __typename?: 'InterviewTemplateSingleResponse';
+  errors?: Maybe<Array<FieldError>>;
+  interviewTemplate?: Maybe<InterviewTemplate>;
+};
+
 export type Keystroke = {
   __typename?: 'Keystroke';
   answer: Answer;
@@ -111,7 +123,7 @@ export type Mutation = {
   candidateRegister: AuthResponse;
   changePassword: AuthResponse;
   createCandidateInvitation: Scalars['Boolean']['output'];
-  createInterviewTemplate: InterviewTemplate;
+  createInterviewTemplate: InterviewTemplateSingleResponse;
   createQuestion: QuestionSingleResponse;
   createTag: TagSingleResponse;
   deleteInterviewTemplate: Scalars['Boolean']['output'];
@@ -123,7 +135,7 @@ export type Mutation = {
   login: AuthResponse;
   logout: Scalars['Boolean']['output'];
   saveKeystrokes: Scalars['Boolean']['output'];
-  updateInterviewTemplate: InterviewTemplate;
+  updateInterviewTemplate: InterviewTemplateSingleResponse;
   updateQuestion: QuestionSingleResponse;
   updateQuestionSortOrder: Scalars['Boolean']['output'];
   updateTag: TagSingleResponse;
@@ -231,8 +243,8 @@ export type MutationUpdateTagArgs = {
 export type Query = {
   __typename?: 'Query';
   getCandidateInvitations: Array<CandidateInvitation>;
-  getInterviewTemplate?: Maybe<InterviewTemplate>;
-  getInterviewTemplates: Array<InterviewTemplate>;
+  getInterviewTemplate?: Maybe<InterviewTemplateSingleResponse>;
+  getInterviewTemplates: InterviewTemplateMultipleResponse;
   getKeystrokes?: Maybe<Array<Keystroke>>;
   getQuestions: QuestionMultipleResponse;
   getTags: TagMultipleResponse;
@@ -404,7 +416,7 @@ export type CreateInterviewTemplateMutationVariables = Exact<{
 }>;
 
 
-export type CreateInterviewTemplateMutation = { __typename?: 'Mutation', createInterviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } };
+export type CreateInterviewTemplateMutation = { __typename?: 'Mutation', createInterviewTemplate: { __typename?: 'InterviewTemplateSingleResponse', interviewTemplate?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } | null } };
 
 export type CreateQuestionMutationVariables = Exact<{
   interviewTemplateId: Scalars['Int']['input'];
@@ -495,7 +507,7 @@ export type UpdateInterviewTemplateMutationVariables = Exact<{
 }>;
 
 
-export type UpdateInterviewTemplateMutation = { __typename?: 'Mutation', updateInterviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } };
+export type UpdateInterviewTemplateMutation = { __typename?: 'Mutation', updateInterviewTemplate: { __typename?: 'InterviewTemplateSingleResponse', interviewTemplate?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } | null } };
 
 export type UpdateQuestionMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -532,14 +544,14 @@ export type GetInterviewTemplateQueryVariables = Exact<{
 }>;
 
 
-export type GetInterviewTemplateQuery = { __typename?: 'Query', getInterviewTemplate?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } | null };
+export type GetInterviewTemplateQuery = { __typename?: 'Query', getInterviewTemplate?: { __typename?: 'InterviewTemplateSingleResponse', interviewTemplate?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } | null } | null };
 
 export type GetInterviewTemplatesQueryVariables = Exact<{
   tagsIds?: InputMaybe<Array<Scalars['Int']['input']> | Scalars['Int']['input']>;
 }>;
 
 
-export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTemplates: Array<{ __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }> };
+export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTemplates: { __typename?: 'InterviewTemplateMultipleResponse', interviewTemplates?: Array<{ __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }> | null } };
 
 export type GetKeystrokesQueryVariables = Exact<{
   answerId: Scalars['Float']['input'];
@@ -658,7 +670,9 @@ export function useCreateCandidateInvitationMutation() {
 export const CreateInterviewTemplateDocument = gql`
     mutation CreateInterviewTemplate($input: InterviewTemplateInput!) {
   createInterviewTemplate(input: $input) {
-    ...InterviewTemplate
+    interviewTemplate {
+      ...InterviewTemplate
+    }
   }
 }
     ${InterviewTemplateFragmentDoc}`;
@@ -801,7 +815,9 @@ export function useSaveKeystrokesMutation() {
 export const UpdateInterviewTemplateDocument = gql`
     mutation UpdateInterviewTemplate($id: Int!, $input: InterviewTemplateInput!) {
   updateInterviewTemplate(id: $id, input: $input) {
-    ...InterviewTemplate
+    interviewTemplate {
+      ...InterviewTemplate
+    }
   }
 }
     ${InterviewTemplateFragmentDoc}`;
@@ -869,7 +885,9 @@ export function useGetCandidateInvitationsQuery(options?: Omit<Urql.UseQueryArgs
 export const GetInterviewTemplateDocument = gql`
     query GetInterviewTemplate($id: Int!) {
   getInterviewTemplate(id: $id) {
-    ...InterviewTemplateWithQuestions
+    interviewTemplate {
+      ...InterviewTemplateWithQuestions
+    }
   }
 }
     ${InterviewTemplateWithQuestionsFragmentDoc}`;
@@ -880,7 +898,9 @@ export function useGetInterviewTemplateQuery(options: Omit<Urql.UseQueryArgs<Get
 export const GetInterviewTemplatesDocument = gql`
     query GetInterviewTemplates($tagsIds: [Int!]) {
   getInterviewTemplates(tagsIds: $tagsIds) {
-    ...InterviewTemplate
+    interviewTemplates {
+      ...InterviewTemplate
+    }
   }
 }
     ${InterviewTemplateFragmentDoc}`;

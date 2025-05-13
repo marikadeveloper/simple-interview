@@ -31,11 +31,11 @@ const InterviewTemplate = () => {
     return <div>Loading...</div>;
   }
 
-  if (!data?.getInterviewTemplate || !id) {
+  if (!data?.getInterviewTemplate?.interviewTemplate || !id) {
     return <div>No template found</div>;
   }
 
-  const { getInterviewTemplate: interviewTemplate } = data;
+  const interviewTemplate = data.getInterviewTemplate.interviewTemplate;
   return (
     <div className='container mx-auto'>
       <div className='flex align-top justify-between'>

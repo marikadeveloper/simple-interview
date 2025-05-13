@@ -1,5 +1,7 @@
 query GetInterviewTemplate($id: Int!) {
   getInterviewTemplate(id: $id) {
-    ...InterviewTemplateWithQuestions
+    interviewTemplate {
+      ...InterviewTemplateWithQuestions
+    }
   }
 }

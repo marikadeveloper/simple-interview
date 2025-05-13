@@ -72,8 +72,8 @@ const InterviewTemplates = () => {
         <DataTable
           columns={columns}
           data={
-            (interviewTemplatesData?.getInterviewTemplates as InterviewTemplateFragment[]) ||
-            []
+            (interviewTemplatesData?.getInterviewTemplates
+              .interviewTemplates as InterviewTemplateFragment[]) || []
           }
         />
       </div>

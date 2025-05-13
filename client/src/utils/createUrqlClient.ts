@@ -102,6 +102,8 @@ export const createUrqlClient = () => {
                 _result,
                 () => ({ me: { user: null } }),
               );
+              // delete other cache
+              invalidateAll(cache, 'getUsers');
             },
 
             login: (_result, _args, cache, _info) => {

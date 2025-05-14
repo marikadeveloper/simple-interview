@@ -154,6 +154,12 @@ const getCandidateInterviewQuery = `
   }
 `;
 
+const confirmInterviewCompletionMutation = `
+  mutation ConfirmInterviewCompletion($id: Int!) {
+    confirmInterviewCompletion(id: $id)
+  }
+`;
+
 const createInterview = async (
   interviewTemplateId: number,
   candidateId: number,
@@ -501,6 +507,50 @@ describe('Interview Resolver', () => {
 
     // Clean up answer
     await answer.remove();
+  });
+
+  it('should return "completed" status if the candidate has marked the interview as completed', async () => {
+    const interviewCandidate = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+    );
+    testInterviews.push(interviewCandidate);
+
+    // Mark the interview as completed
+    await graphqlCall({
+      source: confirmInterviewCompletionMutation,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: candidateUser.id,
+    });
+
+    const response = await graphqlCall({
+      source: getInterviewQuery,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getInterview: {
+          interview: {
+            id: interviewCandidate.id,
+            interviewTemplate: {
+              id: interviewTemplateId,
+            },
+            user: {
+              id: candidateUser.id,
+            },
+            deadline: interviewCandidate.deadline.toString().split('T')[0],
+            status: InterviewStatus.COMPLETED,
+          },
+          errors: null,
+        },
+      },
+    });
   });
 
   it('candidates should be able to get their own interview', async () => {

@@ -26,6 +26,9 @@ import {
 export class InterviewResolver {
   @FieldResolver(() => InterviewStatus)
   async status(@Root() interview: Interview): Promise<InterviewStatus> {
+    if (interview.status === InterviewStatus.COMPLETED) {
+      return InterviewStatus.COMPLETED;
+    }
     // Expired
     const now = new Date();
     const deadline = new Date(interview.deadline);
@@ -200,5 +203,27 @@ export class InterviewResolver {
     }
 
     return { interview };
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async confirmInterviewCompletion(
+    @Ctx() { req }: MyContext,
+    @Arg('id', () => Int) id: number,
+  ) {
+    const userId = req.session.userId;
+
+    const interview = await Interview.findOne({
+      where: { id, user: { id: userId } },
+    });
+
+    if (!interview) {
+      return false;
+    }
+
+    interview.status = InterviewStatus.COMPLETED;
+    await interview.save();
+
+    return true;
   }
 }

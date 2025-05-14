@@ -486,7 +486,7 @@ describe('Interview Resolver', () => {
     });
   });
 
-  it("candidates should not be able to get other candidates' interview", async () => {
+  it("candidates should not be able to get other candidates' interviews", async () => {
     const interviewCandidate2 = await createInterview(
       interviewTemplateId,
       candidateUser2.id,

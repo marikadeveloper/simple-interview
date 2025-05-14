@@ -1,6 +1,7 @@
 import { dataSource } from '../../';
 import { Interview, InterviewStatus } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
+import { Question } from '../../entities/Question';
 import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
@@ -37,6 +38,24 @@ const createInterviewTemplate = () => {
     name: 'Test Interview Template',
     description: 'This is a test interview template',
   }).save();
+};
+const createMockQuestions = async (interviewTemplateId: number) => {
+  const questions = [
+    { title: 'Question 1', description: 'Description 1', sortOrder: 0 },
+    { title: 'Question 2', description: 'Description 2', sortOrder: 1 },
+    { title: 'Question 3', description: 'Description 3', sortOrder: 2 },
+  ];
+
+  await Promise.all(
+    questions.map((question) =>
+      Question.create({
+        title: question.title,
+        description: question.description,
+        sortOrder: question.sortOrder,
+        interviewTemplate: { id: interviewTemplateId },
+      }).save(),
+    ),
+  );
 };
 
 const createInterviewMutation = `
@@ -105,6 +124,31 @@ const getInterviewQuery = `
   }
 `;
 
+const getCandidateInterviewQuery = `
+  query GetCandidateInterview($id: Int!) {
+    getCandidateInterview(id: $id) {
+      interview {
+        id
+        interviewTemplate {
+          id
+          questions {
+            id
+          }
+        }
+        user {
+          id
+        }
+        deadline
+        status
+      }
+      errors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 const createInterview = async (
   interviewTemplateId: number,
   candidateId: number,
@@ -141,6 +185,7 @@ describe('Interview Resolver', () => {
     // Create a test interview template
     testInterviewTemplate = await createInterviewTemplate();
     interviewTemplateId = testInterviewTemplate.id;
+    await createMockQuestions(interviewTemplateId);
   });
 
   afterEach(async () => {
@@ -398,6 +443,42 @@ describe('Interview Resolver', () => {
             },
             deadline: pastDeadline.toString().split('T')[0],
             status: InterviewStatus.EXPIRED,
+          },
+          errors: null,
+        },
+      },
+    });
+  });
+
+  it('candidates should be able to get their own interview', async () => {
+    let interviewCandidate = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+    );
+    testInterviews.push(interviewCandidate);
+
+    const response = await graphqlCall({
+      source: getCandidateInterviewQuery,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: candidateUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getCandidateInterview: {
+          interview: {
+            id: interviewCandidate.id,
+            interviewTemplate: {
+              id: interviewTemplateId,
+              questions: expect.any(Array),
+            },
+            user: {
+              id: candidateUser.id,
+            },
+            deadline: interviewCandidate.deadline.toString().split('T')[0],
+            status: InterviewStatus.PENDING,
           },
           errors: null,
         },

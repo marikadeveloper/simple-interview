@@ -160,4 +160,31 @@ export class InterviewResolver {
 
     return { interview };
   }
+
+  @Query(() => InterviewSingleResponse)
+  @UseMiddleware(isAuth)
+  async getCandidateInterview(
+    @Ctx() { req }: MyContext,
+    @Arg('id', () => Int) id: number,
+  ): Promise<InterviewSingleResponse> {
+    const userId = req.session.userId;
+
+    const interview = await Interview.findOne({
+      where: { id, user: { id: userId } },
+      relations: ['interviewTemplate', 'interviewTemplate.questions', 'user'],
+    });
+
+    if (!interview) {
+      return {
+        errors: [
+          {
+            field: 'id',
+            message: 'Interview not found',
+          },
+        ],
+      };
+    }
+
+    return { interview };
+  }
 }

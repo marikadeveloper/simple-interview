@@ -9,11 +9,11 @@ export const interviewFormSchema = z.object({
     message: 'Candidate is required.',
   }),
   deadline: z
-    .string()
-    .refine((date) => !isNaN(Date.parse(date)), {
-      message: 'Invalid date format.',
+    .date()
+    .refine((date) => date > new Date(), {
+      message: 'Deadline must be in the future.',
     })
-    .refine((date) => new Date(date) > new Date(), {
-      message: 'Date must be in the future.',
+    .refine((date) => !isNaN(date.getTime()), {
+      message: 'Invalid date format.',
     }),
 });

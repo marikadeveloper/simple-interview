@@ -61,9 +61,10 @@ export class Interview extends BaseEntity {
   })
   user!: User;
 
-  @Field(() => Answer)
+  @Field(() => [Answer], { nullable: true })
   @OneToMany(() => Answer, (answer) => answer.interview, {
     onDelete: 'CASCADE',
+    nullable: true,
   })
   answers: Answer[];
 }

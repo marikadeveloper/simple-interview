@@ -171,7 +171,12 @@ export class InterviewResolver {
 
     const interview = await Interview.findOne({
       where: { id, user: { id: userId } },
-      relations: ['interviewTemplate', 'interviewTemplate.questions', 'user'],
+      relations: [
+        'interviewTemplate',
+        'interviewTemplate.questions',
+        'user',
+        'answers',
+      ],
     });
 
     if (!interview) {

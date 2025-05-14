@@ -23,15 +23,19 @@ export class Answer extends BaseEntity {
   text: string;
 
   @Field(() => Question)
-  @ManyToOne(() => Question)
+  @ManyToOne(() => Question, { nullable: false })
   question!: Question;
 
   @Field(() => Interview)
-  @ManyToOne(() => Interview, (interview) => interview.answers)
+  @ManyToOne(() => Interview, (interview) => interview.answers, {
+    nullable: false,
+  })
   interview!: Interview;
 
   @Field(() => [Keystroke], { nullable: true })
-  @OneToMany(() => Keystroke, (keystroke) => keystroke.answer)
+  @OneToMany(() => Keystroke, (keystroke) => keystroke.answer, {
+    nullable: true,
+  })
   keystrokes: Keystroke[];
 
   @Field(() => Boolean, { defaultValue: false })

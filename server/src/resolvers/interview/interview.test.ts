@@ -138,6 +138,10 @@ const getCandidateInterviewQuery = `
         user {
           id
         }
+        answers {
+          id
+          text
+        }
         deadline
         status
       }
@@ -465,6 +469,8 @@ describe('Interview Resolver', () => {
       userId: candidateUser.id,
     });
 
+    console.log('response', response);
+
     expect(response).toMatchObject({
       data: {
         getCandidateInterview: {
@@ -477,6 +483,7 @@ describe('Interview Resolver', () => {
             user: {
               id: candidateUser.id,
             },
+            answers: expect.any(Array),
             deadline: interviewCandidate.deadline.toString().split('T')[0],
             status: InterviewStatus.PENDING,
           },

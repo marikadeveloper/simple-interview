@@ -1,12 +1,15 @@
 import {
   Arg,
   Ctx,
+  FieldResolver,
+  Int,
   Mutation,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from 'type-graphql';
-import { Interview } from '../../entities/Interview';
+import { Interview, InterviewStatus } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { User, UserRole } from '../../entities/User';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
@@ -20,6 +23,17 @@ import {
 
 @Resolver(Interview)
 export class InterviewResolver {
+  @FieldResolver(() => InterviewStatus)
+  status(@Root() interview: Interview): InterviewStatus {
+    const now = new Date();
+    const deadline = new Date(interview.deadline);
+    if (deadline < now) {
+      return InterviewStatus.EXPIRED;
+    }
+
+    return InterviewStatus.PENDING;
+  }
+
   @Mutation(() => InterviewSingleResponse)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
@@ -120,5 +134,30 @@ export class InterviewResolver {
       });
       return { interviews };
     }
+  }
+
+  @Query(() => InterviewSingleResponse)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async getInterview(
+    @Arg('id', () => Int) id: number,
+  ): Promise<InterviewSingleResponse> {
+    const interview = await Interview.findOne({
+      where: { id },
+      relations: ['interviewTemplate', 'user'],
+    });
+
+    if (!interview) {
+      return {
+        errors: [
+          {
+            field: 'id',
+            message: 'Interview not found',
+          },
+        ],
+      };
+    }
+
+    return { interview };
   }
 }

@@ -83,6 +83,46 @@ const getInterviewsQuery = `
   }
 `;
 
+const getInterviewQuery = `
+  query GetInterview($id: Int!) {
+    getInterview(id: $id) {
+      interview {
+        id
+        interviewTemplate {
+          id
+        }
+        user {
+          id
+        }
+        deadline
+        status
+      }
+      errors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const createInterview = async (
+  interviewTemplateId: number,
+  candidateId: number,
+  deadline?: string,
+) => {
+  if (!deadline) {
+    // Default to 1 day from now
+    deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  }
+
+  const interview = await Interview.create({
+    interviewTemplate: { id: interviewTemplateId },
+    user: { id: candidateId },
+    deadline,
+  }).save();
+  return interview;
+};
+
 describe('Interview Resolver', () => {
   let adminUser: User;
   let interviewerUser: User;
@@ -212,16 +252,14 @@ describe('Interview Resolver', () => {
   });
 
   it('admins and interviewers should be able to see all interviews', async () => {
-    const interviewCandidate1 = await Interview.create({
-      interviewTemplate: { id: interviewTemplateId },
-      user: { id: candidateUser.id },
-      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
-    }).save();
-    const interviewCandidate2 = await Interview.create({
-      interviewTemplate: { id: interviewTemplateId },
-      user: { id: candidateUser2.id },
-      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
-    }).save();
+    const interviewCandidate1 = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+    );
+    const interviewCandidate2 = await createInterview(
+      interviewTemplateId,
+      candidateUser2.id,
+    );
     testInterviews.push(interviewCandidate1, interviewCandidate2);
 
     const response = await graphqlCall({
@@ -259,16 +297,14 @@ describe('Interview Resolver', () => {
   });
 
   it('candidates should only see their own interviews', async () => {
-    const interviewCandidate1 = await Interview.create({
-      interviewTemplate: { id: interviewTemplateId },
-      user: { id: candidateUser.id },
-      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
-    }).save();
-    const interviewCandidate2 = await Interview.create({
-      interviewTemplate: { id: interviewTemplateId },
-      user: { id: candidateUser2.id },
-      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
-    }).save();
+    const interviewCandidate1 = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+    );
+    const interviewCandidate2 = await createInterview(
+      interviewTemplateId,
+      candidateUser2.id,
+    );
     testInterviews.push(interviewCandidate1, interviewCandidate2);
 
     const response = await graphqlCall({
@@ -290,6 +326,79 @@ describe('Interview Resolver', () => {
               },
             },
           ],
+          errors: null,
+        },
+      },
+    });
+  });
+
+  it('admins and interviewers should be able to get a single interview', async () => {
+    const interviewCandidate = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+    );
+    testInterviews.push(interviewCandidate);
+
+    const response = await graphqlCall({
+      source: getInterviewQuery,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getInterview: {
+          interview: {
+            id: interviewCandidate.id,
+            interviewTemplate: {
+              id: interviewTemplateId,
+            },
+            user: {
+              id: candidateUser.id,
+            },
+            deadline: interviewCandidate.deadline.toString().split('T')[0],
+            status: InterviewStatus.PENDING,
+          },
+          errors: null,
+        },
+      },
+    });
+  });
+
+  it('should automatically set the status to "expired" if the deadline is in the past', async () => {
+    const pastDeadline = new Date(
+      Date.now() - 24 * 60 * 60 * 1000,
+    ).toISOString(); // 1 day in the past
+    const interviewCandidate = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+      pastDeadline,
+    );
+    testInterviews.push(interviewCandidate);
+
+    const response = await graphqlCall({
+      source: getInterviewQuery,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: adminUser.id,
+    });
+    expect(response).toMatchObject({
+      data: {
+        getInterview: {
+          interview: {
+            id: interviewCandidate.id,
+            interviewTemplate: {
+              id: interviewTemplateId,
+            },
+            user: {
+              id: candidateUser.id,
+            },
+            deadline: pastDeadline.toString().split('T')[0],
+            status: InterviewStatus.EXPIRED,
+          },
           errors: null,
         },
       },

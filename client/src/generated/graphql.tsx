@@ -59,13 +59,32 @@ export type FieldError = {
 
 export type Interview = {
   __typename?: 'Interview';
-  answers: Answer;
+  answers?: Maybe<Array<Answer>>;
   createdAt: Scalars['String']['output'];
+  deadline: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   interviewTemplate: InterviewTemplate;
   status: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
   user: User;
+};
+
+export type InterviewInput = {
+  candidateId: Scalars['Int']['input'];
+  deadline: Scalars['String']['input'];
+  interviewTemplateId: Scalars['Int']['input'];
+};
+
+export type InterviewMultipleResponse = {
+  __typename?: 'InterviewMultipleResponse';
+  errors?: Maybe<Array<FieldError>>;
+  interviews?: Maybe<Array<Interview>>;
+};
+
+export type InterviewSingleResponse = {
+  __typename?: 'InterviewSingleResponse';
+  errors?: Maybe<Array<FieldError>>;
+  interview?: Maybe<Interview>;
 };
 
 export type InterviewTemplate = {
@@ -123,6 +142,7 @@ export type Mutation = {
   candidateRegister: AuthResponse;
   changePassword: AuthResponse;
   createCandidateInvitation: Scalars['Boolean']['output'];
+  createInterview: InterviewSingleResponse;
   createInterviewTemplate: InterviewTemplateSingleResponse;
   createQuestion: QuestionSingleResponse;
   createTag: TagSingleResponse;
@@ -159,6 +179,11 @@ export type MutationChangePasswordArgs = {
 
 export type MutationCreateCandidateInvitationArgs = {
   email: Scalars['String']['input'];
+};
+
+
+export type MutationCreateInterviewArgs = {
+  input: InterviewInput;
 };
 
 
@@ -242,9 +267,12 @@ export type MutationUpdateTagArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  getCandidateInterview: InterviewSingleResponse;
   getCandidateInvitations: Array<CandidateInvitation>;
+  getInterview: InterviewSingleResponse;
   getInterviewTemplate?: Maybe<InterviewTemplateSingleResponse>;
   getInterviewTemplates: InterviewTemplateMultipleResponse;
+  getInterviews: InterviewMultipleResponse;
   getKeystrokes?: Maybe<Array<Keystroke>>;
   getQuestions: QuestionMultipleResponse;
   getTags: TagMultipleResponse;
@@ -255,8 +283,18 @@ export type Query = {
 };
 
 
+export type QueryGetCandidateInterviewArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type QueryGetCandidateInvitationsArgs = {
   used?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type QueryGetInterviewArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -552,6 +590,11 @@ export type GetInterviewTemplatesQueryVariables = Exact<{
 
 
 export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTemplates: { __typename?: 'InterviewTemplateMultipleResponse', interviewTemplates?: Array<{ __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }> | null } };
+
+export type GetInterviewsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetInterviewsQuery = { __typename?: 'Query', getInterviews: { __typename?: 'InterviewMultipleResponse', interviews?: Array<{ __typename?: 'Interview', id: number, deadline: string, status: string, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } }> | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
 export type GetKeystrokesQueryVariables = Exact<{
   answerId: Scalars['Float']['input'];
@@ -907,6 +950,32 @@ export const GetInterviewTemplatesDocument = gql`
 
 export function useGetInterviewTemplatesQuery(options?: Omit<Urql.UseQueryArgs<GetInterviewTemplatesQueryVariables>, 'query'>) {
   return Urql.useQuery<GetInterviewTemplatesQuery, GetInterviewTemplatesQueryVariables>({ query: GetInterviewTemplatesDocument, ...options });
+};
+export const GetInterviewsDocument = gql`
+    query GetInterviews {
+  getInterviews {
+    interviews {
+      id
+      interviewTemplate {
+        ...InterviewTemplate
+      }
+      user {
+        ...User
+      }
+      deadline
+      status
+    }
+    errors {
+      ...Error
+    }
+  }
+}
+    ${InterviewTemplateFragmentDoc}
+${UserFragmentDoc}
+${ErrorFragmentDoc}`;
+
+export function useGetInterviewsQuery(options?: Omit<Urql.UseQueryArgs<GetInterviewsQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetInterviewsQuery, GetInterviewsQueryVariables>({ query: GetInterviewsDocument, ...options });
 };
 export const GetKeystrokesDocument = gql`
     query GetKeystrokes($answerId: Float!) {

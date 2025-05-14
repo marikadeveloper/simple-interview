@@ -1,7 +1,9 @@
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import { useGetInterviewsQuery } from '@/generated/graphql';
 
 export const CandidateInterviews = () => {
+  const [{ data }] = useGetInterviewsQuery();
   return (
     <div className='container mx-auto'>
       <div className='flex items-center justify-between'>

@@ -449,6 +449,13 @@ export type CreateCandidateInvitationMutationVariables = Exact<{
 
 export type CreateCandidateInvitationMutation = { __typename?: 'Mutation', createCandidateInvitation: boolean };
 
+export type CreateInterviewMutationVariables = Exact<{
+  input: InterviewInput;
+}>;
+
+
+export type CreateInterviewMutation = { __typename?: 'Mutation', createInterview: { __typename?: 'InterviewSingleResponse', interview?: { __typename?: 'Interview', id: number } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+
 export type CreateInterviewTemplateMutationVariables = Exact<{
   input: InterviewTemplateInput;
 }>;
@@ -709,6 +716,23 @@ export const CreateCandidateInvitationDocument = gql`
 
 export function useCreateCandidateInvitationMutation() {
   return Urql.useMutation<CreateCandidateInvitationMutation, CreateCandidateInvitationMutationVariables>(CreateCandidateInvitationDocument);
+};
+export const CreateInterviewDocument = gql`
+    mutation CreateInterview($input: InterviewInput!) {
+  createInterview(input: $input) {
+    interview {
+      id
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+    `;
+
+export function useCreateInterviewMutation() {
+  return Urql.useMutation<CreateInterviewMutation, CreateInterviewMutationVariables>(CreateInterviewDocument);
 };
 export const CreateInterviewTemplateDocument = gql`
     mutation CreateInterviewTemplate($input: InterviewTemplateInput!) {

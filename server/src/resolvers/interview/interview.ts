@@ -135,14 +135,14 @@ export class InterviewResolver {
       const interviews = await Interview.find({
         where: { user: { id: userId } },
         relations: ['interviewTemplate', 'user'],
-        order: { createdAt: 'DESC' },
+        order: { deadline: 'DESC' },
       });
 
       return { interviews };
     } else {
       const interviews = await Interview.find({
         relations: ['interviewTemplate', 'user'],
-        order: { createdAt: 'DESC' },
+        order: { deadline: 'DESC' },
       });
       return { interviews };
     }

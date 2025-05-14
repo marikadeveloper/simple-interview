@@ -1,15 +1,7 @@
 query GetInterviews {
   getInterviews {
     interviews {
-      id
-      interviewTemplate {
-        ...InterviewTemplate
-      }
-      user {
-        ...User
-      }
-      deadline
-      status
+      ...InterviewListItem
     }
     errors {
       ...Error

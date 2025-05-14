@@ -1,6 +1,11 @@
+import { DataTable } from '@/components/ui/data-table';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
-import { useGetInterviewsQuery } from '@/generated/graphql';
+import {
+  InterviewListItemFragment,
+  useGetInterviewsQuery,
+} from '@/generated/graphql';
+import { columns } from '../columns';
 import { CreateInterviewDialog } from '../components/CreateInterviewDialog';
 
 export const AdminInterviews = () => {
@@ -18,7 +23,15 @@ export const AdminInterviews = () => {
         </div>
       </div>
 
-      <div className='py-8'></div>
+      <div className='py-8'>
+        <DataTable
+          columns={columns}
+          data={
+            (data?.getInterviews.interviews as InterviewListItemFragment[]) ||
+            []
+          }
+        />
+      </div>
     </div>
   );
 };

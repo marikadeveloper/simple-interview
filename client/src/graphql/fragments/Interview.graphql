@@ -1,0 +1,11 @@
+fragment InterviewListItem on Interview {
+  id
+  interviewTemplate {
+    ...InterviewTemplate
+  }
+  user {
+    ...User
+  }
+  deadline
+  status
+}

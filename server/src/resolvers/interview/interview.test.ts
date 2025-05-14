@@ -469,8 +469,6 @@ describe('Interview Resolver', () => {
       userId: candidateUser.id,
     });
 
-    console.log('response', response);
-
     expect(response).toMatchObject({
       data: {
         getCandidateInterview: {

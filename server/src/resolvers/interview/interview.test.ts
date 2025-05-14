@@ -485,4 +485,34 @@ describe('Interview Resolver', () => {
       },
     });
   });
+
+  it("candidates should not be able to get other candidates' interview", async () => {
+    const interviewCandidate2 = await createInterview(
+      interviewTemplateId,
+      candidateUser2.id,
+    );
+    testInterviews.push(interviewCandidate2);
+
+    const response = await graphqlCall({
+      source: getCandidateInterviewQuery,
+      variableValues: {
+        id: interviewCandidate2.id,
+      },
+      userId: candidateUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getCandidateInterview: {
+          interview: null,
+          errors: [
+            {
+              field: 'id',
+              message: 'Interview not found',
+            },
+          ],
+        },
+      },
+    });
+  });
 });

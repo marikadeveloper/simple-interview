@@ -1,4 +1,5 @@
 import { dataSource } from '../../';
+import { Answer } from '../../entities/Answer';
 import { Interview, InterviewStatus } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
@@ -452,6 +453,54 @@ describe('Interview Resolver', () => {
         },
       },
     });
+  });
+
+  it('should automatically set the status to "in progress" if at least one question is answered', async () => {
+    // create interview
+    const interviewCandidate = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+    );
+    testInterviews.push(interviewCandidate);
+    const questions = await Question.findBy({
+      interviewTemplate: { id: interviewTemplateId },
+    });
+    // create answer
+    const answer = await Answer.create({
+      text: 'Test answer',
+      question: { id: questions[0].id },
+      interview: { id: interviewCandidate.id },
+    }).save();
+
+    // assert
+    const response = await graphqlCall({
+      source: getInterviewQuery,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: adminUser.id,
+    });
+    expect(response).toMatchObject({
+      data: {
+        getInterview: {
+          interview: {
+            id: interviewCandidate.id,
+            interviewTemplate: {
+              id: interviewTemplateId,
+            },
+            user: {
+              id: candidateUser.id,
+            },
+            deadline: interviewCandidate.deadline.toString().split('T')[0],
+            status: InterviewStatus.IN_PROGRESS,
+          },
+          errors: null,
+        },
+      },
+    });
+
+    // Clean up answer
+    await answer.remove();
   });
 
   it('candidates should be able to get their own interview', async () => {

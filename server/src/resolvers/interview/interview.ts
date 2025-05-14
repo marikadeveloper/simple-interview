@@ -9,6 +9,7 @@ import {
   Root,
   UseMiddleware,
 } from 'type-graphql';
+import { Answer } from '../../entities/Answer';
 import { Interview, InterviewStatus } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { User, UserRole } from '../../entities/User';
@@ -24,11 +25,19 @@ import {
 @Resolver(Interview)
 export class InterviewResolver {
   @FieldResolver(() => InterviewStatus)
-  status(@Root() interview: Interview): InterviewStatus {
+  async status(@Root() interview: Interview): Promise<InterviewStatus> {
+    // Expired
     const now = new Date();
     const deadline = new Date(interview.deadline);
     if (deadline < now) {
       return InterviewStatus.EXPIRED;
+    }
+    // In progress -> at least 1 question answered
+    const answers = await Answer.find({
+      where: { interview: { id: interview.id } },
+    });
+    if (answers.length > 0) {
+      return InterviewStatus.IN_PROGRESS;
     }
 
     return InterviewStatus.PENDING;

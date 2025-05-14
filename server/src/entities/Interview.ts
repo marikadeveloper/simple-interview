@@ -36,6 +36,10 @@ export class Interview extends BaseEntity {
   status!: InterviewStatus;
 
   @Field(() => String)
+  @Column({ type: 'date' })
+  deadline!: Date;
+
+  @Field(() => String)
   @UpdateDateColumn({ type: 'date' })
   updatedAt: Date;
 

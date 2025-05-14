@@ -1,10 +1,11 @@
 import { dataSource } from '../../';
-import { Interview } from '../../entities/Interview';
+import { Interview, InterviewStatus } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { InterviewInput } from './interview-types';
 
 // Track entities created during tests for reliable cleanup
 let testUsers: User[] = [];
@@ -49,6 +50,8 @@ const createInterviewMutation = `
         user {
           id
         }
+        deadline
+        status
       }
       errors {
         field
@@ -69,6 +72,8 @@ const getInterviewsQuery = `
         user {
           id
         }
+        deadline
+        status
       }
       errors {
         field
@@ -107,13 +112,15 @@ describe('Interview Resolver', () => {
   });
 
   it('should create an interview successfully', async () => {
+    const input: InterviewInput = {
+      interviewTemplateId,
+      candidateId: candidateUser.id,
+      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
+    };
     const response = await graphqlCall({
       source: createInterviewMutation,
       variableValues: {
-        input: {
-          interviewTemplateId,
-          candidateId: candidateUser.id,
-        },
+        input,
       },
       userId: adminUser.id,
     });
@@ -129,6 +136,8 @@ describe('Interview Resolver', () => {
             user: {
               id: candidateUser.id,
             },
+            deadline: input.deadline,
+            status: InterviewStatus.PENDING,
           },
           errors: null,
         },
@@ -144,14 +153,74 @@ describe('Interview Resolver', () => {
     }
   });
 
+  it('should not create an interview with an invalid date string', async () => {
+    const input: InterviewInput = {
+      interviewTemplateId,
+      candidateId: candidateUser.id,
+      deadline: 'invalid-date-string',
+    };
+    const response = await graphqlCall({
+      source: createInterviewMutation,
+      variableValues: {
+        input,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        createInterview: {
+          interview: null,
+          errors: [
+            {
+              field: 'deadline',
+              message: 'Invalid date format',
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should not create an interview with a past date', async () => {
+    const input: InterviewInput = {
+      interviewTemplateId,
+      candidateId: candidateUser.id,
+      deadline: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day in the past
+    };
+    const response = await graphqlCall({
+      source: createInterviewMutation,
+      variableValues: {
+        input,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        createInterview: {
+          interview: null,
+          errors: [
+            {
+              field: 'deadline',
+              message: 'Date must be in the future',
+            },
+          ],
+        },
+      },
+    });
+  });
+
   it('admins and interviewers should be able to see all interviews', async () => {
     const interviewCandidate1 = await Interview.create({
       interviewTemplate: { id: interviewTemplateId },
       user: { id: candidateUser.id },
+      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
     }).save();
     const interviewCandidate2 = await Interview.create({
       interviewTemplate: { id: interviewTemplateId },
       user: { id: candidateUser2.id },
+      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
     }).save();
     testInterviews.push(interviewCandidate1, interviewCandidate2);
 
@@ -193,10 +262,12 @@ describe('Interview Resolver', () => {
     const interviewCandidate1 = await Interview.create({
       interviewTemplate: { id: interviewTemplateId },
       user: { id: candidateUser.id },
+      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
     }).save();
     const interviewCandidate2 = await Interview.create({
       interviewTemplate: { id: interviewTemplateId },
       user: { id: candidateUser2.id },
+      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
     }).save();
     testInterviews.push(interviewCandidate1, interviewCandidate2);
 

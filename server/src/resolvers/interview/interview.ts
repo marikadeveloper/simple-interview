@@ -26,7 +26,7 @@ export class InterviewResolver {
   async createInterview(
     @Arg('input', () => InterviewInput) input: InterviewInput,
   ) {
-    const { interviewTemplateId, candidateId } = input;
+    const { interviewTemplateId, candidateId, deadline } = input;
 
     // Check if interview template exists
     const interviewTemplate = await InterviewTemplate.findOneBy({
@@ -61,9 +61,36 @@ export class InterviewResolver {
       };
     }
 
+    // Check if the date is valid
+    const date = new Date(deadline);
+    if (isNaN(date.getTime())) {
+      return {
+        errors: [
+          {
+            field: 'deadline',
+            message: 'Invalid date format',
+          },
+        ],
+      };
+    }
+
+    // Check if the date is in the past
+    const now = new Date();
+    if (date < now) {
+      return {
+        errors: [
+          {
+            field: 'deadline',
+            message: 'Date must be in the future',
+          },
+        ],
+      };
+    }
+
     const interview = await Interview.create({
       interviewTemplate: { id: interviewTemplateId },
       user: { id: candidateId },
+      deadline,
     }).save();
 
     return { interview };

@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from 'type-graphql';
+import { Field, Int, ObjectType, registerEnumType } from 'type-graphql';
 import {
   BaseEntity,
   Column,
@@ -19,6 +19,11 @@ export enum InterviewStatus {
   COMPLETED = 'completed',
   EXPIRED = 'expired',
 }
+// Register the enum with Type-GraphQL
+registerEnumType(InterviewStatus, {
+  name: 'InterviewStatus', // This is the name that will be used in the GraphQL schema
+  description: 'Interview status enumeration',
+});
 
 @ObjectType()
 @Entity()
@@ -27,7 +32,7 @@ export class Interview extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field(() => String)
+  @Field(() => InterviewStatus)
   @Column({
     type: 'enum',
     enum: InterviewStatus,

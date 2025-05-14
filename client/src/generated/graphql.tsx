@@ -64,7 +64,7 @@ export type Interview = {
   deadline: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   interviewTemplate: InterviewTemplate;
-  status: Scalars['String']['output'];
+  status: InterviewStatus;
   updatedAt: Scalars['String']['output'];
   user: User;
 };
@@ -86,6 +86,14 @@ export type InterviewSingleResponse = {
   errors?: Maybe<Array<FieldError>>;
   interview?: Maybe<Interview>;
 };
+
+/** Interview status enumeration */
+export enum InterviewStatus {
+  Completed = 'COMPLETED',
+  Expired = 'EXPIRED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING'
+}
 
 export type InterviewTemplate = {
   __typename?: 'InterviewTemplate';
@@ -436,7 +444,7 @@ export type AuthResponseFragment = { __typename?: 'AuthResponse', user?: { __typ
 
 export type ErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
-export type InterviewListItemFragment = { __typename?: 'Interview', id: number, deadline: string, status: string, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } };
+export type InterviewListItemFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } };
 
 export type InterviewTemplateFragment = { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null };
 
@@ -609,7 +617,7 @@ export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTem
 export type GetInterviewsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetInterviewsQuery = { __typename?: 'Query', getInterviews: { __typename?: 'InterviewMultipleResponse', interviews?: Array<{ __typename?: 'Interview', id: number, deadline: string, status: string, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } }> | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+export type GetInterviewsQuery = { __typename?: 'Query', getInterviews: { __typename?: 'InterviewMultipleResponse', interviews?: Array<{ __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } }> | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
 export type GetKeystrokesQueryVariables = Exact<{
   answerId: Scalars['Float']['input'];

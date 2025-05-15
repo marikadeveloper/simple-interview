@@ -26,6 +26,8 @@ export const errorStrings = {
     notFound: 'interview not found',
     canNotDelete:
       'you can only delete interviews that are in the PENDING status',
+    canNotUpdate:
+      'you can only update interviews that are in the PENDING status',
   },
   question: {
     notFound: 'question not found',

@@ -1,0 +1,5 @@
+mutation UpdateInterview($id: Int!, $input: InterviewInput!) {
+  updateInterview(id: $id, input: $input) {
+    id
+  }
+}

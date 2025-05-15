@@ -204,4 +204,71 @@ export class InterviewResolver {
 
     return true;
   }
+
+  @Mutation(() => Interview, { nullable: true })
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async updateInterview(
+    @Arg('id', () => Int) id: number,
+    @Arg('input', () => InterviewInput) input: InterviewInput,
+  ): Promise<Interview | null> {
+    // check if the interview exists
+    const interview = await Interview.findOne({
+      where: { id },
+      relations: ['interviewTemplate', 'user'],
+    });
+
+    if (!interview) {
+      throw new Error(errorStrings.interview.notFound);
+    }
+
+    if (interview.status !== InterviewStatus.PENDING) {
+      throw new Error(errorStrings.interview.canNotUpdate);
+    }
+
+    const { interviewTemplateId, candidateId, deadline } = input;
+
+    // Check if interview template exists
+    const interviewTemplate = await InterviewTemplate.findOneBy({
+      id: interviewTemplateId,
+    });
+
+    if (!interviewTemplate) {
+      throw new Error(errorStrings.interviewTemplate.notFound);
+    }
+
+    // Check if candidate exists
+    const candidate = await User.findOneBy({
+      id: candidateId,
+      role: UserRole.CANDIDATE,
+    });
+
+    if (!candidate) {
+      throw new Error(errorStrings.user.notCandidate);
+    }
+
+    // Check if the date is valid
+    const date = new Date(deadline);
+    if (isNaN(date.getTime())) {
+      throw new Error(errorStrings.date.invalidFormat);
+    }
+
+    // Check if the date is in the past
+    const now = new Date();
+    if (date < now) {
+      throw new Error(errorStrings.date.mustBeInTheFuture);
+    }
+
+    await Interview.update(
+      { id },
+      {
+        interviewTemplate: { id: interviewTemplateId },
+        user: { id: candidateId },
+        deadline,
+        status: InterviewStatus.PENDING,
+      },
+    );
+
+    return interview;
+  }
 }

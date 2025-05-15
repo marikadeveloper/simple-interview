@@ -129,6 +129,7 @@ export type Mutation = {
   login?: Maybe<User>;
   logout: Scalars['Boolean']['output'];
   saveKeystrokes: Scalars['Boolean']['output'];
+  updateInterview?: Maybe<Interview>;
   updateInterviewTemplate?: Maybe<InterviewTemplate>;
   updateQuestion?: Maybe<Question>;
   updateQuestionSortOrder: Scalars['Boolean']['output'];
@@ -224,6 +225,12 @@ export type MutationLoginArgs = {
 
 export type MutationSaveKeystrokesArgs = {
   input: SaveKeystrokesInput;
+};
+
+
+export type MutationUpdateInterviewArgs = {
+  id: Scalars['Int']['input'];
+  input: InterviewInput;
 };
 
 
@@ -498,6 +505,14 @@ export type SaveKeystrokesMutationVariables = Exact<{
 
 
 export type SaveKeystrokesMutation = { __typename?: 'Mutation', saveKeystrokes: boolean };
+
+export type UpdateInterviewMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: InterviewInput;
+}>;
+
+
+export type UpdateInterviewMutation = { __typename?: 'Mutation', updateInterview?: { __typename?: 'Interview', id: number } | null };
 
 export type UpdateInterviewTemplateMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -817,6 +832,17 @@ export const SaveKeystrokesDocument = gql`
 
 export function useSaveKeystrokesMutation() {
   return Urql.useMutation<SaveKeystrokesMutation, SaveKeystrokesMutationVariables>(SaveKeystrokesDocument);
+};
+export const UpdateInterviewDocument = gql`
+    mutation UpdateInterview($id: Int!, $input: InterviewInput!) {
+  updateInterview(id: $id, input: $input) {
+    id
+  }
+}
+    `;
+
+export function useUpdateInterviewMutation() {
+  return Urql.useMutation<UpdateInterviewMutation, UpdateInterviewMutationVariables>(UpdateInterviewDocument);
 };
 export const UpdateInterviewTemplateDocument = gql`
     mutation UpdateInterviewTemplate($id: Int!, $input: InterviewTemplateInput!) {

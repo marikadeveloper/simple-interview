@@ -5,6 +5,7 @@ import { dataSource } from '../../index';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { errorStrings } from '../../utils/errorStrings';
 import { sendEmail } from '../../utils/sendEmail';
 
 jest.mock('../../utils/sendEmail', () => ({
@@ -40,13 +41,7 @@ afterAll(async () => {
 const changePasswordMutation = `
   mutation ChangePassword($input: ChangePasswordInput!) {
     changePassword(input: $input) {
-      errors {
-        field
-        message
-      }
-      user {
-        id
-      }
+      id
     }
   }
 `;
@@ -78,10 +73,7 @@ describe('changePassword', () => {
     expect(response).toMatchObject({
       data: {
         changePassword: {
-          errors: null,
-          user: {
-            id: expect.any(Number),
-          },
+          id: expect.any(Number),
         },
       },
     });
@@ -104,16 +96,9 @@ describe('changePassword', () => {
 
     expect(response).toMatchObject({
       data: {
-        changePassword: {
-          errors: [
-            {
-              field: 'newPassword',
-              message: `Length must be at least ${PASSWORD_MIN_LENGTH} characters`,
-            },
-          ],
-          user: null,
-        },
+        changePassword: null,
       },
+      errors: [{ message: errorStrings.user.passwordTooShort }],
     });
   });
 
@@ -130,16 +115,9 @@ describe('changePassword', () => {
 
     expect(response).toMatchObject({
       data: {
-        changePassword: {
-          errors: [
-            {
-              field: 'token',
-              message: 'Token expired or invalid',
-            },
-          ],
-          user: null,
-        },
+        changePassword: null,
       },
+      errors: [{ message: errorStrings.user.tokenExpired }],
     });
   });
 
@@ -156,16 +134,9 @@ describe('changePassword', () => {
     });
     expect(response).toMatchObject({
       data: {
-        changePassword: {
-          errors: [
-            {
-              field: 'token',
-              message: 'User no longer exists',
-            },
-          ],
-          user: null,
-        },
+        changePassword: null,
       },
+      errors: [{ message: errorStrings.user.notFound }],
     });
   });
 });

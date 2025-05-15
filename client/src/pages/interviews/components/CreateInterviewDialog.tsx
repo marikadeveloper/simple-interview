@@ -90,8 +90,8 @@ export const CreateInterviewDialog: React.FC<
   };
 
   const interviewTemplates =
-    interviewTemplatesData?.getInterviewTemplates?.interviewTemplates || [];
-  const candidates = candidatesData?.getUsers?.users || [];
+    interviewTemplatesData?.getInterviewTemplates || [];
+  const candidates = candidatesData?.getUsers || [];
 
   return (
     <>

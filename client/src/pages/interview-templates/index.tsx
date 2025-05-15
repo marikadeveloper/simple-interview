@@ -30,8 +30,8 @@ const InterviewTemplates = () => {
 
   const tags = useMemo(
     () =>
-      tagsData?.getTags.tags
-        ? tagsData.getTags.tags.map((t) => ({
+      tagsData?.getTags
+        ? tagsData.getTags.map((t) => ({
             label: t.text,
             value: t.id.toString(),
           }))
@@ -72,8 +72,8 @@ const InterviewTemplates = () => {
         <DataTable
           columns={columns}
           data={
-            (interviewTemplatesData?.getInterviewTemplates
-              .interviewTemplates as InterviewTemplateFragment[]) || []
+            (interviewTemplatesData?.getInterviewTemplates as InterviewTemplateFragment[]) ||
+            []
           }
         />
       </div>

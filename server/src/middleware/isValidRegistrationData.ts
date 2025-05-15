@@ -8,12 +8,10 @@ export const isValidRegistrationData: MiddlewareFn<MyContext> = async (
 ) => {
   const { input } = args;
 
-  const errors = await validateRegister(input);
+  const error = await validateRegister(input);
 
-  if (errors) {
-    return {
-      errors,
-    };
+  if (error) {
+    throw new Error(error);
   }
 
   return next();

@@ -3,6 +3,7 @@ import { dataSource } from '../../index';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { errorStrings } from '../../utils/errorStrings';
 
 jest.mock('../../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {
@@ -35,13 +36,7 @@ afterEach(async () => {
 const meQuery = `
   query Me {
     me {
-      user {
-        id
-      }
-      errors {
-        field
-        message
-      }
+      id
     }
   }
 `;
@@ -49,13 +44,7 @@ const meQuery = `
 const loginMutation = `
   mutation Login($input: AuthInput!) {
     login(input: $input) {
-      user {
-        id
-      }
-      errors {
-        field
-        message
-      }
+      id
     }
   }
 `;
@@ -80,9 +69,7 @@ describe('me', () => {
     expect(response).toMatchObject({
       data: {
         me: {
-          user: {
-            id: expect.any(Number),
-          },
+          id: expect.any(Number),
         },
       },
     });
@@ -95,16 +82,13 @@ describe('me', () => {
 
     expect(response).toMatchObject({
       data: {
-        me: {
-          user: null,
-          errors: [
-            {
-              field: 'general',
-              message: 'not authenticated',
-            },
-          ],
-        },
+        me: null,
       },
+      errors: [
+        {
+          message: errorStrings.user.notAuthenticated,
+        },
+      ],
     });
   });
 
@@ -116,16 +100,13 @@ describe('me', () => {
 
     expect(response).toMatchObject({
       data: {
-        me: {
-          user: null,
-          errors: [
-            {
-              field: 'general',
-              message: 'user not found',
-            },
-          ],
-        },
+        me: null,
       },
+      errors: [
+        {
+          message: errorStrings.user.notFound,
+        },
+      ],
     });
   });
 });
@@ -151,9 +132,7 @@ describe('login', () => {
     expect(response).toMatchObject({
       data: {
         login: {
-          user: {
-            id: expect.any(Number),
-          },
+          id: expect.any(Number),
         },
       },
     });
@@ -170,16 +149,12 @@ describe('login', () => {
       },
     });
     expect(response).toMatchObject({
-      data: {
-        login: {
-          errors: [
-            {
-              field: 'email',
-              message: 'email does not exist',
-            },
-          ],
+      data: null,
+      errors: [
+        {
+          message: errorStrings.user.notFound,
         },
-      },
+      ],
     });
   });
 
@@ -199,17 +174,12 @@ describe('login', () => {
     });
 
     expect(response).toMatchObject({
-      data: {
-        login: {
-          user: null,
-          errors: [
-            {
-              field: 'password',
-              message: 'incorrect password',
-            },
-          ],
+      data: null,
+      errors: [
+        {
+          message: errorStrings.user.incorrectPassword,
         },
-      },
+      ],
     });
   });
 });

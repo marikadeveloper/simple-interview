@@ -1,7 +1,5 @@
 mutation CreateInterviewTemplate($input: InterviewTemplateInput!) {
   createInterviewTemplate(input: $input) {
-    interviewTemplate {
-      ...InterviewTemplate
-    }
+    ...InterviewTemplate
   }
 }

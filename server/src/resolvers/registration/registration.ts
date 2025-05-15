@@ -7,19 +7,19 @@ import { isAdmin } from '../../middleware/isAdmin';
 import { isAuth } from '../../middleware/isAuth';
 import { isValidRegistrationData } from '../../middleware/isValidRegistrationData';
 import { MyContext } from '../../types';
+import { errorStrings } from '../../utils/errorStrings';
 import { handleRegistrationErrors } from '../../utils/handleRegistrationErrors';
 import { sendEmail } from '../../utils/sendEmail';
-import { AuthResponse } from '../resolvers-types';
 import { RegisterInput } from './registration-types';
 
 @Resolver()
 export class RegistrationResolver {
-  @Mutation(() => AuthResponse)
+  @Mutation(() => User, { nullable: true })
   @UseMiddleware(isValidRegistrationData)
   async adminRegister(
     @Arg('input', () => RegisterInput) input: RegisterInput,
     @Ctx() { req }: MyContext,
-  ): Promise<AuthResponse> {
+  ): Promise<User | null> {
     // check if there is already an admin
     const adminCount = await User.count({
       where: {
@@ -28,14 +28,7 @@ export class RegistrationResolver {
     });
 
     if (adminCount > 0) {
-      return {
-        errors: [
-          {
-            field: 'role',
-            message: 'only one admin is allowed',
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.onlyOneAdminAllowed);
     }
 
     const hashedPassword = await argon2.hash(input.password);
@@ -51,18 +44,18 @@ export class RegistrationResolver {
       // Store user id session
       req.session.userId = user.id;
 
-      return { user };
+      return user;
     } catch (err) {
       return handleRegistrationErrors(err);
     }
   }
 
-  @Mutation(() => AuthResponse)
+  @Mutation(() => User, { nullable: true })
   @UseMiddleware(isValidRegistrationData)
   async candidateRegister(
     @Arg('input', () => RegisterInput) input: RegisterInput,
     @Ctx() { req }: MyContext,
-  ): Promise<AuthResponse> {
+  ): Promise<User | null> {
     const hashedPassword = await argon2.hash(input.password);
 
     try {
@@ -76,7 +69,7 @@ export class RegistrationResolver {
           );
 
           if (!candidateInvitation) {
-            throw new Error('invalid invitation');
+            throw new Error(errorStrings.user.invalidInvitation);
           }
 
           candidateInvitation.used = true;
@@ -94,19 +87,19 @@ export class RegistrationResolver {
       // Store user id session
       req.session.userId = user.id;
 
-      return { user };
+      return user;
     } catch (err) {
       return handleRegistrationErrors(err);
     }
   }
 
-  @Mutation(() => AuthResponse)
+  @Mutation(() => User, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdmin)
   @UseMiddleware(isValidRegistrationData)
   async interviewerRegister(
     @Arg('input', () => RegisterInput) input: RegisterInput,
-  ): Promise<AuthResponse> {
+  ): Promise<User | null> {
     const hashedPassword = await argon2.hash(input.password);
 
     try {
@@ -130,7 +123,7 @@ export class RegistrationResolver {
         `,
       );
 
-      return { user };
+      return user;
     } catch (err) {
       return handleRegistrationErrors(err);
     }

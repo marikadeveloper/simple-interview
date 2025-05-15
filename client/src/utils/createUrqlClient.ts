@@ -86,12 +86,6 @@ export const createUrqlClient = () => {
       cacheExchange({
         keys: {
           Tag: () => null,
-          AuthResponse: () => null,
-          UserMultipleResponse: () => null,
-          InterviewTemplateSingleResponse: () => null,
-          InterviewTemplateMultipleResponse: () => null,
-          TagSingleResponse: () => null,
-          TagMultipleResponse: () => null,
         },
         resolvers: {
           Query: {},
@@ -103,7 +97,7 @@ export const createUrqlClient = () => {
                 cache,
                 { query: MeDocument },
                 _result,
-                () => ({ me: { user: null } }),
+                () => ({ me: null }),
               );
               // delete other cache
               invalidateAll(cache, 'getUsers');
@@ -115,13 +109,11 @@ export const createUrqlClient = () => {
                 { query: MeDocument },
                 _result,
                 (result, query) => {
-                  if (result.login.errors) {
+                  if (!result.login) {
                     return query;
                   } else {
                     return {
-                      me: {
-                        user: result.login.user,
-                      },
+                      me: result.login,
                     };
                   }
                 },
@@ -169,6 +161,13 @@ export const createUrqlClient = () => {
             },
             deleteQuestion: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplate');
+            },
+
+            createInterview: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getInterviews');
+            },
+            deleteInterview: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getInterviews');
             },
 
             // register: (_result, _args, cache, _info) => {

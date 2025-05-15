@@ -49,8 +49,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!fetching) {
-      if (data?.me?.user) {
-        setUser(data.me.user as unknown as User);
+      if (data?.me) {
+        setUser(data.me as unknown as User);
       } else {
         setUser(null);
       }
@@ -61,16 +61,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     const response = await loginMutation({ input: { email, password } });
 
-    if (response.data?.login.user) {
-      setUser(response.data.login.user as unknown as User);
+    if (response.data?.login) {
+      setUser(response.data.login as unknown as User);
       return { success: true };
     }
 
     return {
       success: false,
-      errors: response.data?.login.errors || [
-        { field: 'general', message: 'Login failed' },
-      ],
+      errors: [{ field: 'general', message: 'Login failed' }],
     };
   };
 

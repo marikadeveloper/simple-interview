@@ -1,10 +1,5 @@
 mutation CreateQuestion($interviewTemplateId: Int!, $input: QuestionInput!) {
   createQuestion(interviewTemplateId: $interviewTemplateId, input: $input) {
-    question {
-      ...Question
-    }
-    errors {
-      ...Error
-    }
+    ...Question
   }
 }

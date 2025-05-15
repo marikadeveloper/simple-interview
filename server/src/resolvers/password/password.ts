@@ -4,52 +4,31 @@ import { v4 } from 'uuid';
 import { FORGET_PASSWORD_PREFIX, PASSWORD_MIN_LENGTH } from '../../constants';
 import { User } from '../../entities/User';
 import { MyContext } from '../../types';
+import { errorStrings } from '../../utils/errorStrings';
 import { sendEmail } from '../../utils/sendEmail';
-import { AuthResponse } from '../resolvers-types';
 import { ChangePasswordInput } from './password-types';
 
 @Resolver()
 export class PasswordResolver {
-  @Mutation(() => AuthResponse)
+  @Mutation(() => User, { nullable: true })
   async changePassword(
     @Arg('input') input: ChangePasswordInput,
     @Ctx() { redis, req }: MyContext,
-  ): Promise<AuthResponse> {
+  ): Promise<User | null> {
     if (input.newPassword.length < PASSWORD_MIN_LENGTH) {
-      return {
-        errors: [
-          {
-            field: 'newPassword',
-            message: `Length must be at least ${PASSWORD_MIN_LENGTH} characters`,
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.passwordTooShort);
     }
 
     const key = FORGET_PASSWORD_PREFIX + input.token;
     const userId = await redis.get(key);
 
     if (!userId) {
-      return {
-        errors: [
-          {
-            field: 'token',
-            message: 'Token expired or invalid',
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.tokenExpired);
     }
 
     const user = await User.findOneBy({ id: parseInt(userId) });
     if (!user) {
-      return {
-        errors: [
-          {
-            field: 'token',
-            message: 'User no longer exists',
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.notFound);
     }
 
     // update password
@@ -60,7 +39,7 @@ export class PasswordResolver {
     await redis.del(key);
     // log in user
     req.session.userId = user.id;
-    return { user };
+    return user;
   }
 
   @Mutation(() => Boolean)

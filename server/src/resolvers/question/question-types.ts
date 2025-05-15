@@ -1,6 +1,4 @@
-import { Field, InputType, Int, ObjectType } from 'type-graphql';
-import { Question } from '../../entities/Question';
-import { FieldError } from '../resolvers-types';
+import { Field, InputType, Int } from 'type-graphql';
 
 @InputType()
 export class QuestionInput {
@@ -17,22 +15,4 @@ export class UpdateQuestionSortOrderInput {
 
   @Field(() => Int)
   newSortOrder: number; // The new 0-based index for the question
-}
-
-@ObjectType()
-export class QuestionSingleResponse {
-  @Field(() => Question, { nullable: true })
-  question?: Question;
-
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
-}
-
-@ObjectType()
-export class QuestionMultipleResponse {
-  @Field(() => [Question], { nullable: true })
-  questions?: Question[];
-
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
 }

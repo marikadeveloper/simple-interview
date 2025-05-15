@@ -67,9 +67,7 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
       },
     });
     setIsOpen(false);
-    navigate(
-      `/interview-templates/${data.data?.createInterviewTemplate?.interviewTemplate?.id}`,
-    );
+    navigate(`/interview-templates/${data.data?.createInterviewTemplate?.id}`);
     form.reset();
   };
 
@@ -80,10 +78,10 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
         text: newTagName,
       });
 
-      if (response.data?.createTag?.tag) {
+      if (response.data?.createTag) {
         const newTag = {
           label: newTagName,
-          value: response.data.createTag.tag.id.toString(),
+          value: response.data.createTag.id.toString(),
         };
 
         // Add the new tag to the tags list

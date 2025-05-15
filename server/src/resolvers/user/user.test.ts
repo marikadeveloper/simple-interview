@@ -3,6 +3,7 @@ import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { errorStrings } from '../../utils/errorStrings';
 
 let testUsers: User[] = [];
 
@@ -28,10 +29,8 @@ afterEach(async () => {
 const getUsersQuery = `
   query GetUsers($filters: UsersFilters!) {
     getUsers(filters: $filters) {
-      users {
-        id
-        email
-      }
+      id
+      email
     }
   }
 `;
@@ -39,14 +38,8 @@ const getUsersQuery = `
 const getUserQuery = `
   query GetUser($id: Int!) {
     getUser(id: $id) {
-      user {
-        id
-        email
-      }
-      errors {
-        field
-        message
-      }
+      id
+      email
     }
   }
 `;
@@ -75,18 +68,16 @@ describe('users', () => {
 
     expect(response).toMatchObject({
       data: {
-        getUsers: {
-          users: [
-            {
-              id: user1.id,
-              email: user1.email,
-            },
-            {
-              id: user2.id,
-              email: user2.email,
-            },
-          ],
-        },
+        getUsers: [
+          {
+            id: user1.id,
+            email: user1.email,
+          },
+          {
+            id: user2.id,
+            email: user2.email,
+          },
+        ],
       },
     });
   });
@@ -107,11 +98,8 @@ describe('users', () => {
     expect(response).toMatchObject({
       data: {
         getUser: {
-          user: {
-            id: user.id,
-            email: user.email,
-          },
-          errors: null,
+          id: user.id,
+          email: user.email,
         },
       },
     });
@@ -132,16 +120,9 @@ describe('users', () => {
 
     expect(response).toMatchObject({
       data: {
-        getUser: {
-          user: null,
-          errors: [
-            {
-              field: 'general',
-              message: 'not authorized',
-            },
-          ],
-        },
+        getUser: null,
       },
+      errors: [{ message: errorStrings.user.notAuthorized }],
     });
   });
 

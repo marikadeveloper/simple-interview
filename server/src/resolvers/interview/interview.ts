@@ -16,11 +16,8 @@ import { User, UserRole } from '../../entities/User';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { MyContext } from '../../types';
-import {
-  InterviewInput,
-  InterviewMultipleResponse,
-  InterviewSingleResponse,
-} from './interview-types';
+import { errorStrings } from '../../utils/errorStrings';
+import { InterviewInput } from './interview-types';
 
 @Resolver(Interview)
 export class InterviewResolver {
@@ -46,12 +43,12 @@ export class InterviewResolver {
     return InterviewStatus.PENDING;
   }
 
-  @Mutation(() => InterviewSingleResponse)
+  @Mutation(() => Interview, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async createInterview(
     @Arg('input', () => InterviewInput) input: InterviewInput,
-  ) {
+  ): Promise<Interview | null> {
     const { interviewTemplateId, candidateId, deadline } = input;
 
     // Check if interview template exists
@@ -60,14 +57,7 @@ export class InterviewResolver {
     });
 
     if (!interviewTemplate) {
-      return {
-        errors: [
-          {
-            field: 'interviewTemplateId',
-            message: 'Interview template not found',
-          },
-        ],
-      };
+      throw new Error(errorStrings.interviewTemplate.notFound);
     }
 
     // Check if candidate exists
@@ -77,40 +67,19 @@ export class InterviewResolver {
     });
 
     if (!candidate) {
-      return {
-        errors: [
-          {
-            field: 'candidateId',
-            message: 'Candidate not found or not a candidate role',
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.notCandidate);
     }
 
     // Check if the date is valid
     const date = new Date(deadline);
     if (isNaN(date.getTime())) {
-      return {
-        errors: [
-          {
-            field: 'deadline',
-            message: 'Invalid date format',
-          },
-        ],
-      };
+      throw new Error(errorStrings.date.invalidFormat);
     }
 
     // Check if the date is in the past
     const now = new Date();
     if (date < now) {
-      return {
-        errors: [
-          {
-            field: 'deadline',
-            message: 'Date must be in the future',
-          },
-        ],
-      };
+      throw new Error(errorStrings.date.mustBeInTheFuture);
     }
 
     const interview = await Interview.create({
@@ -120,12 +89,12 @@ export class InterviewResolver {
       status: InterviewStatus.PENDING,
     }).save();
 
-    return { interview };
+    return interview;
   }
 
-  @Query(() => InterviewMultipleResponse)
+  @Query(() => [Interview], { nullable: true })
   @UseMiddleware(isAuth)
-  async getInterviews(@Ctx() { req }: MyContext) {
+  async getInterviews(@Ctx() { req }: MyContext): Promise<Interview[] | null> {
     // admin and interviewer can see all interviews
     // candidate can only see their own interviews
     const userId = req.session.userId;
@@ -139,47 +108,40 @@ export class InterviewResolver {
         order: { deadline: 'DESC' },
       });
 
-      return { interviews };
+      return interviews;
     } else {
       const interviews = await Interview.find({
         relations: ['interviewTemplate', 'user'],
         order: { deadline: 'DESC' },
       });
-      return { interviews };
+      return interviews;
     }
   }
 
-  @Query(() => InterviewSingleResponse)
+  @Query(() => Interview, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async getInterview(
     @Arg('id', () => Int) id: number,
-  ): Promise<InterviewSingleResponse> {
+  ): Promise<Interview | null> {
     const interview = await Interview.findOne({
       where: { id },
       relations: ['interviewTemplate', 'user'],
     });
 
     if (!interview) {
-      return {
-        errors: [
-          {
-            field: 'id',
-            message: 'Interview not found',
-          },
-        ],
-      };
+      throw new Error(errorStrings.interview.notFound);
     }
 
-    return { interview };
+    return interview;
   }
 
-  @Query(() => InterviewSingleResponse)
+  @Query(() => Interview, { nullable: true })
   @UseMiddleware(isAuth)
   async getCandidateInterview(
     @Ctx() { req }: MyContext,
     @Arg('id', () => Int) id: number,
-  ): Promise<InterviewSingleResponse> {
+  ): Promise<Interview | null> {
     const userId = req.session.userId;
 
     const interview = await Interview.findOne({
@@ -193,17 +155,10 @@ export class InterviewResolver {
     });
 
     if (!interview) {
-      return {
-        errors: [
-          {
-            field: 'id',
-            message: 'Interview not found',
-          },
-        ],
-      };
+      throw new Error(errorStrings.interview.notFound);
     }
 
-    return { interview };
+    return interview;
   }
 
   @Mutation(() => Boolean)
@@ -238,13 +193,11 @@ export class InterviewResolver {
     });
 
     if (!interview) {
-      throw new Error('Interview not found');
+      throw new Error(errorStrings.interview.notFound);
     }
 
     if (interview.status !== InterviewStatus.PENDING) {
-      throw new Error(
-        'You can only delete interviews that are in the PENDING status',
-      );
+      throw new Error(errorStrings.interview.canNotDelete);
     }
 
     await Interview.delete({ id });

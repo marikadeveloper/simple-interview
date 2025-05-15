@@ -1,10 +1,5 @@
 mutation UpdateTag($id: Int!, $text: String!) {
   updateTag(id: $id, text: $text) {
-    tag {
-      ...Tag
-    }
-    errors {
-      ...Error
-    }
+    ...Tag
   }
 }

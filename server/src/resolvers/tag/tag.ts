@@ -10,73 +10,65 @@ import { Not } from 'typeorm';
 import { Tag } from '../../entities/Tag';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
-import { TagMultipleResponse, TagSingleResponse } from './tag-types';
+import { errorStrings } from '../../utils/errorStrings';
 
 @Resolver(Tag)
 export class TagResolver {
-  @Query(() => TagMultipleResponse)
+  @Query(() => [Tag], { nullable: true })
   @UseMiddleware(isAuth)
-  async getTags(): Promise<TagMultipleResponse> {
+  async getTags(): Promise<Tag[] | null> {
     const tags = await Tag.find({
       order: { text: 'ASC' },
     });
-    return { tags };
+    return tags;
   }
 
-  @Mutation(() => TagSingleResponse)
+  @Mutation(() => Tag, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
-  async createTag(@Arg('text') text: string): Promise<TagSingleResponse> {
+  async createTag(@Arg('text') text: string): Promise<Tag | null> {
     // convert text to lowercase
     text = text.toLowerCase();
 
     // check if tag is empty
     if (text.trim() === '') {
-      return {
-        errors: [{ field: 'text', message: 'Tag cannot be empty' }],
-      };
+      throw new Error(errorStrings.tag.emptyText);
     }
 
     const existingTag = await Tag.findOne({
       where: { text },
     });
     if (existingTag) {
-      return {
-        errors: [{ field: 'text', message: 'Tag already exists' }],
-      };
+      throw new Error(errorStrings.tag.duplicate);
     }
 
     const tag = Tag.create({
       text,
     });
     await tag.save();
-    return { tag };
+    return tag;
   }
 
-  @Mutation(() => TagSingleResponse)
+  @Mutation(() => Tag, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async updateTag(
     @Arg('id', () => Int) id: number,
     @Arg('text') text: string,
-  ): Promise<TagSingleResponse> {
+  ): Promise<Tag | null> {
     // convert text to lowercase
     text = text.toLowerCase();
 
     // check if tag is empty
     if (text.trim() === '') {
-      return {
-        errors: [{ field: 'text', message: 'Tag cannot be empty' }],
-      };
+      throw new Error(errorStrings.tag.emptyText);
     }
 
     const existingTag = await Tag.findOne({
       where: { text, id: Not(id) },
     });
     if (existingTag) {
-      return {
-        errors: [{ field: 'text', message: 'Tag already exists' }],
-      };
+      throw new Error(errorStrings.tag.duplicate);
     }
 
     const tag = await Tag.findOneOrFail({
@@ -84,7 +76,7 @@ export class TagResolver {
     });
     tag.text = text;
     await tag.save();
-    return { tag };
+    return tag;
   }
 
   @Mutation(() => Boolean)

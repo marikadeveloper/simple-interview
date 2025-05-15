@@ -1,5 +1,6 @@
 import { InterviewListItemFragment } from '@/generated/graphql';
 import React from 'react';
+import { DeleteInterviewConfirmationDialog } from './DeleteInterviewConfirmationDialog';
 
 interface InterviewActionsProps {
   interview: InterviewListItemFragment;

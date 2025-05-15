@@ -5,6 +5,7 @@ import {
   UserFragment,
 } from '@/generated/graphql';
 import { ColumnDef } from '@tanstack/react-table';
+import { InterviewActions } from './components/IntreviewActions';
 
 export const columns: ColumnDef<InterviewListItemFragment>[] = [
   {

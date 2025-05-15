@@ -9,6 +9,7 @@ import {
   fakeQuestionData,
 } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { errorStrings } from '../../utils/errorStrings';
 
 // Track entities created during tests for reliable cleanup
 let testUsers: User[] = [];
@@ -47,16 +48,10 @@ afterAll(async () => {
 const createQuestionMutation = `
   mutation CreateQuestion($interviewTemplateId: Int!, $input: QuestionInput!) {
     createQuestion(interviewTemplateId: $interviewTemplateId, input: $input) {
-      question {
-        id
-        title
-        description
-        sortOrder
-      }
-      errors {
-        field
-        message
-      }
+      id
+      title
+      description
+      sortOrder
     }
   }
 `;
@@ -64,16 +59,10 @@ const createQuestionMutation = `
 const updateQuestionMutation = `
   mutation UpdateQuestion($id: Int!, $input: QuestionInput!) {
     updateQuestion(id: $id, input: $input) {
-      question {
-        id
-        title
-        description
-        sortOrder
-      }
-      errors {
-        field
-        message
-      }
+      id
+      title
+      description
+      sortOrder
     }
   }
 `;
@@ -81,16 +70,10 @@ const updateQuestionMutation = `
 const getQuestionsQuery = `
   query GetQuestions($interviewTemplateId: Int!) {
     getQuestions(interviewTemplateId: $interviewTemplateId) {
-      questions {
-        id
-        title
-        description
-        sortOrder
-      }
-      errors {
-        field
-        message
-      }
+      id
+      title
+      description
+      sortOrder
     }
   }
 `;
@@ -148,20 +131,16 @@ describe('QuestionResolver', () => {
       expect(response).toMatchObject({
         data: {
           createQuestion: {
-            errors: null,
-            question: {
-              id: expect.any(Number),
-              title: questionInput.title,
-              description: questionInput.description,
-              sortOrder: expect.any(Number),
-            },
+            id: expect.any(Number),
+            title: questionInput.title,
+            description: questionInput.description,
+            sortOrder: expect.any(Number),
           },
         },
       });
 
       // Store the created question for cleanup
-      // @ts-ignore
-      const createdQuestion = response.data?.createQuestion?.question;
+      const createdQuestion = response.data?.createQuestion as Question;
       testQuestions.push(
         await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
       );
@@ -177,20 +156,16 @@ describe('QuestionResolver', () => {
       expect(response).toMatchObject({
         data: {
           createQuestion: {
-            errors: null,
-            question: {
-              id: expect.any(Number),
-              title: questionInput.title,
-              description: questionInput.description,
-              sortOrder: expect.any(Number),
-            },
+            id: expect.any(Number),
+            title: questionInput.title,
+            description: questionInput.description,
+            sortOrder: expect.any(Number),
           },
         },
       });
 
       // Store the created question for cleanup
-      // @ts-ignore
-      const createdQuestion = response.data?.createQuestion?.question;
+      const createdQuestion = response.data?.createQuestion as Question;
       testQuestions.push(
         await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
       );
@@ -211,16 +186,9 @@ describe('QuestionResolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        createQuestion: {
-          question: null,
-          errors: [
-            {
-              field: 'general',
-              message: 'not authorized',
-            },
-          ],
-        },
+        createQuestion: null,
       },
+      errors: [{ message: errorStrings.user.notAuthorized }],
     });
   });
 
@@ -237,16 +205,9 @@ describe('QuestionResolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        createQuestion: {
-          question: null,
-          errors: [
-            {
-              field: 'general',
-              message: 'User not logged in',
-            },
-          ],
-        },
+        createQuestion: null,
       },
+      errors: [{ message: errorStrings.user.notAuthenticated }],
     });
   });
 
@@ -264,13 +225,10 @@ describe('QuestionResolver', () => {
     expect(response1).toMatchObject({
       data: {
         createQuestion: {
-          errors: null,
-          question: {
-            id: expect.any(Number),
-            title: questionInput1.title,
-            description: questionInput1.description,
-            sortOrder: 0,
-          },
+          id: expect.any(Number),
+          title: questionInput1.title,
+          description: questionInput1.description,
+          sortOrder: 0,
         },
       },
     });
@@ -285,22 +243,17 @@ describe('QuestionResolver', () => {
     expect(response2).toMatchObject({
       data: {
         createQuestion: {
-          errors: null,
-          question: {
-            id: expect.any(Number),
-            title: questionInput2.title,
-            description: questionInput2.description,
-            sortOrder: 1,
-          },
+          id: expect.any(Number),
+          title: questionInput2.title,
+          description: questionInput2.description,
+          sortOrder: 1,
         },
       },
     });
 
     // Store the created questions for cleanup
-    // @ts-ignore
-    const createdQuestion1 = response1.data?.createQuestion?.question;
-    // @ts-ignore
-    const createdQuestion2 = response2.data?.createQuestion?.question;
+    const createdQuestion1 = response1.data?.createQuestion as Question;
+    const createdQuestion2 = response2.data?.createQuestion as Question;
     testQuestions.push(
       await Question.findOneOrFail({ where: { id: createdQuestion1.id } }),
       await Question.findOneOrFail({ where: { id: createdQuestion2.id } }),
@@ -325,26 +278,23 @@ describe('QuestionResolver', () => {
     });
 
     // @ts-ignore
-    expect(response.data.getQuestions.questions).toHaveLength(2);
+    expect(response.data.getQuestions).toHaveLength(2);
     expect(response).toMatchObject({
       data: {
-        getQuestions: {
-          questions: [
-            {
-              id: question1.id,
-              title: question1.title,
-              description: question1.description,
-              sortOrder: question1.sortOrder,
-            },
-            {
-              id: question2.id,
-              title: question2.title,
-              description: question2.description,
-              sortOrder: question2.sortOrder,
-            },
-          ],
-          errors: null,
-        },
+        getQuestions: [
+          {
+            id: question1.id,
+            title: question1.title,
+            description: question1.description,
+            sortOrder: question1.sortOrder,
+          },
+          {
+            id: question2.id,
+            title: question2.title,
+            description: question2.description,
+            sortOrder: question2.sortOrder,
+          },
+        ],
       },
     });
   });
@@ -369,13 +319,10 @@ describe('QuestionResolver', () => {
     expect(response).toMatchObject({
       data: {
         updateQuestion: {
-          question: {
-            id: question.id,
-            title: updatedQuestionInput.title,
-            description: updatedQuestionInput.description,
-            sortOrder: question.sortOrder,
-          },
-          errors: null,
+          id: question.id,
+          title: updatedQuestionInput.title,
+          description: updatedQuestionInput.description,
+          sortOrder: question.sortOrder,
         },
       },
     });

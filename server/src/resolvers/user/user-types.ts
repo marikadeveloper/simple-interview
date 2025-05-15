@@ -1,6 +1,5 @@
-import { Field, InputType, ObjectType } from 'type-graphql';
-import { User, UserRole } from '../../entities/User';
-import { FieldError } from '../resolvers-types';
+import { Field, InputType } from 'type-graphql';
+import { UserRole } from '../../entities/User';
 
 @InputType()
 export class UsersFilters {
@@ -25,22 +24,4 @@ export class CandidatesFilters {
 
   @Field({ nullable: true })
   fullName?: string;
-}
-
-@ObjectType()
-export class UserSingleResponse {
-  @Field(() => User, { nullable: true })
-  user?: User;
-
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
-}
-
-@ObjectType()
-export class UserMultipleResponse {
-  @Field(() => [User], { nullable: true })
-  users?: User[];
-
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
 }

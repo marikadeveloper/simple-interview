@@ -31,10 +31,10 @@ export function PendingInvitesDialog() {
         <div className='flex flex-col gap-2'>
           {fetching ? (
             <p>Loading...</p>
-          ) : data?.getCandidateInvitations.length === 0 ? (
+          ) : data?.getCandidateInvitations?.length === 0 ? (
             <p>No pending invites</p>
           ) : (
-            data?.getCandidateInvitations.map((invite) => (
+            data?.getCandidateInvitations?.map((invite) => (
               <div
                 key={invite.id}
                 className='flex items-center justify-between p-2 border-b'>

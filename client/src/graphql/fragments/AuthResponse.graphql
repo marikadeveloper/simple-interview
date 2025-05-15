@@ -1,8 +1,0 @@
-fragment AuthResponse on AuthResponse {
-  user {
-    ...User
-  }
-  errors {
-    ...Error
-  }
-}

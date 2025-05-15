@@ -96,4 +96,24 @@ describe('candidateInvitation', () => {
       },
     });
   });
+
+  it('a candidate should not be able to see invitations', async () => {
+    const testCandidate = await createFakeUser(UserRole.CANDIDATE);
+    testUsers.push(testCandidate);
+
+    const email = faker.internet.email();
+    await CandidateInvitation.create({
+      email,
+      used: false,
+    }).save();
+
+    const response = await graphqlCall({
+      source: getCandidateInvitationsQuery,
+      userId: testCandidate.id,
+    });
+
+    expect(response).toMatchObject({
+      data: null,
+    });
+  });
 });

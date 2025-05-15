@@ -1,10 +1,5 @@
 query GetInterviews {
   getInterviews {
-    interviews {
-      ...InterviewListItem
-    }
-    errors {
-      ...Error
-    }
+    ...InterviewListItem
   }
 }

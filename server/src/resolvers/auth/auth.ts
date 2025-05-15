@@ -3,75 +3,44 @@ import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { COOKIE_NAME } from '../../constants';
 import { User } from '../../entities/User';
 import { MyContext } from '../../types';
-import { AuthResponse } from '../resolvers-types';
+import { errorStrings } from '../../utils/errorStrings';
 import { AuthInput } from './auth-types';
 
 @Resolver()
 export class AuthResolver {
-  @Query(() => AuthResponse, { nullable: true })
-  async me(@Ctx() { req }: MyContext): Promise<AuthResponse> {
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req }: MyContext): Promise<User | null> {
     if (!req.session.userId) {
-      return {
-        errors: [
-          {
-            field: 'general',
-            message: 'not authenticated',
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.notAuthenticated);
     }
     const user = await User.findOne({ where: { id: req.session.userId } });
 
     if (!user) {
-      return {
-        errors: [
-          {
-            field: 'general',
-            message: 'user not found',
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.notFound);
     }
-    return {
-      user,
-    };
+
+    return user;
   }
 
-  @Mutation(() => AuthResponse)
+  @Mutation(() => User, { nullable: true })
   async login(
     @Arg('input', () => AuthInput) input: AuthInput,
     @Ctx() { req }: MyContext,
-  ): Promise<AuthResponse> {
+  ): Promise<User | null> {
     const user = await User.findOne({ where: [{ email: input.email }] });
     if (!user) {
-      return {
-        errors: [
-          {
-            field: 'email',
-            message: 'email does not exist',
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.notFound);
     }
 
     const valid = await argon2.verify(user.password, input.password);
     if (!valid) {
-      return {
-        errors: [
-          {
-            field: 'password',
-            message: 'incorrect password',
-          },
-        ],
-      };
+      throw new Error(errorStrings.user.incorrectPassword);
     }
 
     // store user id session
     req.session.userId = user.id;
 
-    return {
-      user,
-    };
+    return user;
   }
 
   @Mutation(() => Boolean)

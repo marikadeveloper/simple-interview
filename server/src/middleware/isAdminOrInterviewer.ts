@@ -1,6 +1,7 @@
 import { MiddlewareFn } from 'type-graphql';
 import { User, UserRole } from '../entities/User';
 import { MyContext } from '../types';
+import { errorStrings } from '../utils/errorStrings';
 
 export const isAdminOrInterviewer: MiddlewareFn<MyContext> = async (
   { context },
@@ -16,14 +17,7 @@ export const isAdminOrInterviewer: MiddlewareFn<MyContext> = async (
     !user ||
     (user.role !== UserRole.ADMIN && user.role !== UserRole.INTERVIEWER)
   ) {
-    return {
-      errors: [
-        {
-          field: 'general',
-          message: 'not authorized',
-        },
-      ],
-    };
+    throw new Error(errorStrings.user.notAuthorized);
   }
 
   return next();

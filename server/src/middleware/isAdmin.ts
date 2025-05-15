@@ -1,6 +1,7 @@
 import { MiddlewareFn } from 'type-graphql';
 import { User, UserRole } from '../entities/User';
 import { MyContext } from '../types';
+import { errorStrings } from '../utils/errorStrings';
 
 export const isAdmin: MiddlewareFn<MyContext> = async ({ context }, next) => {
   const userId = context.req.session.userId;
@@ -10,14 +11,7 @@ export const isAdmin: MiddlewareFn<MyContext> = async ({ context }, next) => {
   });
 
   if (!admin) {
-    return {
-      errors: [
-        {
-          field: 'general',
-          message: 'User is not an admin',
-        },
-      ],
-    };
+    throw new Error(errorStrings.user.notAuthorized);
   }
 
   return next();

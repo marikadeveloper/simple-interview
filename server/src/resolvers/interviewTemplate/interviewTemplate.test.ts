@@ -36,14 +36,12 @@ afterEach(async () => {
 const createInterviewTemplateMutation = `
   mutation CreateInterviewTemplate($input: InterviewTemplateInput!) {
     createInterviewTemplate(input: $input) {
-      interviewTemplate {
+      id
+      name
+      description
+      tags {
         id
-        name
-        description
-        tags {
-          id
-          text
-        }
+        text
       }
     }
   }
@@ -51,14 +49,12 @@ const createInterviewTemplateMutation = `
 const getInterviewTemplatesQuery = `
   query GetInterviewTemplates {
     getInterviewTemplates {
-      interviewTemplates {
+      id
+      name
+      description
+      tags {
         id
-        name
-        description
-        tags {
-          id
-          text
-        }
+        text
       }
     }
   }
@@ -66,19 +62,17 @@ const getInterviewTemplatesQuery = `
 const getInterviewTemplateQuery = `
   query GetInterviewTemplate($id: Int!) {
     getInterviewTemplate(id: $id) {
-      interviewTemplate {
+      id
+      name
+      description
+      tags {
         id
-        name
+        text
+      }
+      questions {
+        id
+        title
         description
-        tags {
-          id
-          text
-        }
-        questions {
-          id
-          title
-          description
-        }
       }
     }
   }
@@ -86,11 +80,9 @@ const getInterviewTemplateQuery = `
 const updateInterviewTemplateMutation = `
   mutation UpdateInterviewTemplate($id: Int!, $input: InterviewTemplateInput!) {
     updateInterviewTemplate(id: $id, input: $input) {
-      interviewTemplate {
-        id
-        name
-        description
-      }
+      id
+      name
+      description
     }
   }
 `;
@@ -123,21 +115,19 @@ describe('interviewTemplate', () => {
     expect(response).toMatchObject({
       data: {
         createInterviewTemplate: {
-          interviewTemplate: {
-            id: expect.any(Number),
-            name: input.name,
-            description: input.description,
-            tags: [
-              {
-                id: testTag.id,
-                text: testTag.text,
-              },
-              {
-                id: testTag2.id,
-                text: testTag2.text,
-              },
-            ],
-          },
+          id: expect.any(Number),
+          name: input.name,
+          description: input.description,
+          tags: [
+            {
+              id: testTag.id,
+              text: testTag.text,
+            },
+            {
+              id: testTag2.id,
+              text: testTag2.text,
+            },
+          ],
         },
       },
     });
@@ -154,9 +144,7 @@ describe('interviewTemplate', () => {
 
     expect(response).toMatchObject({
       data: {
-        getInterviewTemplates: {
-          interviewTemplates: expect.any(Array),
-        },
+        getInterviewTemplates: expect.any(Array),
       },
     });
   });
@@ -179,11 +167,9 @@ describe('interviewTemplate', () => {
     expect(response).toMatchObject({
       data: {
         getInterviewTemplate: {
-          interviewTemplate: {
-            id: interviewTemplate.id,
-            name: interviewTemplate.name,
-            description: interviewTemplate.description,
-          },
+          id: interviewTemplate.id,
+          name: interviewTemplate.name,
+          description: interviewTemplate.description,
         },
       },
     });
@@ -212,11 +198,9 @@ describe('interviewTemplate', () => {
     expect(response).toMatchObject({
       data: {
         updateInterviewTemplate: {
-          interviewTemplate: {
-            id: interviewTemplate.id,
-            name: input.name,
-            description: input.description,
-          },
+          id: interviewTemplate.id,
+          name: input.name,
+          description: input.description,
         },
       },
     });
@@ -243,4 +227,6 @@ describe('interviewTemplate', () => {
       },
     });
   });
+
+  it.todo('test error messages');
 });

@@ -11,20 +11,17 @@ import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Tag } from '../../entities/Tag';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
-import {
-  InterviewTemplateInput,
-  InterviewTemplateMultipleResponse,
-  InterviewTemplateSingleResponse,
-} from './interviewTemplate-types';
+import { errorStrings } from '../../utils/errorStrings';
+import { InterviewTemplateInput } from './interviewTemplate-types';
 
 @Resolver(InterviewTemplate)
 export class InterviewTemplateResolver {
-  @Query(() => InterviewTemplateMultipleResponse)
+  @Query(() => [InterviewTemplate], { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async getInterviewTemplates(
     @Arg('tagsIds', () => [Int], { nullable: true }) tagsIds: number[],
-  ): Promise<InterviewTemplateMultipleResponse> {
+  ): Promise<InterviewTemplate[] | null> {
     const queryBuilder = InterviewTemplate.createQueryBuilder(
       'interviewTemplate',
     )
@@ -46,39 +43,32 @@ export class InterviewTemplateResolver {
 
     const interviewTemplates = await queryBuilder.getMany();
 
-    return { interviewTemplates };
+    return interviewTemplates;
   }
 
-  @Query(() => InterviewTemplateSingleResponse, { nullable: true })
+  @Query(() => InterviewTemplate, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async getInterviewTemplate(
     @Arg('id', () => Int) id: number,
-  ): Promise<InterviewTemplateSingleResponse> {
+  ): Promise<InterviewTemplate | null> {
     const interviewTemplate = await InterviewTemplate.findOne({
       where: { id },
       relations: ['questions', 'tags'],
       order: { questions: { sortOrder: 'ASC' } },
     });
     if (!interviewTemplate) {
-      return {
-        errors: [
-          {
-            field: 'id',
-            message: 'Interview template not found',
-          },
-        ],
-      };
+      throw new Error(errorStrings.interviewTemplate.notFound);
     }
-    return { interviewTemplate };
+    return interviewTemplate;
   }
 
-  @Mutation(() => InterviewTemplateSingleResponse)
+  @Mutation(() => InterviewTemplate, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async createInterviewTemplate(
     @Arg('input', () => InterviewTemplateInput) input: InterviewTemplateInput,
-  ): Promise<InterviewTemplateSingleResponse> {
+  ): Promise<InterviewTemplate | null> {
     const interviewTemplate = InterviewTemplate.create({
       name: input.name,
       description: input.description,
@@ -93,26 +83,19 @@ export class InterviewTemplateResolver {
     }
 
     await interviewTemplate.save();
-    return { interviewTemplate };
+    return interviewTemplate;
   }
 
-  @Mutation(() => InterviewTemplateSingleResponse)
+  @Mutation(() => InterviewTemplate, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async updateInterviewTemplate(
     @Arg('id', () => Int) id: number,
     @Arg('input', () => InterviewTemplateInput) input: InterviewTemplateInput,
-  ): Promise<InterviewTemplateSingleResponse> {
+  ): Promise<InterviewTemplate | null> {
     const interviewTemplate = await InterviewTemplate.findOneBy({ id });
     if (!interviewTemplate) {
-      return {
-        errors: [
-          {
-            field: 'id',
-            message: 'Interview template not found',
-          },
-        ],
-      };
+      throw new Error(errorStrings.interviewTemplate.notFound);
     }
     interviewTemplate.name = input.name;
     interviewTemplate.description = input.description;
@@ -128,7 +111,7 @@ export class InterviewTemplateResolver {
     }
 
     await interviewTemplate.save();
-    return { interviewTemplate };
+    return interviewTemplate;
   }
 
   @Mutation(() => Boolean)

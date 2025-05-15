@@ -7,6 +7,7 @@ import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { errorStrings } from '../../utils/errorStrings';
 import { InterviewInput } from './interview-types';
 
 // Track entities created during tests for reliable cleanup
@@ -246,6 +247,11 @@ describe('Interview Resolver', () => {
       data: {
         createInterview: null,
       },
+      errors: [
+        {
+          message: errorStrings.date.invalidFormat,
+        },
+      ],
     });
   });
 
@@ -267,6 +273,11 @@ describe('Interview Resolver', () => {
       data: {
         createInterview: null,
       },
+      errors: [
+        {
+          message: errorStrings.date.mustBeInTheFuture,
+        },
+      ],
     });
   });
 
@@ -555,6 +566,7 @@ describe('Interview Resolver', () => {
       data: {
         getCandidateInterview: null,
       },
+      errors: [{ message: errorStrings.interview.notFound }],
     });
   });
 
@@ -607,13 +619,9 @@ describe('Interview Resolver', () => {
       data: null,
       errors: [
         {
-          message:
-            'You can only delete interviews that are in the PENDING status',
+          message: errorStrings.interview.canNotDelete,
         },
       ],
     });
   });
-
-  it.todo('test correct error messages');
-  it.todo('organize tests better by grouping them by query/mutation');
 });

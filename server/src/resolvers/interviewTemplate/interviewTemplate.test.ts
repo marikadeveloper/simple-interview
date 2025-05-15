@@ -227,6 +227,4 @@ describe('interviewTemplate', () => {
       },
     });
   });
-
-  it.todo('test error messages');
 });

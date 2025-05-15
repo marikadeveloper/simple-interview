@@ -193,13 +193,11 @@ export class InterviewResolver {
     });
 
     if (!interview) {
-      throw new Error('Interview not found');
+      throw new Error(errorStrings.interview.notFound);
     }
 
     if (interview.status !== InterviewStatus.PENDING) {
-      throw new Error(
-        'You can only delete interviews that are in the PENDING status',
-      );
+      throw new Error(errorStrings.interview.canNotDelete);
     }
 
     await Interview.delete({ id });

@@ -275,6 +275,4 @@ describe('TagResolver', () => {
       },
     });
   });
-
-  it.todo('check for null error when checking for success');
 });

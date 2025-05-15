@@ -14,6 +14,7 @@ export const errorStrings = {
     passwordTooShort: `password must be at least ${PASSWORD_MIN_LENGTH} characters`,
     fullNameTooShort: `full name must be at least ${FULL_NAME_MIN_LENGTH} characters`,
     notCandidate: 'user is not a candidate',
+    tokenExpired: 'token expired or invalid',
   },
   interviewTemplate: {
     notFound: 'interview template not found',

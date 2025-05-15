@@ -1,11 +1,12 @@
 import { faker } from '@faker-js/faker';
-import { FULL_NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '../../constants';
+import { PASSWORD_MIN_LENGTH } from '../../constants';
 import { CandidateInvitation } from '../../entities/CandidateInvitation';
 import { User, UserRole } from '../../entities/User';
 import { dataSource } from '../../index';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser, fakeUserData } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { errorStrings } from '../../utils/errorStrings';
 
 jest.mock('../../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {
@@ -48,13 +49,7 @@ afterAll(async () => {
 const adminRegisterMutation = `
   mutation Register($input: RegisterInput!) {
     adminRegister(input: $input) {
-      user {
-        id
-      }
-      errors {
-        field
-        message
-      }
+      id
     }
   }
 `;
@@ -62,13 +57,7 @@ const adminRegisterMutation = `
 const candidateRegisterMutation = `
   mutation CandidateRegister($input: RegisterInput!) {
     candidateRegister(input: $input) {
-      user {
-        id
-      }
-      errors {
-        field
-        message
-      }
+      id
     }
   }
 `;
@@ -76,13 +65,7 @@ const candidateRegisterMutation = `
 const interviewerRegisterMutation = `
   mutation InterviewerRegister($input: RegisterInput!) {
     interviewerRegister(input: $input) {
-      user {
-        id
-      }
-      errors {
-        field
-        message
-      }
+      id
     }
   }
 `;
@@ -104,16 +87,13 @@ describe('UserResolver', () => {
 
       expect(response).toMatchObject({
         data: {
-          adminRegister: {
-            user: null,
-            errors: [
-              {
-                field: 'general',
-                message: 'Unexpected error',
-              },
-            ],
-          },
+          adminRegister: null,
         },
+        errors: [
+          {
+            message: 'Unexpected error',
+          },
+        ],
       });
 
       // Restore the original implementation
@@ -131,20 +111,17 @@ describe('UserResolver', () => {
       expect(response).toMatchObject({
         data: {
           adminRegister: {
-            user: {
-              id: expect.any(Number),
-            },
-            errors: null,
+            id: expect.any(Number),
           },
         },
       });
 
       // Add to cleanup list
       // @ts-ignore
-      if (response?.data?.adminRegister?.user?.id) {
+      if (response?.data?.adminRegister?.id) {
         const user = await User.findOne({
           // @ts-ignore
-          where: { id: response.data.adminRegister.user.id },
+          where: { id: response.data.adminRegister.id },
         });
         if (user) testUsers.push(user);
       }
@@ -164,16 +141,13 @@ describe('UserResolver', () => {
 
       expect(response).toMatchObject({
         data: {
-          adminRegister: {
-            user: null,
-            errors: [
-              {
-                field: 'role',
-                message: 'only one admin is allowed',
-              },
-            ],
-          },
+          adminRegister: null,
         },
+        errors: [
+          {
+            message: errorStrings.user.onlyOneAdminAllowed,
+          },
+        ],
       });
     });
   });
@@ -204,20 +178,17 @@ describe('UserResolver', () => {
       expect(response).toMatchObject({
         data: {
           candidateRegister: {
-            user: {
-              id: expect.any(Number),
-            },
-            errors: null,
+            id: expect.any(Number),
           },
         },
       });
 
       // Add to cleanup list
       // @ts-ignore
-      if (response?.data?.candidateRegister?.user?.id) {
+      if (response?.data?.candidateRegister?.id) {
         const user = await User.findOne({
           // @ts-ignore
-          where: { id: response.data.candidateRegister.user.id },
+          where: { id: response.data.candidateRegister.id },
         });
         if (user) testUsers.push(user);
       }
@@ -238,16 +209,13 @@ describe('UserResolver', () => {
 
       expect(response).toMatchObject({
         data: {
-          candidateRegister: {
-            user: null,
-            errors: [
-              {
-                field: 'email',
-                message: 'invalid email',
-              },
-            ],
-          },
+          candidateRegister: null,
         },
+        errors: [
+          {
+            message: errorStrings.user.invalidEmail,
+          },
+        ],
       });
     });
 
@@ -266,16 +234,13 @@ describe('UserResolver', () => {
 
       expect(response).toMatchObject({
         data: {
-          candidateRegister: {
-            user: null,
-            errors: [
-              {
-                field: 'password',
-                message: `Length must be at least ${PASSWORD_MIN_LENGTH} characters`,
-              },
-            ],
-          },
+          candidateRegister: null,
         },
+        errors: [
+          {
+            message: errorStrings.user.passwordTooShort,
+          },
+        ],
       });
     });
 
@@ -294,16 +259,13 @@ describe('UserResolver', () => {
 
       expect(response).toMatchObject({
         data: {
-          candidateRegister: {
-            user: null,
-            errors: [
-              {
-                field: 'fullName',
-                message: `Length must be at least ${FULL_NAME_MIN_LENGTH} characters`,
-              },
-            ],
-          },
+          candidateRegister: null,
         },
+        errors: [
+          {
+            message: errorStrings.user.fullNameTooShort,
+          },
+        ],
       });
     });
 
@@ -321,16 +283,13 @@ describe('UserResolver', () => {
 
       expect(response).toMatchObject({
         data: {
-          candidateRegister: {
-            user: null,
-            errors: [
-              {
-                field: 'general',
-                message: 'invalid invitation',
-              },
-            ],
-          },
+          candidateRegister: null,
         },
+        errors: [
+          {
+            message: errorStrings.user.invalidInvitation,
+          },
+        ],
       });
     });
   });
@@ -356,26 +315,23 @@ describe('UserResolver', () => {
       expect(response).toMatchObject({
         data: {
           interviewerRegister: {
-            user: {
-              id: expect.any(Number),
-            },
-            errors: null,
+            id: expect.any(Number),
           },
         },
       });
 
       // Add to cleanup list
       // @ts-ignore
-      if (response?.data?.interviewerRegister?.user?.id) {
+      if (response?.data?.interviewerRegister?.id) {
         const user = await User.findOne({
           // @ts-ignore
-          where: { id: response.data.interviewerRegister.user.id },
+          where: { id: response.data.interviewerRegister.id },
         });
         if (user) testUsers.push(user);
       }
     });
 
-    it('should return error trying to register an interviewer without sign in as admin', async () => {
+    it('should return error trying to register an interviewer without sign in', async () => {
       const interviewerInput = {
         ...fakeUserData(),
       };
@@ -389,16 +345,13 @@ describe('UserResolver', () => {
 
       expect(response).toMatchObject({
         data: {
-          interviewerRegister: {
-            user: null,
-            errors: [
-              {
-                field: 'general',
-                message: 'User not logged in',
-              },
-            ],
-          },
+          interviewerRegister: null,
         },
+        errors: [
+          {
+            message: errorStrings.user.notAuthenticated,
+          },
+        ],
       });
     });
   });

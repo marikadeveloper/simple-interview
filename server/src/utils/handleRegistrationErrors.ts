@@ -1,24 +1,8 @@
-import { FieldError } from '../resolvers/resolvers-types';
+import { errorStrings } from './errorStrings';
 
-export const handleRegistrationErrors = (
-  err: any,
-): { errors: FieldError[] } => {
+export const handleRegistrationErrors = (err: any) => {
   if (err.code === '23505') {
-    return {
-      errors: [
-        {
-          field: 'email',
-          message: 'email already taken',
-        },
-      ],
-    };
+    throw new Error(errorStrings.user.duplicateEmail);
   }
-  return {
-    errors: [
-      {
-        field: 'general',
-        message: err.message,
-      },
-    ],
-  };
+  throw new Error(err.message);
 };

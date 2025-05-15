@@ -15,6 +15,9 @@ export const errorStrings = {
     fullNameTooShort: `full name must be at least ${FULL_NAME_MIN_LENGTH} characters`,
     notCandidate: 'user is not a candidate',
     tokenExpired: 'token expired or invalid',
+    onlyOneAdminAllowed: 'only one admin user allowed',
+    duplicateEmail: 'email already taken',
+    invalidInvitation: 'invalid invitation',
   },
   interviewTemplate: {
     notFound: 'interview template not found',

@@ -1,6 +1,4 @@
-import { Field, InputType, Int, ObjectType } from 'type-graphql';
-import { Interview } from '../../entities/Interview';
-import { FieldError } from '../resolvers-types';
+import { Field, InputType, Int } from 'type-graphql';
 
 @InputType()
 export class InterviewInput {
@@ -12,22 +10,4 @@ export class InterviewInput {
 
   @Field(() => String)
   deadline: string;
-}
-
-@ObjectType()
-export class InterviewSingleResponse {
-  @Field(() => Interview, { nullable: true })
-  interview?: Interview;
-
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
-}
-
-@ObjectType()
-export class InterviewMultipleResponse {
-  @Field(() => [Interview], { nullable: true })
-  interviews?: Interview[];
-
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
 }

@@ -22,7 +22,7 @@ export class AuthResolver {
     return user;
   }
 
-  @Mutation(() => User)
+  @Mutation(() => User, { nullable: true })
   async login(
     @Arg('input', () => AuthInput) input: AuthInput,
     @Ctx() { req }: MyContext,

@@ -62,21 +62,15 @@ const createMockQuestions = async (interviewTemplateId: number) => {
 const createInterviewMutation = `
   mutation CreateInterview($input: InterviewInput!) {
     createInterview(input: $input) {
-      interview {
+      id
+      interviewTemplate {
         id
-        interviewTemplate {
-          id
-        }
-        user {
-          id
-        }
-        deadline
-        status
       }
-      errors {
-        field
-        message
+      user {
+        id
       }
+      deadline
+      status
     }
   }
 `;
@@ -84,21 +78,15 @@ const createInterviewMutation = `
 const getInterviewsQuery = `
   query GetInterviews {
     getInterviews {
-      interviews {
+      id
+      interviewTemplate {
         id
-        interviewTemplate {
-          id
-        }
-        user {
-          id
-        }
-        deadline
-        status
       }
-      errors {
-        field
-        message
+      user {
+        id
       }
+      deadline
+      status
     }
   }
 `;
@@ -106,21 +94,15 @@ const getInterviewsQuery = `
 const getInterviewQuery = `
   query GetInterview($id: Int!) {
     getInterview(id: $id) {
-      interview {
+      id
+      interviewTemplate {
         id
-        interviewTemplate {
-          id
-        }
-        user {
-          id
-        }
-        deadline
-        status
       }
-      errors {
-        field
-        message
+      user {
+        id
       }
+      deadline
+      status
     }
   }
 `;
@@ -128,28 +110,22 @@ const getInterviewQuery = `
 const getCandidateInterviewQuery = `
   query GetCandidateInterview($id: Int!) {
     getCandidateInterview(id: $id) {
-      interview {
+      id
+      interviewTemplate {
         id
-        interviewTemplate {
-          id
-          questions {
-            id
-          }
-        }
-        user {
+        questions {
           id
         }
-        answers {
-          id
-          text
-        }
-        deadline
-        status
       }
-      errors {
-        field
-        message
+      user {
+        id
       }
+      answers {
+        id
+        text
+      }
+      deadline
+      status
     }
   }
 `;
@@ -230,26 +206,23 @@ describe('Interview Resolver', () => {
     expect(response).toMatchObject({
       data: {
         createInterview: {
-          interview: {
-            id: expect.any(Number),
-            interviewTemplate: {
-              id: interviewTemplateId,
-            },
-            user: {
-              id: candidateUser.id,
-            },
-            deadline: input.deadline,
-            status: InterviewStatus.PENDING,
+          id: expect.any(Number),
+          interviewTemplate: {
+            id: interviewTemplateId,
           },
-          errors: null,
+          user: {
+            id: candidateUser.id,
+          },
+          deadline: input.deadline,
+          status: InterviewStatus.PENDING,
         },
       },
     });
 
     // @ts-ignore
-    if (response?.data?.createInterview?.interview) {
+    if (response?.data?.createInterview) {
       const interviewId = // @ts-ignore
-        response.data.createInterview.interview.id as unknown as number;
+        response.data.createInterview.id as unknown as number;
       const interview = await Interview.findOneBy({ id: interviewId });
       testInterviews.push(interview as Interview);
     }
@@ -271,15 +244,7 @@ describe('Interview Resolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        createInterview: {
-          interview: null,
-          errors: [
-            {
-              field: 'deadline',
-              message: 'Invalid date format',
-            },
-          ],
-        },
+        createInterview: null,
       },
     });
   });
@@ -300,15 +265,7 @@ describe('Interview Resolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        createInterview: {
-          interview: null,
-          errors: [
-            {
-              field: 'deadline',
-              message: 'Date must be in the future',
-            },
-          ],
-        },
+        createInterview: null,
       },
     });
   });
@@ -331,29 +288,30 @@ describe('Interview Resolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        getInterviews: {
-          interviews: [
-            {
-              id: interviewCandidate1.id,
-              interviewTemplate: {
-                id: interviewTemplateId,
-              },
-              user: {
-                id: candidateUser.id,
-              },
+        getInterviews: [
+          {
+            id: interviewCandidate1.id,
+            interviewTemplate: {
+              id: interviewTemplateId,
             },
-            {
-              id: interviewCandidate2.id,
-              interviewTemplate: {
-                id: interviewTemplateId,
-              },
-              user: {
-                id: candidateUser2.id,
-              },
+            user: {
+              id: candidateUser.id,
             },
-          ],
-          errors: null,
-        },
+            deadline: expect.any(String),
+            status: InterviewStatus.PENDING,
+          },
+          {
+            id: interviewCandidate2.id,
+            interviewTemplate: {
+              id: interviewTemplateId,
+            },
+            user: {
+              id: candidateUser2.id,
+            },
+            deadline: expect.any(String),
+            status: InterviewStatus.PENDING,
+          },
+        ],
       },
     });
   });
@@ -376,20 +334,17 @@ describe('Interview Resolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        getInterviews: {
-          interviews: [
-            {
-              id: interviewCandidate1.id,
-              interviewTemplate: {
-                id: interviewTemplateId,
-              },
-              user: {
-                id: candidateUser.id,
-              },
+        getInterviews: [
+          {
+            id: interviewCandidate1.id,
+            interviewTemplate: {
+              id: interviewTemplateId,
             },
-          ],
-          errors: null,
-        },
+            user: {
+              id: candidateUser.id,
+            },
+          },
+        ],
       },
     });
   });
@@ -412,18 +367,15 @@ describe('Interview Resolver', () => {
     expect(response).toMatchObject({
       data: {
         getInterview: {
-          interview: {
-            id: interviewCandidate.id,
-            interviewTemplate: {
-              id: interviewTemplateId,
-            },
-            user: {
-              id: candidateUser.id,
-            },
-            deadline: interviewCandidate.deadline.toString().split('T')[0],
-            status: InterviewStatus.PENDING,
+          id: interviewCandidate.id,
+          interviewTemplate: {
+            id: interviewTemplateId,
           },
-          errors: null,
+          user: {
+            id: candidateUser.id,
+          },
+          deadline: interviewCandidate.deadline.toString().split('T')[0],
+          status: InterviewStatus.PENDING,
         },
       },
     });
@@ -450,18 +402,15 @@ describe('Interview Resolver', () => {
     expect(response).toMatchObject({
       data: {
         getInterview: {
-          interview: {
-            id: interviewCandidate.id,
-            interviewTemplate: {
-              id: interviewTemplateId,
-            },
-            user: {
-              id: candidateUser.id,
-            },
-            deadline: pastDeadline.toString().split('T')[0],
-            status: InterviewStatus.EXPIRED,
+          id: interviewCandidate.id,
+          interviewTemplate: {
+            id: interviewTemplateId,
           },
-          errors: null,
+          user: {
+            id: candidateUser.id,
+          },
+          deadline: pastDeadline.toString().split('T')[0],
+          status: InterviewStatus.EXPIRED,
         },
       },
     });
@@ -495,18 +444,15 @@ describe('Interview Resolver', () => {
     expect(response).toMatchObject({
       data: {
         getInterview: {
-          interview: {
-            id: interviewCandidate.id,
-            interviewTemplate: {
-              id: interviewTemplateId,
-            },
-            user: {
-              id: candidateUser.id,
-            },
-            deadline: interviewCandidate.deadline.toString().split('T')[0],
-            status: InterviewStatus.IN_PROGRESS,
+          id: interviewCandidate.id,
+          interviewTemplate: {
+            id: interviewTemplateId,
           },
-          errors: null,
+          user: {
+            id: candidateUser.id,
+          },
+          deadline: interviewCandidate.deadline.toString().split('T')[0],
+          status: InterviewStatus.IN_PROGRESS,
         },
       },
     });
@@ -542,18 +488,15 @@ describe('Interview Resolver', () => {
     expect(response).toMatchObject({
       data: {
         getInterview: {
-          interview: {
-            id: interviewCandidate.id,
-            interviewTemplate: {
-              id: interviewTemplateId,
-            },
-            user: {
-              id: candidateUser.id,
-            },
-            deadline: interviewCandidate.deadline.toString().split('T')[0],
-            status: InterviewStatus.COMPLETED,
+          id: interviewCandidate.id,
+          interviewTemplate: {
+            id: interviewTemplateId,
           },
-          errors: null,
+          user: {
+            id: candidateUser.id,
+          },
+          deadline: interviewCandidate.deadline.toString().split('T')[0],
+          status: InterviewStatus.COMPLETED,
         },
       },
     });
@@ -577,20 +520,17 @@ describe('Interview Resolver', () => {
     expect(response).toMatchObject({
       data: {
         getCandidateInterview: {
-          interview: {
-            id: interviewCandidate.id,
-            interviewTemplate: {
-              id: interviewTemplateId,
-              questions: expect.any(Array),
-            },
-            user: {
-              id: candidateUser.id,
-            },
-            answers: expect.any(Array),
-            deadline: interviewCandidate.deadline.toString().split('T')[0],
-            status: InterviewStatus.PENDING,
+          id: interviewCandidate.id,
+          interviewTemplate: {
+            id: interviewTemplateId,
+            questions: expect.any(Array),
           },
-          errors: null,
+          user: {
+            id: candidateUser.id,
+          },
+          answers: expect.any(Array),
+          deadline: interviewCandidate.deadline.toString().split('T')[0],
+          status: InterviewStatus.PENDING,
         },
       },
     });
@@ -613,15 +553,7 @@ describe('Interview Resolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        getCandidateInterview: {
-          interview: null,
-          errors: [
-            {
-              field: 'id',
-              message: 'Interview not found',
-            },
-          ],
-        },
+        getCandidateInterview: null,
       },
     });
   });
@@ -681,4 +613,7 @@ describe('Interview Resolver', () => {
       ],
     });
   });
+
+  it.todo('test correct error messages');
+  it.todo('organize tests better by grouping them by query/mutation');
 });

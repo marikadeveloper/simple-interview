@@ -37,7 +37,7 @@ export class CandidateInvitationResolver {
     }
   }
 
-  @Query(() => [CandidateInvitation])
+  @Query(() => [CandidateInvitation], { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async getCandidateInvitations(

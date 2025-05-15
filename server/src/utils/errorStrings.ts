@@ -28,4 +28,8 @@ export const errorStrings = {
   question: {
     notFound: 'question not found',
   },
+  tag: {
+    emptyText: 'Tag cannot be empty',
+    duplicate: 'Tag already exists',
+  },
 };

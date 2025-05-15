@@ -4,6 +4,7 @@ import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { errorStrings } from '../../utils/errorStrings';
 
 let testUsers: User[] = [];
 let testTags: Tag[] = [];
@@ -36,14 +37,8 @@ afterAll(async () => {
 const createTagMutation = `
   mutation CreateTag($text: String!) {
     createTag(text: $text) {
-      tag {
-        id
-        text
-      }
-      errors {
-        field
-        message
-      }
+      id
+      text
     }
   }
 `;
@@ -51,10 +46,8 @@ const createTagMutation = `
 const getTagsQuery = `
   query GetTags {
     getTags {
-      tags {
-        id
-        text
-      }
+      id
+      text
     }
   }
 `;
@@ -62,14 +55,8 @@ const getTagsQuery = `
 const updateTagMutation = `
   mutation UpdateTag($id: Int!, $text: String!) {
     updateTag(id: $id, text: $text) {
-      tag {
-        id
-        text
-      }
-      errors {
-        field
-        message
-      }
+      id
+      text
     }
   }
 `;
@@ -106,11 +93,8 @@ describe('TagResolver', () => {
       expect(response).toMatchObject({
         data: {
           createTag: {
-            tag: {
-              id: expect.any(Number),
-              text: tagText.toLowerCase(),
-            },
-            errors: null,
+            id: expect.any(Number),
+            text: tagText.toLowerCase(),
           },
         },
       });
@@ -131,11 +115,8 @@ describe('TagResolver', () => {
       expect(response).toMatchObject({
         data: {
           createTag: {
-            tag: {
-              id: expect.any(Number),
-              text: tagText.toLowerCase(),
-            },
-            errors: null,
+            id: expect.any(Number),
+            text: tagText.toLowerCase(),
           },
         },
       });
@@ -156,11 +137,9 @@ describe('TagResolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        createTag: {
-          tag: null,
-          errors: [{ message: 'not authorized', field: 'general' }],
-        },
+        createTag: null,
       },
+      errors: [{ message: errorStrings.user.notAuthorized }],
     });
   });
 
@@ -172,11 +151,9 @@ describe('TagResolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        createTag: {
-          tag: null,
-          errors: [{ message: 'User not logged in', field: 'general' }],
-        },
+        createTag: null,
       },
+      errors: [{ message: errorStrings.user.notAuthenticated }],
     });
   });
 
@@ -189,11 +166,9 @@ describe('TagResolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        createTag: {
-          tag: null,
-          errors: [{ message: 'Tag cannot be empty', field: 'text' }],
-        },
+        createTag: null,
       },
+      errors: [{ message: errorStrings.tag.emptyText }],
     });
   });
 
@@ -211,11 +186,9 @@ describe('TagResolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        createTag: {
-          tag: null,
-          errors: [{ message: 'Tag already exists', field: 'text' }],
-        },
+        createTag: null,
       },
+      errors: [{ message: errorStrings.tag.duplicate }],
     });
   });
 
@@ -232,14 +205,12 @@ describe('TagResolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        getTags: {
-          tags: [
-            {
-              id: expect.any(Number),
-              text: tag.text,
-            },
-          ],
-        },
+        getTags: [
+          {
+            id: expect.any(Number),
+            text: tag.text,
+          },
+        ],
       },
     });
   });
@@ -260,11 +231,8 @@ describe('TagResolver', () => {
     expect(response).toMatchObject({
       data: {
         updateTag: {
-          tag: {
-            id: tag.id,
-            text: 'updated tag',
-          },
-          errors: null,
+          id: tag.id,
+          text: 'updated tag',
         },
       },
     });
@@ -285,11 +253,9 @@ describe('TagResolver', () => {
 
     expect(response).toMatchObject({
       data: {
-        updateTag: {
-          tag: null,
-          errors: [{ message: 'Tag cannot be empty', field: 'text' }],
-        },
+        updateTag: null,
       },
+      errors: [{ message: errorStrings.tag.emptyText }],
     });
   });
 
@@ -309,4 +275,6 @@ describe('TagResolver', () => {
       },
     });
   });
+
+  it.todo('check for null error when checking for success');
 });

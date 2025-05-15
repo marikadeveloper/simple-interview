@@ -11,24 +11,22 @@ import { User, UserRole } from '../../entities/User';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { MyContext } from '../../types';
-import {
-  UserMultipleResponse,
-  UsersFilters,
-  UserSingleResponse,
-} from './user-types';
+import { errorStrings } from '../../utils/errorStrings';
+import { UsersFilters } from './user-types';
 
 @Resolver(User)
 export class UserResolver {
-  @Query(() => UserMultipleResponse, {
+  @Query(() => [User], {
     description:
       'Returns all users except the logged in user, if logged in as Interviewer only candidates are returned',
+    nullable: true,
   })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async getUsers(
     @Arg('filters', () => UsersFilters) filters: UsersFilters,
     @Ctx() { req }: MyContext,
-  ): Promise<UserMultipleResponse> {
+  ): Promise<User[] | null> {
     const userId = req.session.userId;
     const user = (await User.findOne({
       where: { id: userId },
@@ -60,25 +58,23 @@ export class UserResolver {
       });
     }
     const users = await query.getMany();
-    return { users };
+    return users;
   }
 
-  @Query(() => UserSingleResponse, { nullable: true })
+  @Query(() => User, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
-  async getUser(@Arg('id', () => Int) id: number): Promise<UserSingleResponse> {
+  async getUser(@Arg('id', () => Int) id: number): Promise<User | null> {
     const user = await User.findOne({
       where: { id },
       relations: ['interviews'],
     });
 
     if (!user) {
-      return {
-        errors: [{ field: 'id', message: 'User not found' }],
-      };
+      throw new Error(errorStrings.user.notFound);
     }
 
-    return { user };
+    return user;
   }
 
   @Mutation(() => Boolean)

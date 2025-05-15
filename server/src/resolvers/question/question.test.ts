@@ -9,6 +9,7 @@ import {
   fakeQuestionData,
 } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
+import { errorStrings } from '../../utils/errorStrings';
 
 // Track entities created during tests for reliable cleanup
 let testUsers: User[] = [];
@@ -187,6 +188,7 @@ describe('QuestionResolver', () => {
       data: {
         createQuestion: null,
       },
+      errors: [{ message: errorStrings.user.notAuthorized }],
     });
   });
 
@@ -205,6 +207,7 @@ describe('QuestionResolver', () => {
       data: {
         createQuestion: null,
       },
+      errors: [{ message: errorStrings.user.notAuthenticated }],
     });
   });
 

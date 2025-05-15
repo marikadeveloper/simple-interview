@@ -18,8 +18,8 @@ const InterviewTemplate = () => {
   const [{ data: tagsData }] = useGetTagsQuery();
   const tags = useMemo(
     () =>
-      tagsData?.getTags.tags
-        ? tagsData.getTags.tags.map((t) => ({
+      tagsData?.getTags
+        ? tagsData.getTags.map((t) => ({
             label: t.text,
             value: t.id.toString(),
           }))
@@ -31,11 +31,11 @@ const InterviewTemplate = () => {
     return <div>Loading...</div>;
   }
 
-  if (!data?.getInterviewTemplate?.interviewTemplate || !id) {
+  if (!data?.getInterviewTemplate || !id) {
     return <div>No template found</div>;
   }
 
-  const interviewTemplate = data.getInterviewTemplate.interviewTemplate;
+  const interviewTemplate = data.getInterviewTemplate;
   return (
     <div className='container mx-auto'>
       <div className='flex align-top justify-between'>

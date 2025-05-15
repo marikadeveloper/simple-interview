@@ -26,10 +26,7 @@ export const AdminInterviews = () => {
       <div className='py-8'>
         <DataTable
           columns={columns}
-          data={
-            (data?.getInterviews.interviews as InterviewListItemFragment[]) ||
-            []
-          }
+          data={(data?.getInterviews as InterviewListItemFragment[]) || []}
         />
       </div>
     </div>

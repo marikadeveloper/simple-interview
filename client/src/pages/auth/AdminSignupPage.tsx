@@ -27,14 +27,8 @@ export default function AdminSignupPage() {
         input: { email, password, fullName },
       });
 
-      if (result.data?.adminRegister.user) {
+      if (result.data?.adminRegister) {
         navigate('/dashboard');
-      } else {
-        const newErrors: { [key: string]: string } = {};
-        result.data?.adminRegister.errors?.forEach((error) => {
-          newErrors[error.field] = error.message;
-        });
-        setErrors(newErrors);
       }
     } catch (error) {
       setErrors({ general: 'An unexpected error occurred' });

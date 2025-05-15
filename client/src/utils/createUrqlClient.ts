@@ -97,7 +97,7 @@ export const createUrqlClient = () => {
                 cache,
                 { query: MeDocument },
                 _result,
-                () => ({ me: { user: null } }),
+                () => ({ me: null }),
               );
               // delete other cache
               invalidateAll(cache, 'getUsers');
@@ -109,13 +109,11 @@ export const createUrqlClient = () => {
                 { query: MeDocument },
                 _result,
                 (result, query) => {
-                  if (result.login.errors) {
+                  if (!result.login) {
                     return query;
                   } else {
                     return {
-                      me: {
-                        user: result.login.user,
-                      },
+                      me: result.login,
                     };
                   }
                 },

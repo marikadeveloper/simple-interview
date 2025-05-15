@@ -46,14 +46,8 @@ export default function CandidateSignupPage() {
         input: { email, password, fullName },
       });
 
-      if (result.data?.candidateRegister.user) {
+      if (result.data?.candidateRegister) {
         navigate('/dashboard');
-      } else {
-        const newErrors: { [key: string]: string } = {};
-        result.data?.candidateRegister.errors?.forEach((error) => {
-          newErrors[error.field] = error.message;
-        });
-        setErrors(newErrors);
       }
     } catch (error) {
       setErrors({ general: 'An unexpected error occurred' });

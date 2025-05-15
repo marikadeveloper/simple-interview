@@ -11,6 +11,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -51,7 +52,9 @@ export const CreateInterviewDialog: React.FC<
   CreateInterviewDialogProps
 > = ({}) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [{ data: interviewTemplatesData }] = useGetInterviewTemplatesQuery();
+  const [{ data: interviewTemplatesData }] = useGetInterviewTemplatesQuery({
+    pause: !isOpen,
+  });
   const [{ data: candidatesData }] = useGetUsersQuery({
     variables: {
       filters: {
@@ -102,6 +105,9 @@ export const CreateInterviewDialog: React.FC<
         <DialogContent className='sm:max-w-[525px]'>
           <DialogHeader>
             <DialogTitle>Create Interview</DialogTitle>
+            <DialogDescription>
+              Create a new interview for a candidate.
+            </DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form

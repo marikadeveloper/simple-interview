@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -9,9 +10,10 @@ import {
 } from '@/components/ui/dialog';
 import {
   InterviewListItemFragment,
+  InterviewStatus,
   useDeleteInterviewMutation,
 } from '@/generated/graphql';
-import { Trash } from 'lucide-react';
+import { AlertCircle, Trash } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface DeleteInterviewConfirmationDialogProps {
@@ -22,11 +24,22 @@ export const DeleteInterviewConfirmationDialog: React.FC<
 > = ({ interview }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [, deleteInterview] = useDeleteInterviewMutation();
+  const canDelete: boolean = interview.status === InterviewStatus.Pending;
 
   const handleDelete = async () => {
     await deleteInterview({ id: interview.id });
     setIsOpen(false);
   };
+
+  const Fallback = () => (
+    <Alert variant='destructive'>
+      <AlertCircle className='h-4 w-4' />
+      <AlertTitle>Attention</AlertTitle>
+      <AlertDescription>
+        You can only delete interviews that are pending.
+      </AlertDescription>
+    </Alert>
+  );
 
   return (
     <>
@@ -47,6 +60,7 @@ export const DeleteInterviewConfirmationDialog: React.FC<
               {interview.user.fullName} @ {interview.interviewTemplate.name}"?
               This action cannot be undone.
             </DialogDescription>
+            {!canDelete && <Fallback />}
           </DialogHeader>
           <DialogFooter>
             <Button
@@ -55,12 +69,14 @@ export const DeleteInterviewConfirmationDialog: React.FC<
               onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <Button
-              type='button'
-              variant='destructive'
-              onClick={() => interview && handleDelete()}>
-              Delete
-            </Button>
+            {canDelete && (
+              <Button
+                type='button'
+                variant='destructive'
+                onClick={() => interview && handleDelete()}>
+                Delete
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

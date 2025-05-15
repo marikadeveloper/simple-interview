@@ -1,0 +1,3 @@
+mutation DeleteInterview($id: Int!) {
+  deleteInterview(id: $id)
+}

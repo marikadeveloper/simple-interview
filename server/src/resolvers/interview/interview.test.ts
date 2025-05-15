@@ -160,6 +160,12 @@ const confirmInterviewCompletionMutation = `
   }
 `;
 
+const deleteInterviewMutation = `
+  mutation DeleteInterview($id: Int!) {
+    deleteInterview(id: $id)
+  }
+`;
+
 const createInterview = async (
   interviewTemplateId: number,
   candidateId: number,
@@ -423,7 +429,7 @@ describe('Interview Resolver', () => {
     });
   });
 
-  it('should automatically set the status to "expired" if the deadline is in the past', async () => {
+  it('should automatically set the status to "EXPIRED" if the deadline is in the past', async () => {
     const pastDeadline = new Date(
       Date.now() - 24 * 60 * 60 * 1000,
     ).toISOString(); // 1 day in the past
@@ -509,14 +515,14 @@ describe('Interview Resolver', () => {
     await answer.remove();
   });
 
-  it('should return "completed" status if the candidate has marked the interview as completed', async () => {
+  it('should return "COMPLETED" status if the candidate has marked the interview as COMPLETED', async () => {
     const interviewCandidate = await createInterview(
       interviewTemplateId,
       candidateUser.id,
     );
     testInterviews.push(interviewCandidate);
 
-    // Mark the interview as completed
+    // Mark the interview as COMPLETED
     await graphqlCall({
       source: confirmInterviewCompletionMutation,
       variableValues: {
@@ -617,6 +623,62 @@ describe('Interview Resolver', () => {
           ],
         },
       },
+    });
+  });
+
+  it('admins and interviewers should be able to delete an interview', async () => {
+    const interviewCandidate = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+    );
+
+    const response = await graphqlCall({
+      source: deleteInterviewMutation,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        deleteInterview: true,
+      },
+    });
+  });
+
+  it('admins and interviewers should not be able to delete an interview that is not in PENDING status', async () => {
+    const interviewCandidate = await createInterview(
+      interviewTemplateId,
+      candidateUser.id,
+    );
+    testInterviews.push(interviewCandidate);
+
+    // Mark the interview as COMPLETED
+    await graphqlCall({
+      source: confirmInterviewCompletionMutation,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: candidateUser.id,
+    });
+
+    const response = await graphqlCall({
+      source: deleteInterviewMutation,
+      variableValues: {
+        id: interviewCandidate.id,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: null,
+      errors: [
+        {
+          message:
+            'You can only delete interviews that are in the PENDING status',
+        },
+      ],
     });
   });
 });

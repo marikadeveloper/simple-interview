@@ -155,6 +155,7 @@ export type Mutation = {
   createInterviewTemplate: InterviewTemplateSingleResponse;
   createQuestion: QuestionSingleResponse;
   createTag: TagSingleResponse;
+  deleteInterview: Scalars['Boolean']['output'];
   deleteInterviewTemplate: Scalars['Boolean']['output'];
   deleteQuestion: Scalars['Boolean']['output'];
   deleteTag: Scalars['Boolean']['output'];
@@ -214,6 +215,11 @@ export type MutationCreateQuestionArgs = {
 
 export type MutationCreateTagArgs = {
   text: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteInterviewArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -493,6 +499,13 @@ export type CreateTagMutationVariables = Exact<{
 
 
 export type CreateTagMutation = { __typename?: 'Mutation', createTag: { __typename?: 'TagSingleResponse', tag?: { __typename?: 'Tag', id: number, text: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+
+export type DeleteInterviewMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteInterviewMutation = { __typename?: 'Mutation', deleteInterview: boolean };
 
 export type DeleteInterviewTemplateMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -810,6 +823,15 @@ ${ErrorFragmentDoc}`;
 
 export function useCreateTagMutation() {
   return Urql.useMutation<CreateTagMutation, CreateTagMutationVariables>(CreateTagDocument);
+};
+export const DeleteInterviewDocument = gql`
+    mutation DeleteInterview($id: Int!) {
+  deleteInterview(id: $id)
+}
+    `;
+
+export function useDeleteInterviewMutation() {
+  return Urql.useMutation<DeleteInterviewMutation, DeleteInterviewMutationVariables>(DeleteInterviewDocument);
 };
 export const DeleteInterviewTemplateDocument = gql`
     mutation DeleteInterviewTemplate($id: Int!) {

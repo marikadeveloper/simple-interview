@@ -14,10 +14,10 @@ import { InterviewTemplate } from './InterviewTemplate';
 import { User } from './User';
 
 export enum InterviewStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  EXPIRED = 'expired',
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  EXPIRED = 'EXPIRED',
 }
 // Register the enum with Type-GraphQL
 registerEnumType(InterviewStatus, {

@@ -52,4 +52,9 @@ export const columns: ColumnDef<InterviewListItemFragment>[] = [
       );
     },
   },
+  {
+    id: 'actions',
+    enableHiding: false,
+    cell: ({ row }) => <InterviewActions interview={row.original} />,
+  },
 ];

@@ -29,7 +29,7 @@ export class InterviewResolver {
     if (interview.status === InterviewStatus.COMPLETED) {
       return InterviewStatus.COMPLETED;
     }
-    // Expired
+    // EXPIRED
     const now = new Date();
     const deadline = new Date(interview.deadline);
     if (deadline < now) {
@@ -117,6 +117,7 @@ export class InterviewResolver {
       interviewTemplate: { id: interviewTemplateId },
       user: { id: candidateId },
       deadline,
+      status: InterviewStatus.PENDING,
     }).save();
 
     return { interview };
@@ -223,6 +224,30 @@ export class InterviewResolver {
 
     interview.status = InterviewStatus.COMPLETED;
     await interview.save();
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async deleteInterview(@Arg('id', () => Int) id: number) {
+    // Check if the interview exists
+    const interview = await Interview.findOne({
+      where: { id },
+    });
+
+    if (!interview) {
+      throw new Error('Interview not found');
+    }
+
+    if (interview.status !== InterviewStatus.PENDING) {
+      throw new Error(
+        'You can only delete interviews that are in the PENDING status',
+      );
+    }
+
+    await Interview.delete({ id });
 
     return true;
   }

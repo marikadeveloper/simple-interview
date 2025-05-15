@@ -1,6 +1,6 @@
 import { UserFragment } from '@/generated/graphql';
 import React from 'react';
-import { DeleteUserConfirmationDialog } from './DeleteTemplateConfirmationDialog';
+import { DeleteUserConfirmationDialog } from './DeleteUserConfirmationDialog';
 
 interface UserActionsProps {
   user: UserFragment;

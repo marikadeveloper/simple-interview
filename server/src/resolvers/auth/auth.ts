@@ -11,7 +11,7 @@ export class AuthResolver {
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req }: MyContext): Promise<User | null> {
     if (!req.session.userId) {
-      throw new Error(errorStrings.user.notAuthenticated);
+      return null;
     }
     const user = await User.findOne({ where: { id: req.session.userId } });
 

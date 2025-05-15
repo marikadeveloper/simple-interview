@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [{ data, fetching }] = useMeQuery();
+  const [{ data, fetching, error }] = useMeQuery();
   const [, loginMutation] = useLoginMutation();
   const [, logoutMutation] = useLogoutMutation();
   const navigate = useNavigate();

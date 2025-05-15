@@ -5,6 +5,7 @@ import {
   UserFragment,
 } from '@/generated/graphql';
 import { ColumnDef } from '@tanstack/react-table';
+import dayjs from 'dayjs';
 import { InterviewActions } from './components/IntreviewActions';
 
 export const columns: ColumnDef<InterviewListItemFragment>[] = [
@@ -29,6 +30,10 @@ export const columns: ColumnDef<InterviewListItemFragment>[] = [
   {
     accessorKey: 'deadline',
     header: 'Deadline',
+    cell: ({ row }) => {
+      const deadline: string = row.getValue('deadline');
+      return dayjs(deadline).format('DD/MM/YYYY');
+    },
   },
   {
     accessorKey: 'status',

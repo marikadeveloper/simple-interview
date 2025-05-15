@@ -57,7 +57,7 @@ const InterviewCard = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='grid grid-cols-[20px_1fr] items-start '>
+        <div className='grid grid-cols-[20px_1fr] items-start'>
           <InterviewCardStatusDot deadline={interview.deadline} />
           <p className='text-sm leading-none'>
             Expires {formatDateRelative(interview.deadline)}

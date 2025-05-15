@@ -22,4 +22,7 @@ export const errorStrings = {
   interview: {
     notFound: 'interview not found',
   },
+  question: {
+    notFound: 'question not found',
+  },
 };

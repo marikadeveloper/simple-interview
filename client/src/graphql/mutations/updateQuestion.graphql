@@ -1,10 +1,5 @@
 mutation UpdateQuestion($id: Int!, $input: QuestionInput!) {
   updateQuestion(id: $id, input: $input) {
-    question {
-      ...Question
-    }
-    errors {
-      ...Error
-    }
+    ...Question
   }
 }

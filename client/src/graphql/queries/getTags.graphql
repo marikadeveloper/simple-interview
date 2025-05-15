@@ -1,10 +1,5 @@
 query GetTags {
   getTags {
-    tags {
-      ...Tag
-    }
-    errors {
-      ...Error
-    }
+    ...Tag
   }
 }

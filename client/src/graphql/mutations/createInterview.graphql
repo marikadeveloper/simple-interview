@@ -1,11 +1,5 @@
 mutation CreateInterview($input: InterviewInput!) {
   createInterview(input: $input) {
-    interview {
-      id
-    }
-    errors {
-      field
-      message
-    }
+    id
   }
 }

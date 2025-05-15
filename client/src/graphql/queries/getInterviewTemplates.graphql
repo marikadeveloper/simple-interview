@@ -1,7 +1,5 @@
 query GetInterviewTemplates($tagsIds: [Int!]) {
   getInterviewTemplates(tagsIds: $tagsIds) {
-    interviewTemplates {
-      ...InterviewTemplate
-    }
+    ...InterviewTemplate
   }
 }

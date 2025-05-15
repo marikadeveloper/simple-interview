@@ -1,10 +1,5 @@
 mutation CreateTag($text: String!) {
   createTag(text: $text) {
-    tag {
-      ...Tag
-    }
-    errors {
-      ...Error
-    }
+    ...Tag
   }
 }

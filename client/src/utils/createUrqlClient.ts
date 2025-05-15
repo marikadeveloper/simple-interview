@@ -86,12 +86,6 @@ export const createUrqlClient = () => {
       cacheExchange({
         keys: {
           Tag: () => null,
-          AuthResponse: () => null,
-          UserMultipleResponse: () => null,
-          InterviewTemplateSingleResponse: () => null,
-          InterviewTemplateMultipleResponse: () => null,
-          TagSingleResponse: () => null,
-          TagMultipleResponse: () => null,
         },
         resolvers: {
           Query: {},

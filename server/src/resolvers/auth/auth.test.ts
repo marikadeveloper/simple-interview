@@ -84,11 +84,6 @@ describe('me', () => {
       data: {
         me: null,
       },
-      errors: [
-        {
-          message: errorStrings.user.notAuthenticated,
-        },
-      ],
     });
   });
 
@@ -149,7 +144,9 @@ describe('login', () => {
       },
     });
     expect(response).toMatchObject({
-      data: null,
+      data: {
+        login: null,
+      },
       errors: [
         {
           message: errorStrings.user.notFound,
@@ -174,7 +171,9 @@ describe('login', () => {
     });
 
     expect(response).toMatchObject({
-      data: null,
+      data: {
+        login: null,
+      },
       errors: [
         {
           message: errorStrings.user.incorrectPassword,

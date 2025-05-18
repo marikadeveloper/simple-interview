@@ -4,10 +4,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import session from 'express-session';
-import Redis from 'ioredis';
 import 'reflect-metadata';
-import { BaseEntity, DataSource } from 'typeorm'; // Import BaseEntity
-import { __prod__, COOKIE_NAME } from './constants';
+import { BaseEntity, DataSource } from 'typeorm';
+import { closeRedis, initRedis, redis, redisClient } from './config/redis';
+import { COOKIE_NAME } from './constants';
 import { testConn } from './test-utils/testConn';
 import { createSchema } from './utils/createSchema';
 import { prodConn } from './utils/prodConn';
@@ -17,7 +17,6 @@ dotenv.config(); // Load environment variables from .env file
 export let dataSource: DataSource;
 export let app: express.Application;
 export let server: any; // Express server
-export let redis: Redis;
 
 // Initialize database connection (without starting HTTP server)
 export const initializeDatabase = async () => {
@@ -46,6 +45,9 @@ export const setupServer = async () => {
   // Initialize database first
   await initializeDatabase();
 
+  // Initialize Redis
+  await initRedis();
+
   // Create apollo server with schema
   const apolloServer = new ApolloServer({
     schema: await createSchema(),
@@ -61,10 +63,9 @@ export const setupServer = async () => {
   app = express();
   app.set('trust proxy', 1);
 
-  // create redis client
-  redis = new Redis();
+  // create redis store for sessions
   let redisStore = new RedisStore({
-    client: redis,
+    client: redisClient,
     disableTouch: true,
   });
 
@@ -86,8 +87,9 @@ export const setupServer = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
         httpOnly: true, // recommended: prevent client-side JS from accessing cookie
-        secure: __prod__, // set to true if using https
+        secure: false, // set to false for development and Docker
         sameSite: 'lax', // CSRF protection
+        domain: process.env.COOKIE_DOMAIN || undefined, // allow setting domain if needed
       },
       secret: process.env.REDIS_SECRET as string, // Use environment variable
     }),
@@ -105,8 +107,9 @@ export const setupServer = async () => {
 // Start the server function - only called when running directly
 export const startServer = async () => {
   const { app } = await setupServer();
-  server = app.listen(4000, () => {
-    console.log('server started on localhost:4000');
+  const port = process.env.PORT || 3000;
+  server = app.listen(port, () => {
+    console.log(`server started on port ${port}`);
   });
   return server;
 };
@@ -115,9 +118,21 @@ export const startServer = async () => {
 export const closeServer = async () => {
   if (server) {
     return new Promise<void>((resolve) => {
-      server.close(() => {
+      server.close(async () => {
         console.log('Server closed');
-        resolve();
+        try {
+          // Close Redis connections first
+          await closeRedis();
+          // Then close database connection
+          if (dataSource.isInitialized) {
+            await dataSource.destroy();
+          }
+          console.log('All connections closed successfully');
+        } catch (error) {
+          console.log('Cleanup completed with some non-critical errors');
+        } finally {
+          resolve();
+        }
       });
     });
   }

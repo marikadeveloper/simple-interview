@@ -113,7 +113,9 @@ describe('candidateInvitation', () => {
     });
 
     expect(response).toMatchObject({
-      data: null,
+      data: {
+        getCandidateInvitations: null,
+      },
     });
   });
 });

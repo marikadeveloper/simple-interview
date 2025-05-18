@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from 'type-graphql';
+import { Field, Int, ObjectType, registerEnumType } from 'type-graphql';
 import {
   BaseEntity,
   Column,
@@ -21,6 +21,11 @@ export enum KeystrokeType {
   REPLACE = 'replace',
 }
 
+registerEnumType(KeystrokeType, {
+  name: 'KeystrokeType',
+  description: 'Keystroke type enumeration',
+});
+
 @ObjectType()
 @Entity()
 export class Keystroke extends BaseEntity {
@@ -28,7 +33,7 @@ export class Keystroke extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field(() => String)
+  @Field(() => KeystrokeType)
   @Column({
     type: 'enum',
     enum: KeystrokeType,

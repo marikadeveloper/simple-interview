@@ -33,7 +33,7 @@ export class KeystrokeRecorder {
     if (!this.isRecording) return;
 
     this.addKeystroke({
-      type: KeystrokeType.INSERT,
+      type: KeystrokeType.Insert,
       position,
       value: text,
       relativeTimestamp: this.getCurrentRelativeTime(),
@@ -44,7 +44,7 @@ export class KeystrokeRecorder {
     if (!this.isRecording) return;
 
     this.addKeystroke({
-      type: KeystrokeType.DELETE,
+      type: KeystrokeType.Delete,
       position,
       length,
       relativeTimestamp: this.getCurrentRelativeTime(),
@@ -55,7 +55,7 @@ export class KeystrokeRecorder {
     if (!this.isRecording) return;
 
     this.addKeystroke({
-      type: KeystrokeType.REPLACE,
+      type: KeystrokeType.Replace,
       position,
       length,
       value: text,
@@ -94,7 +94,7 @@ export function reconstructText(keystrokes: KeystrokeInput[]): string {
 
   for (const keystroke of sortedKeystrokes) {
     switch (keystroke.type) {
-      case KeystrokeType.INSERT: {
+      case KeystrokeType.Insert: {
         if (keystroke.value) {
           if (keystroke.position > text.length) {
             text = text.padEnd(keystroke.position, ' ') + keystroke.value;
@@ -107,7 +107,7 @@ export function reconstructText(keystrokes: KeystrokeInput[]): string {
         }
         break;
       }
-      case KeystrokeType.DELETE: {
+      case KeystrokeType.Delete: {
         const length = keystroke.length || 0;
         if (keystroke.position < text.length) {
           text =
@@ -116,7 +116,7 @@ export function reconstructText(keystrokes: KeystrokeInput[]): string {
         }
         break;
       }
-      case KeystrokeType.REPLACE: {
+      case KeystrokeType.Replace: {
         const length = keystroke.length || 0;
         if (keystroke.position <= text.length) {
           text =

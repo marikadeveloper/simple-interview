@@ -77,7 +77,7 @@ export const createUrqlClient = () => {
   let cookie = '';
 
   return {
-    url: 'http://localhost:4000/graphql',
+    url: import.meta.env.VITE_API_URL || 'http://localhost:3000/graphql',
     fetchOptions: {
       credentials: 'include' as const,
       headers: cookie ? { cookie } : undefined,

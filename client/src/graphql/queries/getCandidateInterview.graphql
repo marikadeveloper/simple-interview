@@ -1,0 +1,5 @@
+query GetCandidateInterview($id: Int!) {
+  getCandidateInterview(id: $id) {
+    ...CandidateInterview
+  }
+}

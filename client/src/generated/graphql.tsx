@@ -388,7 +388,11 @@ export type UsersFilters = {
   role?: InputMaybe<UserRole>;
 };
 
+export type AnswerFragment = { __typename?: 'Answer', id: number, text: string };
+
 export type InterviewListItemFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } };
+
+export type CandidateInterviewFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string }> | null };
 
 export type InterviewTemplateFragment = { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null };
 
@@ -552,6 +556,13 @@ export type UpdateTagMutationVariables = Exact<{
 
 export type UpdateTagMutation = { __typename?: 'Mutation', updateTag?: { __typename?: 'Tag', id: number, text: string } | null };
 
+export type GetCandidateInterviewQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type GetCandidateInterviewQuery = { __typename?: 'Query', getCandidateInterview?: { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string }> | null } | null };
+
 export type GetCandidateInvitationsQueryVariables = Exact<{
   used?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
@@ -668,6 +679,30 @@ export const InterviewTemplateWithQuestionsFragmentDoc = gql`
 }
     ${InterviewTemplateFragmentDoc}
 ${QuestionFragmentDoc}`;
+export const AnswerFragmentDoc = gql`
+    fragment Answer on Answer {
+  id
+  text
+}
+    `;
+export const CandidateInterviewFragmentDoc = gql`
+    fragment CandidateInterview on Interview {
+  id
+  interviewTemplate {
+    ...InterviewTemplateWithQuestions
+  }
+  user {
+    ...User
+  }
+  deadline
+  status
+  answers {
+    ...Answer
+  }
+}
+    ${InterviewTemplateWithQuestionsFragmentDoc}
+${UserFragmentDoc}
+${AnswerFragmentDoc}`;
 export const QuestionWithInterviewTemplateFragmentDoc = gql`
     fragment QuestionWithInterviewTemplate on Question {
   id
@@ -892,6 +927,17 @@ export const UpdateTagDocument = gql`
 
 export function useUpdateTagMutation() {
   return Urql.useMutation<UpdateTagMutation, UpdateTagMutationVariables>(UpdateTagDocument);
+};
+export const GetCandidateInterviewDocument = gql`
+    query GetCandidateInterview($id: Int!) {
+  getCandidateInterview(id: $id) {
+    ...CandidateInterview
+  }
+}
+    ${CandidateInterviewFragmentDoc}`;
+
+export function useGetCandidateInterviewQuery(options: Omit<Urql.UseQueryArgs<GetCandidateInterviewQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetCandidateInterviewQuery, GetCandidateInterviewQueryVariables>({ query: GetCandidateInterviewDocument, ...options });
 };
 export const GetCandidateInvitationsDocument = gql`
     query GetCandidateInvitations($used: Boolean) {

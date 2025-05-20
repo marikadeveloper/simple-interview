@@ -1,0 +1,4 @@
+fragment Answer on Answer {
+  id
+  text
+}

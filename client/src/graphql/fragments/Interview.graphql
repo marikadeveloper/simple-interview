@@ -9,3 +9,18 @@ fragment InterviewListItem on Interview {
   deadline
   status
 }
+
+fragment CandidateInterview on Interview {
+  id
+  interviewTemplate {
+    ...InterviewTemplateWithQuestions
+  }
+  user {
+    ...User
+  }
+  deadline
+  status
+  answers {
+    ...Answer
+  }
+}

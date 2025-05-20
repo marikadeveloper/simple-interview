@@ -1,4 +1,7 @@
-import { useGetCandidateInterviewQuery } from '@/generated/graphql';
+import {
+  CandidateInterviewFragment,
+  useGetCandidateInterviewQuery,
+} from '@/generated/graphql';
 import { useParams } from 'react-router';
 
 const Interview = () => {
@@ -8,7 +11,10 @@ const Interview = () => {
   });
 
   if (fetching) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (error || !data) return <div>Error: {error?.message}</div>;
+  if (!data.getCandidateInterview) return <div>Interview not found</div>;
+
+  const interview: CandidateInterviewFragment = data.getCandidateInterview;
 
   return <div>Interview {id}</div>;
 };

@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { UserRole } from './generated/graphql';
+import Interview from './pages/interview';
 
 const AdminSignupPage = lazy(() => import('./pages/auth/AdminSignupPage'));
 const CandidateSignupPage = lazy(
@@ -78,6 +79,14 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Interviews />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/interviews/:id'
+          element={
+            <ProtectedRoute>
+              <Interview />
             </ProtectedRoute>
           }
         />

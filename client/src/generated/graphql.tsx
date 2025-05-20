@@ -96,7 +96,7 @@ export type Keystroke = {
   position: Scalars['Int']['output'];
   relativeTimestamp: Scalars['Int']['output'];
   timestamp: Scalars['String']['output'];
-  type: Scalars['String']['output'];
+  type: KeystrokeType;
   value?: Maybe<Scalars['String']['output']>;
 };
 
@@ -107,6 +107,13 @@ export type KeystrokeInput = {
   type: Scalars['String']['input'];
   value?: InputMaybe<Scalars['String']['input']>;
 };
+
+/** Keystroke type enumeration */
+export enum KeystrokeType {
+  Delete = 'DELETE',
+  Insert = 'INSERT',
+  Replace = 'REPLACE'
+}
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -576,7 +583,7 @@ export type GetKeystrokesQueryVariables = Exact<{
 }>;
 
 
-export type GetKeystrokesQuery = { __typename?: 'Query', getKeystrokes?: Array<{ __typename?: 'Keystroke', id: number, type: string, value?: string | null, position: number, length?: number | null, timestamp: string, relativeTimestamp: number }> | null };
+export type GetKeystrokesQuery = { __typename?: 'Query', getKeystrokes?: Array<{ __typename?: 'Keystroke', id: number, type: KeystrokeType, value?: string | null, position: number, length?: number | null, timestamp: string, relativeTimestamp: number }> | null };
 
 export type GetQuestionsQueryVariables = Exact<{
   interviewTemplateId: Scalars['Int']['input'];

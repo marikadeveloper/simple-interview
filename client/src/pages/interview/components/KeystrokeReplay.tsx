@@ -22,7 +22,8 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   const [currentText, setCurrentText] = useState(initialText);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0); // 0-100%
-  const [currentKeystrokeIndex, setCurrentKeystrokeIndex] = useState(-1);
+  // const [currentKeystrokeIndex, setCurrentKeystrokeIndex] = useState(-1);
+  const [_, setCurrentKeystrokeIndex] = useState(-1);
 
   const replayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sortedKeystrokes = useRef<Keystroke[]>([]);
@@ -84,7 +85,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
       setCurrentKeystrokeIndex(index);
 
       // Apply keystroke to build the text
-      setCurrentText((prevText) => {
+      setCurrentText(() => {
         const keystrokes = sortedKeystrokes.current.slice(0, index + 1);
         return reconstructText(keystrokes);
       });
@@ -195,7 +196,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
               Speed:
               <select
                 value={speed}
-                onChange={(e) => {
+                onChange={() => {
                   const wasPlaying = isPlaying;
                   pause();
                   // Update speed logic would go here

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { KeystrokeInput } from '../../../generated/graphql';
 import { useKeystrokeRecorder } from '../../../hooks/useKeystrokeRecorder';
 
@@ -27,19 +27,19 @@ export const KeystrokeRecordingTextarea: React.FC<
   disabled = false,
   autoFocus = false,
   rows = 5,
-  answerId,
+  // answerId,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastValueRef = useRef<string>(value);
   const selectionStartRef = useRef<number>(0);
 
   const {
-    isRecording,
-    startRecording,
-    stopRecording,
+    // isRecording,
+    // startRecording,
+    // stopRecording,
     handleInsert,
     handleDelete,
-    handleReplace,
+    // handleReplace,
     getAllKeystrokes,
   } = useKeystrokeRecorder({
     onBatchComplete: onKeystrokesBatchComplete,
@@ -89,14 +89,14 @@ export const KeystrokeRecordingTextarea: React.FC<
   }, [onSaveKeystrokes, getAllKeystrokes]);
 
   // Method to manually save collected keystrokes
-  const saveKeystrokes = useCallback(() => {
-    if (onSaveKeystrokes) {
-      const keystrokes = getAllKeystrokes();
-      if (keystrokes.length > 0) {
-        onSaveKeystrokes(keystrokes);
-      }
-    }
-  }, [onSaveKeystrokes, getAllKeystrokes]);
+  // const saveKeystrokes = useCallback(() => {
+  //   if (onSaveKeystrokes) {
+  //     const keystrokes = getAllKeystrokes();
+  //     if (keystrokes.length > 0) {
+  //       onSaveKeystrokes(keystrokes);
+  //     }
+  //   }
+  // }, [onSaveKeystrokes, getAllKeystrokes]);
 
   return (
     <textarea

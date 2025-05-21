@@ -1,5 +1,9 @@
 import { Textarea } from '@/components/ui/textarea';
-import { KeystrokeInput, QuestionFragment } from '@/generated/graphql';
+import {
+  KeystrokeInput,
+  KeystrokeType,
+  QuestionFragment,
+} from '@/generated/graphql';
 import { useEffect, useRef, useState } from 'react';
 
 interface QuestionCardProps {
@@ -59,7 +63,7 @@ const KeystrokeRecordingTextarea = ({
     if (e.key === 'Backspace' || e.key === 'Delete') {
       const length = e.key === 'Backspace' ? 1 : 1;
       const newKeystroke: KeystrokeInput = {
-        type: 'DELETE',
+        type: KeystrokeType.Delete,
         position,
         length,
         relativeTimestamp,
@@ -74,7 +78,7 @@ const KeystrokeRecordingTextarea = ({
     // Handle regular character input
     if (e.key.length === 1) {
       const newKeystroke: KeystrokeInput = {
-        type: 'INSERT',
+        type: KeystrokeType.Insert,
         position,
         value: e.key,
         relativeTimestamp,

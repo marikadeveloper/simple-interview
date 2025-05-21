@@ -51,5 +51,8 @@ const KeystrokeRecordingTextarea = ({
     keystrokesOutput(keystrokes);
   }, [keystrokes]);
 
+  // TODO: record keystrokes and convert them into KeystrokeInput[]
+  // TODO: output also the text as it is typed
+
   return <Textarea />;
 };

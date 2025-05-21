@@ -1,23 +1,16 @@
-import {
-  CandidateInterviewFragment,
-  useGetCandidateInterviewQuery,
-} from '@/generated/graphql';
-import { useParams } from 'react-router';
-import { InterviewSession } from './components/InterviewSession';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/generated/graphql';
+import { CandidateInterview } from './variants/CandidateInterview';
+import { ReadonlyInterview } from './variants/ReadonlyInterview';
 
 const Interview = () => {
-  const { id } = useParams();
-  const [{ data, fetching, error }] = useGetCandidateInterviewQuery({
-    variables: { id: parseInt(id as string) },
-  });
+  const { user } = useAuth();
 
-  if (fetching) return <div>Loading...</div>;
-  if (error || !data) return <div>Error: {error?.message}</div>;
-  if (!data.getCandidateInterview) return <div>Interview not found</div>;
+  if (user?.role === UserRole.Candidate) {
+    return <CandidateInterview />;
+  }
 
-  const interview: CandidateInterviewFragment = data.getCandidateInterview;
-
-  return <InterviewSession interview={interview} />;
+  return <ReadonlyInterview />;
 };
 
 export default Interview;

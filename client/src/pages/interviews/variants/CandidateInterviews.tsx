@@ -78,21 +78,25 @@ const InterviewCard = ({
           {interview.interviewTemplate.description}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className='grid grid-cols-[20px_1fr] items-start'>
-          <InterviewCardStatusDot deadline={interview.deadline} />
-          <p className='text-sm leading-none'>
-            Expires {formatDateRelative(interview.deadline)}
-          </p>
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Link
-          className='w-full'
-          to={`/interviews/${interview.id}`}>
-          <Button className='w-full'>Take the interview</Button>
-        </Link>
-      </CardFooter>
+      {interview.status !== InterviewStatus.Completed && (
+        <>
+          <CardContent>
+            <div className='grid grid-cols-[20px_1fr] items-start'>
+              <InterviewCardStatusDot deadline={interview.deadline} />
+              <p className='text-sm leading-none'>
+                Expires {formatDateRelative(interview.deadline)}
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Link
+              className='w-full'
+              to={`/interviews/${interview.id}`}>
+              <Button className='w-full'>Take the interview</Button>
+            </Link>
+          </CardFooter>
+        </>
+      )}
     </Card>
   );
 };

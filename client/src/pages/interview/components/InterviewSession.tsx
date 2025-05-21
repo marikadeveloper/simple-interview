@@ -32,6 +32,9 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
 
   const handleAnswerChange = useCallback(
     (questionId: number, text: string, keystrokes: KeystrokeInput[]) => {
+      console.log('🚀 ~ InterviewSession ~ keystrokes:', keystrokes);
+      console.log('🚀 ~ InterviewSession ~ text:', text);
+
       setAnswers((prev) => ({
         ...prev,
         [questionId]: { text, keystrokes },

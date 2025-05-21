@@ -1,4 +1,7 @@
 fragment Answer on Answer {
   id
   text
+  question {
+    id
+  }
 }

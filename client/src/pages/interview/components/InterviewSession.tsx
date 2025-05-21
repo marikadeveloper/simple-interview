@@ -15,7 +15,17 @@ interface InterviewSessionProps {
 
 export const InterviewSession = ({ interview }: InterviewSessionProps) => {
   const navigate = useNavigate();
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  // start from the first question that does not have any answer
+  const lastQuestionWithNoAnswer =
+    interview.interviewTemplate.questions.findIndex(
+      (question) =>
+        !interview.answers?.some(
+          (answer) => answer.question.id === question.id,
+        ),
+    );
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
+    lastQuestionWithNoAnswer,
+  );
   const [answers, setAnswers] = useState<
     Record<number, { text: string; keystrokes: KeystrokeInput[] }>
   >({});
@@ -26,15 +36,11 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
 
   const currentQuestion =
     interview.interviewTemplate.questions[currentQuestionIndex];
-  // TODO: start from the first question that does not have any answer
   const isLastQuestion =
     currentQuestionIndex === interview.interviewTemplate.questions.length - 1;
 
   const handleAnswerChange = useCallback(
     (questionId: number, text: string, keystrokes: KeystrokeInput[]) => {
-      console.log('🚀 ~ InterviewSession ~ keystrokes:', keystrokes);
-      console.log('🚀 ~ InterviewSession ~ text:', text);
-
       setAnswers((prev) => ({
         ...prev,
         [questionId]: { text, keystrokes },

@@ -1,0 +1,3 @@
+mutation ConfirmInterviewCompletion($id: Int!) {
+  confirmInterviewCompletion(id: $id)
+}

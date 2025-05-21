@@ -45,6 +45,12 @@ export type ChangePasswordInput = {
   token: Scalars['String']['input'];
 };
 
+export type CreateAnswerInput = {
+  interviewId: Scalars['Int']['input'];
+  questionId: Scalars['Int']['input'];
+  text: Scalars['String']['input'];
+};
+
 export type Interview = {
   __typename?: 'Interview';
   answers?: Maybe<Array<Answer>>;
@@ -121,6 +127,7 @@ export type Mutation = {
   candidateRegister?: Maybe<User>;
   changePassword?: Maybe<User>;
   confirmInterviewCompletion: Scalars['Boolean']['output'];
+  createAnswer?: Maybe<Answer>;
   createCandidateInvitation: Scalars['Boolean']['output'];
   createInterview?: Maybe<Interview>;
   createInterviewTemplate?: Maybe<InterviewTemplate>;
@@ -161,6 +168,11 @@ export type MutationChangePasswordArgs = {
 
 export type MutationConfirmInterviewCompletionArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationCreateAnswerArgs = {
+  input: CreateAnswerInput;
 };
 
 
@@ -265,6 +277,7 @@ export type MutationUpdateTagArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  answer?: Maybe<Answer>;
   getCandidateInterview?: Maybe<Interview>;
   getCandidateInvitations?: Maybe<Array<CandidateInvitation>>;
   getInterview?: Maybe<Interview>;
@@ -278,6 +291,11 @@ export type Query = {
   /** Returns all users except the logged in user, if logged in as Interviewer only candidates are returned */
   getUsers?: Maybe<Array<User>>;
   me?: Maybe<User>;
+};
+
+
+export type QueryAnswerArgs = {
+  id: Scalars['Float']['input'];
 };
 
 
@@ -405,6 +423,20 @@ export type QuestionWithInterviewTemplateFragment = { __typename?: 'Question', i
 export type TagFragment = { __typename?: 'Tag', id: number, text: string };
 
 export type UserFragment = { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole };
+
+export type ConfirmInterviewCompletionMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type ConfirmInterviewCompletionMutation = { __typename?: 'Mutation', confirmInterviewCompletion: boolean };
+
+export type CreateAnswerMutationVariables = Exact<{
+  input: CreateAnswerInput;
+}>;
+
+
+export type CreateAnswerMutation = { __typename?: 'Mutation', createAnswer?: { __typename?: 'Answer', id: number, text: string } | null };
 
 export type CreateCandidateInvitationMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -715,6 +747,26 @@ export const QuestionWithInterviewTemplateFragmentDoc = gql`
   }
 }
     ${InterviewTemplateFragmentDoc}`;
+export const ConfirmInterviewCompletionDocument = gql`
+    mutation ConfirmInterviewCompletion($id: Int!) {
+  confirmInterviewCompletion(id: $id)
+}
+    `;
+
+export function useConfirmInterviewCompletionMutation() {
+  return Urql.useMutation<ConfirmInterviewCompletionMutation, ConfirmInterviewCompletionMutationVariables>(ConfirmInterviewCompletionDocument);
+};
+export const CreateAnswerDocument = gql`
+    mutation CreateAnswer($input: CreateAnswerInput!) {
+  createAnswer(input: $input) {
+    ...Answer
+  }
+}
+    ${AnswerFragmentDoc}`;
+
+export function useCreateAnswerMutation() {
+  return Urql.useMutation<CreateAnswerMutation, CreateAnswerMutationVariables>(CreateAnswerDocument);
+};
 export const CreateCandidateInvitationDocument = gql`
     mutation CreateCandidateInvitation($email: String!) {
   createCandidateInvitation(email: $email)

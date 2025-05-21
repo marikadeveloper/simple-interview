@@ -3,6 +3,7 @@ import {
   useGetCandidateInterviewQuery,
 } from '@/generated/graphql';
 import { useParams } from 'react-router';
+import { InterviewSession } from './components/InterviewSession';
 
 const Interview = () => {
   const { id } = useParams();
@@ -16,7 +17,7 @@ const Interview = () => {
 
   const interview: CandidateInterviewFragment = data.getCandidateInterview;
 
-  return <div>Interview {id}</div>;
+  return <InterviewSession interview={interview} />;
 };
 
 export default Interview;

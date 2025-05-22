@@ -91,6 +91,7 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
   }, [isOpen]);
 
   const handleUpdateSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!canUpdate) return;
     await updateInterview({
       id: interview.id,
       input: {
@@ -321,6 +322,7 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
       <Button
         variant='outline'
         size='icon'
+        disabled={!canUpdate}
         onClick={() => setIsOpen(true)}>
         <Pencil />
       </Button>

@@ -17,7 +17,7 @@ import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { MyContext } from '../../types';
 import { errorStrings } from '../../utils/errorStrings';
-import { InterviewInput } from './interview-types';
+import { InterviewEvaluationInput, InterviewInput } from './interview-types';
 
 @Resolver(Interview)
 export class InterviewResolver {
@@ -126,7 +126,14 @@ export class InterviewResolver {
   ): Promise<Interview | null> {
     const interview = await Interview.findOne({
       where: { id },
-      relations: ['interviewTemplate', 'user'],
+      relations: [
+        'interviewTemplate',
+        'interviewTemplate.questions',
+        'user',
+        'answers',
+        'answers.keystrokes',
+        'answers.question',
+      ],
     });
 
     if (!interview) {
@@ -270,5 +277,34 @@ export class InterviewResolver {
     );
 
     return interview;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async evaluateInterview(
+    @Arg('id', () => Int) id: number,
+    @Arg('input', () => InterviewEvaluationInput)
+    input: InterviewEvaluationInput,
+  ) {
+    const { evaluationValue, evaluationNotes } = input;
+
+    const interview = await Interview.findOne({
+      where: { id },
+    });
+
+    if (!interview) {
+      throw new Error(errorStrings.interview.notFound);
+    }
+
+    if (interview.status !== InterviewStatus.COMPLETED) {
+      throw new Error(errorStrings.interview.canNotEvaluate);
+    }
+
+    interview.evaluationValue = evaluationValue;
+    interview.evaluationNotes = evaluationNotes;
+    await interview.save();
+
+    return true;
   }
 }

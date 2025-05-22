@@ -1,0 +1,3 @@
+mutation EvaluateInterview($id: Int!, $input: InterviewEvaluationInput!) {
+  evaluateInterview(id: $id, input: $input)
+}

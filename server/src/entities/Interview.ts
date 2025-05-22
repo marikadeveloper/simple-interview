@@ -25,6 +25,17 @@ registerEnumType(InterviewStatus, {
   description: 'Interview status enumeration',
 });
 
+export enum InterviewEvaluation {
+  BAD = 'BAD',
+  GOOD = 'GOOD',
+  EXCELLENT = 'EXCELLENT',
+}
+// Register the enum with Type-GraphQL
+registerEnumType(InterviewEvaluation, {
+  name: 'InterviewEvaluation', // This is the name that will be used in the GraphQL schema
+  description: 'Interview evaluation enumeration',
+});
+
 @ObjectType()
 @Entity()
 export class Interview extends BaseEntity {
@@ -43,6 +54,14 @@ export class Interview extends BaseEntity {
   @Field(() => String)
   @Column({ type: 'date' })
   deadline!: Date;
+
+  @Field(() => InterviewEvaluation, { nullable: true })
+  @Column({ type: 'enum', enum: InterviewEvaluation, nullable: true })
+  evaluationValue?: InterviewEvaluation;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'text', nullable: true })
+  evaluationNotes?: string;
 
   @Field(() => String)
   @UpdateDateColumn({ type: 'date' })

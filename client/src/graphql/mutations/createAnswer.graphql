@@ -1,0 +1,5 @@
+mutation CreateAnswer($input: CreateAnswerInput!) {
+  createAnswer(input: $input) {
+    ...Answer
+  }
+}

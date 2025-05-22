@@ -27,6 +27,7 @@ export const DeleteInterviewConfirmationDialog: React.FC<
   const canDelete: boolean = interview.status === InterviewStatus.Pending;
 
   const handleDelete = async () => {
+    if (!canDelete) return;
     await deleteInterview({ id: interview.id });
     setIsOpen(false);
   };
@@ -46,6 +47,7 @@ export const DeleteInterviewConfirmationDialog: React.FC<
       <Button
         variant='outline'
         size='icon'
+        disabled={!canDelete}
         onClick={() => setIsOpen(true)}>
         <Trash />
       </Button>

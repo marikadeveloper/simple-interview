@@ -11,10 +11,12 @@ import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import {
   InterviewListItemFragment,
+  InterviewStatus,
   useGetInterviewsQuery,
 } from '@/generated/graphql';
 import { formatDateRelative } from '@/utils/dates';
 import dayjs from 'dayjs';
+import { Link } from 'react-router';
 
 const InterviewCardStatusDot = ({ deadline }: { deadline: string }) => {
   let color: string = 'bg-green-500';
@@ -43,6 +45,23 @@ const InterviewCardStatusDot = ({ deadline }: { deadline: string }) => {
   );
 };
 
+const InterviewStatusLabel = ({ status }: { status: InterviewStatus }) => {
+  switch (status) {
+    case InterviewStatus.Pending:
+      return (
+        <span className='text-xs bg-yellow-500/50 px-2 py-1 rounded-full'>
+          Pending
+        </span>
+      );
+    case InterviewStatus.Completed:
+      return (
+        <span className='text-xs bg-green-500/50 px-2 py-1 rounded-full'>
+          Completed
+        </span>
+      );
+  }
+};
+
 const InterviewCard = ({
   interview,
 }: {
@@ -51,22 +70,33 @@ const InterviewCard = ({
   return (
     <Card className={'w-[380px]'}>
       <CardHeader>
-        <CardTitle>{interview.interviewTemplate.name}</CardTitle>
+        <CardTitle className='flex justify-between items-center'>
+          {interview.interviewTemplate.name}
+          <InterviewStatusLabel status={interview.status} />
+        </CardTitle>
         <CardDescription>
           {interview.interviewTemplate.description}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className='grid grid-cols-[20px_1fr] items-start'>
-          <InterviewCardStatusDot deadline={interview.deadline} />
-          <p className='text-sm leading-none'>
-            Expires {formatDateRelative(interview.deadline)}
-          </p>
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button className='w-full'>Take the interview</Button>
-      </CardFooter>
+      {interview.status !== InterviewStatus.Completed && (
+        <>
+          <CardContent>
+            <div className='grid grid-cols-[20px_1fr] items-start'>
+              <InterviewCardStatusDot deadline={interview.deadline} />
+              <p className='text-sm leading-none'>
+                Expires {formatDateRelative(interview.deadline)}
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Link
+              className='w-full'
+              to={`/interviews/${interview.id}`}>
+              <Button className='w-full'>Take the interview</Button>
+            </Link>
+          </CardFooter>
+        </>
+      )}
     </Card>
   );
 };

@@ -3,7 +3,7 @@ import { KeystrokeType } from '../../entities/Keystroke';
 
 @InputType()
 export class KeystrokeInput {
-  @Field(() => String)
+  @Field(() => KeystrokeType)
   type!: KeystrokeType;
 
   @Field(() => String, { nullable: true })

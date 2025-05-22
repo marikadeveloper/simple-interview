@@ -1,0 +1,11 @@
+query GetInterviewForReplay($id: Int!) {
+  getInterview(id: $id) {
+    ...ReplayInterview
+  }
+}
+
+query GetInterviewForFeedback($id: Int!) {
+  getInterview(id: $id) {
+    ...FeedbackInterview
+  }
+}

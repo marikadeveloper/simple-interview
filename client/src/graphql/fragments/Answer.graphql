@@ -1,0 +1,16 @@
+fragment Answer on Answer {
+  id
+  text
+  question {
+    id
+    title
+    description
+  }
+}
+
+fragment AnswerWithKeystrokes on Answer {
+  ...Answer
+  keystrokes {
+    ...Keystroke
+  }
+}

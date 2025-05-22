@@ -8,4 +8,52 @@ fragment InterviewListItem on Interview {
   }
   deadline
   status
+  evaluationValue
+}
+
+fragment CandidateInterview on Interview {
+  id
+  interviewTemplate {
+    ...InterviewTemplateWithQuestions
+  }
+  user {
+    ...User
+  }
+  deadline
+  status
+  answers {
+    ...Answer
+  }
+}
+
+fragment ReplayInterview on Interview {
+  id
+  interviewTemplate {
+    ...InterviewTemplateWithQuestions
+  }
+  user {
+    ...User
+  }
+  deadline
+  status
+  answers {
+    ...AnswerWithKeystrokes
+  }
+}
+
+fragment FeedbackInterview on Interview {
+  id
+  interviewTemplate {
+    ...InterviewTemplateWithQuestions
+  }
+  user {
+    ...User
+  }
+  deadline
+  status
+  answers {
+    ...Answer
+  }
+  evaluationValue
+  evaluationNotes
 }

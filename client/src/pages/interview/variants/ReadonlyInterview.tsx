@@ -4,8 +4,8 @@ import { PageTitle } from '@/components/ui/page-title';
 import {
   AnswerWithKeystrokesFragment,
   QuestionFragment,
-  ReadonlyInterviewFragment,
-  useGetInterviewQuery,
+  ReplayInterviewFragment,
+  useGetInterviewForReplayQuery,
 } from '@/generated/graphql';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
@@ -13,7 +13,7 @@ import { KeystrokeReplay } from '../components/KeystrokeReplay';
 
 export const ReadonlyInterview = () => {
   const { id } = useParams();
-  const [{ data, fetching, error }] = useGetInterviewQuery({
+  const [{ data, fetching, error }] = useGetInterviewForReplayQuery({
     variables: { id: parseInt(id as string) },
   });
 
@@ -46,7 +46,7 @@ export const ReadonlyInterview = () => {
       </div>
     );
 
-  const interview: ReadonlyInterviewFragment = data.getInterview;
+  const interview: ReplayInterviewFragment = data.getInterview;
   const question: QuestionFragment =
     interview.interviewTemplate.questions[currentQuestionIndex];
   const answer: AnswerWithKeystrokesFragment = interview.answers?.find(
@@ -56,7 +56,7 @@ export const ReadonlyInterview = () => {
     currentQuestionIndex === interview.interviewTemplate.questions.length - 1;
 
   return (
-    <div className='container mx-auto px-4 py-8 max-w-4xl'>
+    <div className='container mx-auto px-4 py-8'>
       <div className='flex items-center justify-between mb-8'>
         <div>
           <PageTitle>

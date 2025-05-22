@@ -28,6 +28,7 @@ export const errorStrings = {
       'you can only delete interviews that are in the PENDING status',
     canNotUpdate:
       'you can only update interviews that are in the PENDING status',
+    canNotEvaluate: 'you can only evaluate interviews that are completed',
   },
   question: {
     notFound: 'question not found',

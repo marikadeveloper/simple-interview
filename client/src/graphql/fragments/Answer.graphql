@@ -3,6 +3,8 @@ fragment Answer on Answer {
   text
   question {
     id
+    title
+    description
   }
 }
 

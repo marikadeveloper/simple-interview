@@ -25,7 +25,7 @@ fragment CandidateInterview on Interview {
   }
 }
 
-fragment ReadonlyInterview on Interview {
+fragment ReplayInterview on Interview {
   id
   interviewTemplate {
     ...InterviewTemplateWithQuestions
@@ -37,5 +37,20 @@ fragment ReadonlyInterview on Interview {
   status
   answers {
     ...AnswerWithKeystrokes
+  }
+}
+
+fragment FeedbackInterview on Interview {
+  id
+  interviewTemplate {
+    ...InterviewTemplateWithQuestions
+  }
+  user {
+    ...User
+  }
+  deadline
+  status
+  answers {
+    ...Answer
   }
 }

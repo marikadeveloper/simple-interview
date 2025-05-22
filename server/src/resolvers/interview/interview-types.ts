@@ -1,4 +1,5 @@
 import { Field, InputType, Int } from 'type-graphql';
+import { InterviewEvaluation } from '../../entities/Interview';
 
 @InputType()
 export class InterviewInput {
@@ -10,4 +11,13 @@ export class InterviewInput {
 
   @Field(() => String)
   deadline: string;
+}
+
+@InputType()
+export class InterviewEvaluationInput {
+  @Field(() => InterviewEvaluation)
+  evaluationValue: InterviewEvaluation;
+
+  @Field(() => String, { nullable: true })
+  evaluationNotes?: string;
 }

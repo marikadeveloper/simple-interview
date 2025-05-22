@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ButtonWithTooltip } from '@/components/ui/button-with-tooltip';
+import { ElementWithTooltip } from '@/components/ui/element-with-tooltip';
 import {
   InterviewListItemFragment,
   InterviewStatus,
@@ -27,8 +27,8 @@ export const InterviewActions: React.FC<InterviewActionsProps> = ({
       {interview.status === InterviewStatus.Completed && (
         <>
           <Link to={`/interviews/${interview.id}`}>
-            <ButtonWithTooltip
-              Button={
+            <ElementWithTooltip
+              Element={
                 <Button
                   variant='outline'
                   size='icon'>
@@ -39,8 +39,8 @@ export const InterviewActions: React.FC<InterviewActionsProps> = ({
             />
           </Link>
           <Link to={`/interviews/${interview.id}/feedback`}>
-            <ButtonWithTooltip
-              Button={
+            <ElementWithTooltip
+              Element={
                 <Button
                   variant='outline'
                   size='icon'>

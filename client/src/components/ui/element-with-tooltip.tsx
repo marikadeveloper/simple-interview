@@ -6,17 +6,17 @@ import {
   TooltipTrigger,
 } from './tooltip';
 
-function ButtonWithTooltip({
-  Button,
+function ElementWithTooltip({
+  Element,
   tooltip,
 }: {
-  Button: JSX.Element;
+  Element: JSX.Element;
   tooltip: string;
 }) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>{Button}</TooltipTrigger>
+        <TooltipTrigger asChild>{Element}</TooltipTrigger>
         <TooltipContent>
           <p>{tooltip}</p>
         </TooltipContent>
@@ -25,4 +25,4 @@ function ButtonWithTooltip({
   );
 }
 
-export { ButtonWithTooltip };
+export { ElementWithTooltip };

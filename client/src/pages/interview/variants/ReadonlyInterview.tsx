@@ -8,7 +8,7 @@ import {
   useGetInterviewQuery,
 } from '@/generated/graphql';
 import { useState } from 'react';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { KeystrokeReplay } from '../components/KeystrokeReplay';
 
 export const ReadonlyInterview = () => {
@@ -92,17 +92,25 @@ export const ReadonlyInterview = () => {
 
         <div className='flex items-center justify-between pt-4 border-t'>
           <Button
+            variant='outline'
             onClick={previousQuestion}
             disabled={currentQuestionIndex === 0}
-            className='px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'>
+            className='disabled:opacity-50 disabled:cursor-not-allowed'>
             Previous
           </Button>
-          <Button
-            onClick={nextQuestion}
-            disabled={isLastQuestion}
-            className='px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'>
-            Next
-          </Button>
+          {!isLastQuestion && (
+            <Button
+              variant='outline'
+              onClick={nextQuestion}
+              className='disabled:opacity-50 disabled:cursor-not-allowed'>
+              Next
+            </Button>
+          )}
+          {isLastQuestion && (
+            <Link to={`/interviews/${id}/feedback`}>
+              <Button>Give feedback</Button>
+            </Link>
+          )}
         </div>
       </div>
     </div>

@@ -22,6 +22,10 @@ export class Answer extends BaseEntity {
   @Column()
   text: string;
 
+  @Field(() => String, { defaultValue: 'plaintext' })
+  @Column({ default: 'plaintext' })
+  language: string;
+
   @Field(() => Question)
   @ManyToOne(() => Question, { nullable: false })
   question!: Question;

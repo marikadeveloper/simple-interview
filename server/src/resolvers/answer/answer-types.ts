@@ -10,4 +10,7 @@ export class CreateAnswerInput {
 
   @Field(() => String)
   text: string;
+
+  @Field(() => String, { defaultValue: 'plaintext' })
+  language: string;
 }

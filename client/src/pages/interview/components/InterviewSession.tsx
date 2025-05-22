@@ -27,7 +27,10 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
     lastQuestionWithNoAnswer,
   );
   const [answers, setAnswers] = useState<
-    Record<number, { text: string; keystrokes: KeystrokeInput[] }>
+    Record<
+      number,
+      { text: string; keystrokes: KeystrokeInput[]; language: string }
+    >
   >({});
 
   const [, createAnswer] = useCreateAnswerMutation();
@@ -40,10 +43,15 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
     currentQuestionIndex === interview.interviewTemplate.questions.length - 1;
 
   const handleAnswerChange = useCallback(
-    (questionId: number, text: string, keystrokes: KeystrokeInput[]) => {
+    (
+      questionId: number,
+      text: string,
+      keystrokes: KeystrokeInput[],
+      language: string,
+    ) => {
       setAnswers((prev) => ({
         ...prev,
-        [questionId]: { text, keystrokes },
+        [questionId]: { text, keystrokes, language },
       }));
     },
     [],
@@ -108,8 +116,8 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
 
         <QuestionCard
           question={currentQuestion}
-          onAnswerChange={(text, keystrokes) =>
-            handleAnswerChange(currentQuestion.id, text, keystrokes)
+          onAnswerChange={(text, keystrokes, language) =>
+            handleAnswerChange(currentQuestion.id, text, keystrokes, language)
           }
           initialAnswer={answers[currentQuestion.id]?.text}
         />

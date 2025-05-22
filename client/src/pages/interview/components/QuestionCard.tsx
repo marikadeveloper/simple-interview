@@ -3,7 +3,11 @@ import { KeystrokeRecordingTextarea } from './KeystrokeRecordingTextarea';
 
 interface QuestionCardProps {
   question: QuestionFragment;
-  onAnswerChange: (answer: string, keystrokes: KeystrokeInput[]) => void;
+  onAnswerChange: (
+    answer: string,
+    keystrokes: KeystrokeInput[],
+    language: string,
+  ) => void;
   initialAnswer?: string;
 }
 

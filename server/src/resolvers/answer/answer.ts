@@ -44,6 +44,7 @@ export class AnswerResolver {
       question: { id: input.questionId },
       interview: { id: input.interviewId },
       text: input.text,
+      language: input.language || 'plaintext',
     }).save();
 
     return answer;

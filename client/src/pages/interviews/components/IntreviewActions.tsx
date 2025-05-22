@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
+import { ButtonWithTooltip } from '@/components/ui/button-with-tooltip';
 import {
   InterviewListItemFragment,
   InterviewStatus,
 } from '@/generated/graphql';
-import { Eye } from 'lucide-react';
+import { BookOpenCheck, Play } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router';
 import { DeleteInterviewConfirmationDialog } from './DeleteInterviewConfirmationDialog';
@@ -24,13 +25,32 @@ export const InterviewActions: React.FC<InterviewActionsProps> = ({
         </>
       )}
       {interview.status === InterviewStatus.Completed && (
-        <Link to={`/interviews/${interview.id}`}>
-          <Button
-            variant='outline'
-            size='icon'>
-            <Eye />
-          </Button>
-        </Link>
+        <>
+          <Link to={`/interviews/${interview.id}`}>
+            <ButtonWithTooltip
+              Button={
+                <Button
+                  variant='outline'
+                  size='icon'>
+                  <Play />
+                </Button>
+              }
+              tooltip='Replay Interview'
+            />
+          </Link>
+          <Link to={`/interviews/${interview.id}/feedback`}>
+            <ButtonWithTooltip
+              Button={
+                <Button
+                  variant='outline'
+                  size='icon'>
+                  <BookOpenCheck />
+                </Button>
+              }
+              tooltip='Evaluate Interview'
+            />
+          </Link>
+        </>
       )}
     </div>
   );

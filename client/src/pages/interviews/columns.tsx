@@ -1,4 +1,5 @@
 import {
+  InterviewEvaluation,
   InterviewListItemFragment,
   InterviewStatus,
   InterviewTemplateFragment,
@@ -6,6 +7,7 @@ import {
 } from '@/generated/graphql';
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
+import { Crown, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { InterviewActions } from './components/IntreviewActions';
 
 export const columns: ColumnDef<InterviewListItemFragment>[] = [
@@ -13,7 +15,6 @@ export const columns: ColumnDef<InterviewListItemFragment>[] = [
     id: 'candidate',
     header: 'Candidate',
     cell: ({ row }) => {
-      console.log(row);
       const candidate: UserFragment = row.original.user;
       return candidate.fullName;
     },
@@ -56,6 +57,24 @@ export const columns: ColumnDef<InterviewListItemFragment>[] = [
           {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
         </span>
       );
+    },
+  },
+  {
+    id: 'evaluationValue',
+    header: 'Evaluation',
+    cell: ({ row }) => {
+      const evaluation: InterviewEvaluation | null | undefined =
+        row.original.evaluationValue;
+      switch (evaluation) {
+        case InterviewEvaluation.Bad:
+          return <ThumbsDown className='w-4 h-4' />;
+        case InterviewEvaluation.Good:
+          return <ThumbsUp className='w-4 h-4' />;
+        case InterviewEvaluation.Excellent:
+          return <Crown className='w-4 h-4' />;
+        default:
+          return null;
+      }
     },
   },
   {

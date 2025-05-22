@@ -8,6 +8,7 @@ fragment InterviewListItem on Interview {
   }
   deadline
   status
+  evaluationValue
 }
 
 fragment CandidateInterview on Interview {

@@ -1,0 +1,5 @@
+query GetInterview($id: Int!) {
+  getInterview(id: $id) {
+    ...ReadonlyInterview
+  }
+}

@@ -5,3 +5,10 @@ fragment Answer on Answer {
     id
   }
 }
+
+fragment AnswerWithKeystrokes on Answer {
+  ...Answer
+  keystrokes {
+    ...Keystroke
+  }
+}

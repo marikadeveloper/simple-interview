@@ -24,3 +24,18 @@ fragment CandidateInterview on Interview {
     ...Answer
   }
 }
+
+fragment ReadonlyInterview on Interview {
+  id
+  interviewTemplate {
+    ...InterviewTemplateWithQuestions
+  }
+  user {
+    ...User
+  }
+  deadline
+  status
+  answers {
+    ...AnswerWithKeystrokes
+  }
+}

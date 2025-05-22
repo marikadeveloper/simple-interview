@@ -115,7 +115,7 @@ export const CandidateInterviews = () => {
         <div className='flex items-center gap-2'></div>
       </div>
 
-      <div className='py-8'>
+      <div className='py-8 flex flex-wrap gap-4'>
         {data?.getInterviews?.map((interview) => (
           <InterviewCard
             key={interview.id}

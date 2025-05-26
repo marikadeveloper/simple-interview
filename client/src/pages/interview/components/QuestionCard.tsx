@@ -1,13 +1,12 @@
-import { KeystrokeInput, QuestionFragment } from '@/generated/graphql';
-import { KeystrokeRecordingTextarea } from './KeystrokeRecordingTextarea';
+import { QuestionFragment } from '@/generated/graphql';
+import {
+  KeystrokeRecordingTextarea,
+  KeystrokeRecordingTextareaOutputFn,
+} from './KeystrokeRecordingTextarea';
 
 interface QuestionCardProps {
   question: QuestionFragment;
-  onAnswerChange: (
-    answer: string,
-    keystrokes: KeystrokeInput[],
-    language: string,
-  ) => void;
+  onAnswerChange: KeystrokeRecordingTextareaOutputFn;
   initialAnswer?: string;
 }
 

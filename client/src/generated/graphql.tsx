@@ -23,6 +23,7 @@ export type Answer = {
   id: Scalars['Int']['output'];
   interview: Interview;
   keystrokes?: Maybe<Array<Keystroke>>;
+  language: Scalars['String']['output'];
   question: Question;
   text: Scalars['String']['output'];
 };
@@ -47,6 +48,7 @@ export type ChangePasswordInput = {
 
 export type CreateAnswerInput = {
   interviewId: Scalars['Int']['input'];
+  language?: Scalars['String']['input'];
   questionId: Scalars['Int']['input'];
   text: Scalars['String']['input'];
 };
@@ -465,7 +467,7 @@ export type CreateAnswerMutationVariables = Exact<{
 }>;
 
 
-export type CreateAnswerMutation = { __typename?: 'Mutation', createAnswer?: { __typename?: 'Answer', id: number, text: string, question: { __typename?: 'Question', id: number, title: string, description: string } } | null };
+export type CreateAnswerMutation = { __typename?: 'Mutation', createAnswer?: { __typename?: 'Answer', id: number } | null };
 
 export type CreateCandidateInvitationMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -874,10 +876,10 @@ export function useConfirmInterviewCompletionMutation() {
 export const CreateAnswerDocument = gql`
     mutation CreateAnswer($input: CreateAnswerInput!) {
   createAnswer(input: $input) {
-    ...Answer
+    id
   }
 }
-    ${AnswerFragmentDoc}`;
+    `;
 
 export function useCreateAnswerMutation() {
   return Urql.useMutation<CreateAnswerMutation, CreateAnswerMutationVariables>(CreateAnswerDocument);

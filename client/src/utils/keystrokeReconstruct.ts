@@ -25,11 +25,11 @@ export function reconstructText(keystrokes: KeystrokeInput[]): string {
         break;
       }
       case KeystrokeType.Delete: {
-        const length = keystroke.length || 0;
+        const length = keystroke.length || 1;
         if (keystroke.position < text.length) {
           text =
-            text.substring(0, keystroke.position) +
-            text.substring(keystroke.position + length);
+            text.substring(0, keystroke.position - 1) +
+            text.substring(keystroke.position - 1 + length);
         }
         break;
       }

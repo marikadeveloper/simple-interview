@@ -36,7 +36,6 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
 
   const replayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const progressRef = useRef<number>(0);
-  const animationFrameRef = useRef<number | undefined>(undefined);
 
   const sortedKeystrokes = useMemo(() => {
     return [...keystrokes].sort(
@@ -105,10 +104,50 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
       const keystroke = sortedKeystrokes[index];
       setCurrentKeystrokeIndex(index);
 
-      // Apply keystroke to build the text
-      setCurrentText(() => {
-        const keystrokes = sortedKeystrokes.slice(0, index + 1);
-        return reconstructText(keystrokes);
+      // Apply only the current keystroke to update the text, instead of rebuilding from scratch
+      setCurrentText((prevText) => {
+        // Apply just this keystroke to the current text
+        switch (keystroke.type) {
+          case 'INSERT': {
+            if (keystroke.value) {
+              if (keystroke.position > prevText.length) {
+                return (
+                  prevText.padEnd(keystroke.position, ' ') + keystroke.value
+                );
+              } else {
+                return (
+                  prevText.substring(0, keystroke.position) +
+                  keystroke.value +
+                  prevText.substring(keystroke.position)
+                );
+              }
+            }
+            return prevText;
+          }
+          case 'DELETE': {
+            const length = keystroke.length || 1;
+            if (keystroke.position < prevText.length) {
+              return (
+                prevText.substring(0, keystroke.position - 1) +
+                prevText.substring(keystroke.position - 1 + length)
+              );
+            }
+            return prevText;
+          }
+          case 'REPLACE': {
+            const length = keystroke.length || 0;
+            if (keystroke.position <= prevText.length) {
+              return (
+                prevText.substring(0, keystroke.position) +
+                (keystroke.value || '') +
+                prevText.substring(keystroke.position + length)
+              );
+            }
+            return prevText;
+          }
+          default:
+            return prevText;
+        }
       });
 
       // Calculate progress
@@ -170,7 +209,8 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
       setCurrentKeystrokeIndex(index);
       setProgress(percent);
 
-      // Rebuild text up to this point
+      // For seek operations, we do need to rebuild from scratch
+      // but this happens much less frequently than during replay
       if (index >= 0) {
         const keystrokes = sortedKeystrokes.slice(0, index + 1);
         setCurrentText(reconstructText(keystrokes));

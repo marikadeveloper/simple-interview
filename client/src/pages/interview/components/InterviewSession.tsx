@@ -65,6 +65,7 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
           interviewId: interview.id,
           questionId: currentQuestion.id,
           text: currentAnswer.text,
+          language: currentAnswer.language,
         },
       });
 

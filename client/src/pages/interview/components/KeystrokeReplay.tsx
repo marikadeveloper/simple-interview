@@ -9,12 +9,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 interface KeystrokeReplayProps {
   keystrokes: Keystroke[];
   initialText?: string;
   language?: string;
-  className?: string;
   speed?: number; // Speed multiplier, 1 = normal speed
   onComplete?: () => void;
   controls?: boolean;
@@ -24,7 +25,6 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   keystrokes,
   initialText = '',
   language = '',
-  className = '',
   speed: initialSpeed = 1,
   onComplete,
   controls = true,
@@ -201,11 +201,11 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
 
   return (
     <div className='keystroke-replay w-full max-w-4xl mx-auto p-4 space-y-4'>
-      <pre
-        lang={language}
-        className={`${className} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg font-mono text-sm whitespace-pre-wrap break-words min-h-[100px] border border-gray-200 dark:border-gray-700`}>
+      <SyntaxHighlighter
+        language={language}
+        style={atomOneLight}>
         {currentText || initialText}
-      </pre>
+      </SyntaxHighlighter>
 
       {controls && (
         <div className='keystroke-replay-controls space-y-4'>

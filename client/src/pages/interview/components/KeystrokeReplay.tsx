@@ -33,7 +33,6 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0); // 0-100%
   const [speed, setSpeed] = useState(initialSpeed);
-  const [isDragging, setIsDragging] = useState(false);
   const [_, setCurrentKeystrokeIndex] = useState(-1);
 
   const replayTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -181,15 +180,10 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   );
 
   const handleSeekStart = useCallback(() => {
-    setIsDragging(true);
     if (replayTimerRef.current) {
       clearTimeout(replayTimerRef.current);
       replayTimerRef.current = null;
     }
-  }, []);
-
-  const handleSeekEnd = useCallback(() => {
-    setIsDragging(false);
   }, []);
 
   const handleSpeedChange = useCallback(
@@ -208,6 +202,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   return (
     <div className='keystroke-replay w-full max-w-4xl mx-auto p-4 space-y-4'>
       <pre
+        lang={language}
         className={`${className} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg font-mono text-sm whitespace-pre-wrap break-words min-h-[100px] border border-gray-200 dark:border-gray-700`}>
         {currentText || initialText}
       </pre>
@@ -218,7 +213,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
             <div className='progress w-full space-y-2'>
               <div className='flex items-center gap-2'>
                 <span className='text-xs text-gray-500 dark:text-gray-400'>
-                  0:00
+                  {progress.toFixed(0)}%
                 </span>
                 <div className='relative flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden group'>
                   <div
@@ -233,9 +228,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
                     value={progress}
                     onChange={(e) => seek(Number(e.target.value))}
                     onMouseDown={handleSeekStart}
-                    onMouseUp={handleSeekEnd}
                     onTouchStart={handleSeekStart}
-                    onTouchEnd={handleSeekEnd}
                     className='absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer'
                   />
                 </div>

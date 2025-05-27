@@ -76,18 +76,12 @@ export const KeystrokeRecordingTextarea = ({
     debouncedOutput(state.text, state.keystrokes, language);
   }, [state, language, debouncedOutput]);
 
-  useEffect(() => {
-    console.log('🚀 ~ useEffect ~ state:', state);
-  }, [state]);
-
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // TODO: do not record the keystroke if the key is a space or tab
     const timestamp = Date.now() - startTimeRef.current;
     const textarea = textareaRef.current;
 
     if (!textarea) return;
 
-    console.log(e);
     if (e.code === 'Space' || e.code === 'Tab') return;
 
     const keystrokeEvent: KeystrokeInput = {
@@ -108,11 +102,6 @@ export const KeystrokeRecordingTextarea = ({
       debouncedOutput.cancel();
     };
   }, [debouncedOutput]);
-
-  // Our performance optimization strategy:
-  // 1. We don't debounce keystroke recording (handleKeyDown) to ensure we capture every keystroke accurately
-  // 2. We debounce text updates at 50ms to improve typing responsiveness
-  // 3. We debounce the output callback at 300ms to reduce parent component re-renders
 
   return (
     <div className='space-y-2'>

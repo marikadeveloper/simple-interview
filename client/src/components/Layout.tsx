@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router';
 import { Header } from './Header';
+import { Toaster } from './ui/sonner';
 
 export const Layout: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ export const Layout: React.FC = () => {
         <div className='min-h-screen bg-background p-8'>
           <div className='mx-auto max-w-5xl'>
             <Outlet />
+            <Toaster />
           </div>
         </div>
       </main>

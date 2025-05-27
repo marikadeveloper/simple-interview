@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { KeystrokeInput, KeystrokeType } from '@/generated/graphql';
+import { KeystrokeInput } from '@/generated/graphql';
 import { debounce } from '@/utils/debounce';
 import CodeEditor from '@uiw/react-textarea-code-editor';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -49,6 +49,7 @@ export const KeystrokeRecordingTextarea = ({
     keystrokes: KeystrokeInput[];
   }>({ text: '', keystrokes: [] });
   const startTimeRef = useRef<number>(Date.now());
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [language, setLanguage] = useState('plaintext');
 
   // Refs to store the current state for debouncing
@@ -76,124 +77,37 @@ export const KeystrokeRecordingTextarea = ({
   }, [state, language, debouncedOutput]);
 
   useEffect(() => {
-    console.log('🚀 ~ useEffect ~ keystrokes:', state.keystrokes);
-  }, [state.keystrokes]);
+    console.log('🚀 ~ useEffect ~ state:', state);
+  }, [state]);
 
-  useEffect(() => {
-    console.log('🚀 ~ useEffect ~ text:', state.text);
-  }, [state.text]);
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // TODO: do not record the keystroke if the key is a space or tab
+    const timestamp = Date.now() - startTimeRef.current;
+    const textarea = textareaRef.current;
 
-  // Process keydown events and collect keystrokes - we don't debounce this function
-  // to ensure we capture every keystroke accurately
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      const currentTime = Date.now();
-      const relativeTimestamp = currentTime - startTimeRef.current;
-      const textarea = e.currentTarget;
-      const position = textarea.selectionStart;
-      console.log('🚀 ~ handleKeyDown:', {
-        e,
-        currentTime,
-        relativeTimestamp,
-        position,
-      });
+    if (!textarea) return;
 
-      // Handle backspace and delete
-      if (e.key === 'Backspace' || e.key === 'Delete') {
-        const length = e.key === 'Backspace' ? 1 : 1;
-        const newKeystroke: KeystrokeInput = {
-          type: KeystrokeType.Delete,
-          position,
-          length,
-          relativeTimestamp,
-        };
-        keystrokesRef.current.push(newKeystroke);
-        setState((prev) => ({
-          ...prev,
-          keystrokes: [...keystrokesRef.current],
-        }));
-        return;
-      }
+    console.log(e);
+    if (e.code === 'Space' || e.code === 'Tab') return;
 
-      if (e.key === 'Tab') {
-        // Handle tab key
-        e.preventDefault(); // Prevent default tab behavior
-        const newKeystroke: KeystrokeInput = {
-          type: KeystrokeType.Insert,
-          position,
-          value: '    ', // Insert 4 spaces for tab
-          relativeTimestamp,
-        };
-        keystrokesRef.current.push(newKeystroke);
-        setState((prev) => ({
-          ...prev,
-          keystrokes: [...keystrokesRef.current],
-        }));
-        return;
-      }
+    const keystrokeEvent: KeystrokeInput = {
+      relativeTimestamp: timestamp,
+      snapshot: textarea.value,
+    };
 
-      if (e.key === 'Enter') {
-        // Handle Enter key
-        const newKeystroke: KeystrokeInput = {
-          type: KeystrokeType.Insert,
-          position,
-          value: '\n',
-          relativeTimestamp,
-        };
-        keystrokesRef.current.push(newKeystroke);
-        setState((prev) => ({
-          ...prev,
-          keystrokes: [...keystrokesRef.current],
-        }));
-        return;
-      }
-
-      // Handle regular character input
-      if (e.key.length === 1) {
-        const newKeystroke: KeystrokeInput = {
-          type: KeystrokeType.Insert,
-          position,
-          value: e.key,
-          relativeTimestamp,
-        };
-        keystrokesRef.current.push(newKeystroke);
-        setState((prev) => ({
-          ...prev,
-          keystrokes: [...keystrokesRef.current],
-        }));
-      }
-    },
-    [],
-  );
-
-  // Create a debounced handler for input changes
-  const debouncedInputHandler = useCallback(
-    debounce((newText: string) => {
-      setState((prev) => ({
-        ...prev,
-        text: newText,
-      }));
-    }, 50), // 50ms debounce delay for text input
-    [],
-  );
-
-  // Handle input changes
-  const handleInput = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newText = e.target.value;
-      textRef.current = newText;
-      debouncedInputHandler(newText);
-    },
-    [debouncedInputHandler],
-  );
+    setState((prev) => ({
+      ...prev,
+      text: textarea.value,
+      keystrokes: [...prev.keystrokes, keystrokeEvent],
+    }));
+  };
 
   // Clean up any pending debounced calls when component unmounts
   useEffect(() => {
     return () => {
       debouncedOutput.cancel();
-      debouncedInputHandler.cancel();
     };
-  }, [debouncedOutput, debouncedInputHandler]);
+  }, [debouncedOutput]);
 
   // Our performance optimization strategy:
   // 1. We don't debounce keystroke recording (handleKeyDown) to ensure we capture every keystroke accurately
@@ -220,22 +134,19 @@ export const KeystrokeRecordingTextarea = ({
           </SelectContent>
         </Select>
       </div>
-      <CodeEditor
-        language={language}
-        value={state.text}
-        onChange={handleInput}
-        onKeyDown={handleKeyDown}
-        placeholder={`Please enter ${
-          languages.find((l) => l.value === language)?.label || 'code'
-        } here...`}
-        padding={15}
-        style={{
-          backgroundColor: 'white',
-          fontFamily:
-            'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
-          minHeight: '200px',
-        }}
-      />
+      <div className='font-mono'>
+        <CodeEditor
+          ref={textareaRef}
+          language={language}
+          value={state.text}
+          onKeyUp={handleKeyPress}
+          placeholder={`Please enter ${
+            languages.find((l) => l.value === language)?.label || 'code'
+          } here...`}
+          padding={15}
+          className='rounded-md min-h-[200px]'
+        />
+      </div>
     </div>
   );
 };

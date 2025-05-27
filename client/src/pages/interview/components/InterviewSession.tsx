@@ -7,6 +7,7 @@ import {
 } from '@/generated/graphql';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
 import { QuestionCard } from './QuestionCard';
 
 interface InterviewSessionProps {
@@ -60,7 +61,7 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
   const handleNext = useCallback(async () => {
     const currentAnswer = answers[currentQuestion.id];
     if (currentAnswer) {
-      const { data } = await createAnswer({
+      const { data, error } = await createAnswer({
         input: {
           interviewId: interview.id,
           questionId: currentQuestion.id,
@@ -68,6 +69,11 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
           language: currentAnswer.language,
         },
       });
+
+      if (error) {
+        console.log(error);
+        return toast.error('Failed to save answer. Please try again later.');
+      }
 
       if (data?.createAnswer) {
         await saveKeystrokes({

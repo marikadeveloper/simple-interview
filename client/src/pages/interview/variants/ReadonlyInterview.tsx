@@ -86,6 +86,8 @@ export const ReadonlyInterview = () => {
         <div className='border rounded-lg p-4 bg-gray-50 min-h-[200px]'>
           <KeystrokeReplay
             key={answer?.id}
+            language={answer?.language}
+            initialText={answer?.text}
             keystrokes={answer?.keystrokes || []}
           />
         </div>

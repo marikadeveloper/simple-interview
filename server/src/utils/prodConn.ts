@@ -4,7 +4,6 @@ import { Answer } from '../entities/Answer';
 import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { Interview } from '../entities/Interview';
 import { InterviewTemplate } from '../entities/InterviewTemplate';
-import { Keystroke } from '../entities/Keystroke';
 import { Question } from '../entities/Question';
 import { Tag } from '../entities/Tag';
 import { User } from '../entities/User';
@@ -25,7 +24,6 @@ export const prodConn = () =>
       CandidateInvitation,
       Interview,
       InterviewTemplate,
-      Keystroke,
       Question,
       Answer,
       Tag,

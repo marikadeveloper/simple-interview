@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { KeystrokeFragment } from '@/generated/graphql';
+import { Keystroke } from '@/generated/graphql';
 import { reconstructText } from '@/utils/keystrokeReconstruct';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import React, {
@@ -11,8 +11,9 @@ import React, {
 } from 'react';
 
 interface KeystrokeReplayProps {
-  keystrokes: KeystrokeFragment[];
+  keystrokes: Keystroke[];
   initialText?: string;
+  language?: string;
   className?: string;
   speed?: number; // Speed multiplier, 1 = normal speed
   onComplete?: () => void;
@@ -22,6 +23,7 @@ interface KeystrokeReplayProps {
 export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   keystrokes,
   initialText = '',
+  language = '',
   className = '',
   speed: initialSpeed = 1,
   onComplete,
@@ -31,7 +33,6 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0); // 0-100%
   const [speed, setSpeed] = useState(initialSpeed);
-  const [isDragging, setIsDragging] = useState(false);
   const [_, setCurrentKeystrokeIndex] = useState(-1);
 
   const replayTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -105,50 +106,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
       setCurrentKeystrokeIndex(index);
 
       // Apply only the current keystroke to update the text, instead of rebuilding from scratch
-      setCurrentText((prevText) => {
-        // Apply just this keystroke to the current text
-        switch (keystroke.type) {
-          case 'INSERT': {
-            if (keystroke.value) {
-              if (keystroke.position > prevText.length) {
-                return (
-                  prevText.padEnd(keystroke.position, ' ') + keystroke.value
-                );
-              } else {
-                return (
-                  prevText.substring(0, keystroke.position) +
-                  keystroke.value +
-                  prevText.substring(keystroke.position)
-                );
-              }
-            }
-            return prevText;
-          }
-          case 'DELETE': {
-            const length = keystroke.length || 1;
-            if (keystroke.position < prevText.length) {
-              return (
-                prevText.substring(0, keystroke.position - 1) +
-                prevText.substring(keystroke.position - 1 + length)
-              );
-            }
-            return prevText;
-          }
-          case 'REPLACE': {
-            const length = keystroke.length || 0;
-            if (keystroke.position <= prevText.length) {
-              return (
-                prevText.substring(0, keystroke.position) +
-                (keystroke.value || '') +
-                prevText.substring(keystroke.position + length)
-              );
-            }
-            return prevText;
-          }
-          default:
-            return prevText;
-        }
-      });
+      setCurrentText(keystroke.snapshot);
 
       // Calculate progress
       const totalDuration =
@@ -222,15 +180,10 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   );
 
   const handleSeekStart = useCallback(() => {
-    setIsDragging(true);
     if (replayTimerRef.current) {
       clearTimeout(replayTimerRef.current);
       replayTimerRef.current = null;
     }
-  }, []);
-
-  const handleSeekEnd = useCallback(() => {
-    setIsDragging(false);
   }, []);
 
   const handleSpeedChange = useCallback(
@@ -249,6 +202,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
   return (
     <div className='keystroke-replay w-full max-w-4xl mx-auto p-4 space-y-4'>
       <pre
+        lang={language}
         className={`${className} bg-gray-50 dark:bg-gray-800 p-4 rounded-lg font-mono text-sm whitespace-pre-wrap break-words min-h-[100px] border border-gray-200 dark:border-gray-700`}>
         {currentText || initialText}
       </pre>
@@ -259,7 +213,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
             <div className='progress w-full space-y-2'>
               <div className='flex items-center gap-2'>
                 <span className='text-xs text-gray-500 dark:text-gray-400'>
-                  0:00
+                  {progress.toFixed(0)}%
                 </span>
                 <div className='relative flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden group'>
                   <div
@@ -274,9 +228,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
                     value={progress}
                     onChange={(e) => seek(Number(e.target.value))}
                     onMouseDown={handleSeekStart}
-                    onMouseUp={handleSeekEnd}
                     onTouchStart={handleSeekStart}
-                    onTouchEnd={handleSeekEnd}
                     className='absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer'
                   />
                 </div>

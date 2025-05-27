@@ -1,9 +1,4 @@
 fragment Keystroke on Keystroke {
-  id
-  type
-  value
-  position
-  length
-  timestamp
   relativeTimestamp
+  snapshot
 }

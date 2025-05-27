@@ -6,6 +6,7 @@ fragment Answer on Answer {
     title
     description
   }
+  language
 }
 
 fragment AnswerWithKeystrokes on Answer {

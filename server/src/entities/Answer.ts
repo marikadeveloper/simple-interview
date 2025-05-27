@@ -4,12 +4,20 @@ import {
   Column,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Interview } from './Interview';
-import { Keystroke } from './Keystroke';
 import { Question } from './Question';
+
+@ObjectType()
+export class Keystroke {
+  @Field(() => String)
+  snapshot!: string; // contains a snapshot of the answer text at this keystroke
+
+  @Field(() => Int)
+  @Column()
+  relativeTimestamp!: number;
+}
 
 @ObjectType()
 @Entity()
@@ -26,6 +34,10 @@ export class Answer extends BaseEntity {
   @Column({ default: 'plaintext' })
   language: string;
 
+  @Field(() => [Keystroke], { nullable: true })
+  @Column('simple-json', { nullable: true })
+  keystrokes?: Keystroke[];
+
   @Field(() => Question)
   @ManyToOne(() => Question, { nullable: false })
   question!: Question;
@@ -35,12 +47,6 @@ export class Answer extends BaseEntity {
     nullable: false,
   })
   interview!: Interview;
-
-  @Field(() => [Keystroke], { nullable: true })
-  @OneToMany(() => Keystroke, (keystroke) => keystroke.answer, {
-    nullable: true,
-  })
-  keystrokes: Keystroke[];
 
   @Field(() => Boolean, { defaultValue: false })
   @Column({ default: false })

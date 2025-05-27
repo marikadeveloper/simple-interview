@@ -89,5 +89,5 @@ export class Interview extends BaseEntity {
     onDelete: 'CASCADE',
     nullable: true,
   })
-  answers: Answer[];
+  answers?: Answer[];
 }

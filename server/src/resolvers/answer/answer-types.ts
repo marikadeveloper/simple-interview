@@ -14,3 +14,21 @@ export class CreateAnswerInput {
   @Field(() => String, { defaultValue: 'plaintext' })
   language: string;
 }
+
+@InputType()
+export class KeystrokeInput {
+  @Field(() => String)
+  snapshot: string;
+
+  @Field(() => Int)
+  relativeTimestamp!: number;
+}
+
+@InputType()
+export class SaveKeystrokesInput {
+  @Field(() => Int)
+  answerId!: number;
+
+  @Field(() => [KeystrokeInput])
+  keystrokes!: KeystrokeInput[];
+}

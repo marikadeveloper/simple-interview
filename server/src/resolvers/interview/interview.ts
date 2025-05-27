@@ -131,7 +131,6 @@ export class InterviewResolver {
         'interviewTemplate.questions',
         'user',
         'answers',
-        'answers.keystrokes',
         'answers.question',
       ],
     });
@@ -158,6 +157,7 @@ export class InterviewResolver {
         'interviewTemplate.questions',
         'user',
         'answers',
+        'answers.question',
       ],
     });
 

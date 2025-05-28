@@ -157,17 +157,32 @@ export const createUrqlClient = () => {
               invalidateAll(cache, 'getInterviewTemplate');
             },
             updateQuestion: (_result, _args, cache, _info) => {
-              invalidateAll(cache, 'getInterviewTemplate');
+              cache.invalidate({
+                __typename: 'Question',
+                id: _args.id as number,
+              });
             },
             deleteQuestion: (_result, _args, cache, _info) => {
-              invalidateAll(cache, 'getInterviewTemplate');
+              cache.invalidate({
+                __typename: 'Question',
+                id: _args.id as number,
+              });
             },
 
             createInterview: (_result, _args, cache, _info) => {
-              invalidateAll(cache, 'getInterviews');
+              cache.invalidate('Interview');
+            },
+            updateInterview: (_result, _args, cache, _info) => {
+              cache.invalidate({
+                __typename: 'Interview',
+                id: _args.id as number,
+              });
             },
             deleteInterview: (_result, _args, cache, _info) => {
-              invalidateAll(cache, 'getInterviews');
+              cache.invalidate({
+                __typename: 'Interview',
+                id: _args.id as number,
+              });
             },
 
             // register: (_result, _args, cache, _info) => {

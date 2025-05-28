@@ -127,7 +127,10 @@ export const createUrqlClient = () => {
               invalidateAll(cache, 'getCandidateInvitations');
             },
             deleteUser: (_result, _args, cache, _info) => {
-              invalidateAll(cache, 'getUsers');
+              cache.invalidate({
+                __typename: 'User',
+                id: _args.id as number,
+              });
             },
 
             createInterviewTemplate: (_result, _args, cache, _info) => {

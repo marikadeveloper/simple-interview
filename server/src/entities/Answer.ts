@@ -45,6 +45,7 @@ export class Answer extends BaseEntity {
   @Field(() => Interview)
   @ManyToOne(() => Interview, (interview) => interview.answers, {
     nullable: false,
+    onDelete: 'CASCADE',
   })
   interview!: Interview;
 

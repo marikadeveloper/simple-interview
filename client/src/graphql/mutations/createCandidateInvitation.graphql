@@ -1,3 +1,0 @@
-mutation CreateCandidateInvitation($email: String!) {
-  createCandidateInvitation(email: $email)
-}

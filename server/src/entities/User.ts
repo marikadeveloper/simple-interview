@@ -47,6 +47,10 @@ export class User extends BaseEntity {
   })
   role!: UserRole;
 
+  @Field(() => Boolean)
+  @Column({ default: false })
+  isActive: boolean;
+
   @Field(() => String)
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;

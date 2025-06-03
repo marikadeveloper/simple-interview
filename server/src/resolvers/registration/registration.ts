@@ -1,23 +1,23 @@
 import argon2 from 'argon2';
 import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
-import { dataSource } from '../..';
-import { CandidateInvitation } from '../../entities/CandidateInvitation';
 import { User, UserRole } from '../../entities/User';
 import { isAdmin } from '../../middleware/isAdmin';
+import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { isValidRegistrationData } from '../../middleware/isValidRegistrationData';
 import { MyContext } from '../../types';
 import { errorStrings } from '../../utils/errorStrings';
+import { generatePassword } from '../../utils/generatePassword';
 import { handleRegistrationErrors } from '../../utils/handleRegistrationErrors';
 import { sendEmail } from '../../utils/sendEmail';
-import { RegisterInput } from './registration-types';
+import { AdminRegisterInput, PreRegisterInput } from './registration-types';
 
 @Resolver()
 export class RegistrationResolver {
   @Mutation(() => User, { nullable: true })
   @UseMiddleware(isValidRegistrationData)
   async adminRegister(
-    @Arg('input', () => RegisterInput) input: RegisterInput,
+    @Arg('input', () => AdminRegisterInput) input: AdminRegisterInput,
     @Ctx() { req }: MyContext,
   ): Promise<User | null> {
     // check if there is already an admin
@@ -51,41 +51,38 @@ export class RegistrationResolver {
   }
 
   @Mutation(() => User, { nullable: true })
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
   @UseMiddleware(isValidRegistrationData)
   async candidateRegister(
-    @Arg('input', () => RegisterInput) input: RegisterInput,
-    @Ctx() { req }: MyContext,
+    @Arg('input', () => PreRegisterInput) input: PreRegisterInput,
   ): Promise<User | null> {
-    const hashedPassword = await argon2.hash(input.password);
+    const randomPassword = generatePassword();
+    const hashedPassword = await argon2.hash(randomPassword);
 
     try {
-      const user = await dataSource.transaction(
-        async (transactionalEntityManager) => {
-          const candidateInvitation = await transactionalEntityManager.findOne(
-            CandidateInvitation,
-            {
-              where: { email: input.email, used: false },
-            },
-          );
+      const user = await User.create({
+        email: input.email,
+        password: hashedPassword,
+        fullName: input.fullName,
+        role: UserRole.CANDIDATE,
+      }).save();
 
-          if (!candidateInvitation) {
-            throw new Error(errorStrings.user.invalidInvitation);
-          }
-
-          candidateInvitation.used = true;
-          await transactionalEntityManager.save(candidateInvitation);
-
-          return transactionalEntityManager.save(User, {
-            email: input.email,
-            password: hashedPassword,
-            fullName: input.fullName,
-            role: UserRole.CANDIDATE,
-          });
-        },
+      // send email to candidate with random password
+      const anchorTag = `<a href="${process.env.CLIENT_URL}/login">Login</a>`;
+      await sendEmail(
+        input.email,
+        'Welcome to Simple Interview',
+        `
+        <p>Hi ${input.fullName},</p>
+        <p>Thank you for registering with Simple Interview. Your account has been created with the following credentials:</p>
+        <p><strong>Email:</strong> ${input.email}</p>
+        <p><strong>Password:</strong> ${randomPassword}</p>
+        <p>Please change your password after logging in for the first time.</p>
+        <div>${anchorTag}</div>
+        <p>Thank you for joining us!</p>
+        `,
       );
-
-      // Store user id session
-      req.session.userId = user.id;
 
       return user;
     } catch (err) {
@@ -98,9 +95,10 @@ export class RegistrationResolver {
   @UseMiddleware(isAdmin)
   @UseMiddleware(isValidRegistrationData)
   async interviewerRegister(
-    @Arg('input', () => RegisterInput) input: RegisterInput,
+    @Arg('input', () => PreRegisterInput) input: PreRegisterInput,
   ): Promise<User | null> {
-    const hashedPassword = await argon2.hash(input.password);
+    const randomPassword = generatePassword();
+    const hashedPassword = await argon2.hash(randomPassword);
 
     try {
       const user = await User.create({
@@ -117,7 +115,10 @@ export class RegistrationResolver {
         'Welcome to Simple Interview',
         `
         <p>Hi ${input.fullName},</p>
-        <p>A Simple Interview account has been set up for you. Click the link below to login:</p>
+        <p>Thank you for registering with Simple Interview. Your account has been created with the following credentials:</p>
+        <p><strong>Email:</strong> ${input.email}</p>
+        <p><strong>Password:</strong> ${randomPassword}</p>
+        <p>Please change your password after logging in for the first time.</p>
         <div>${anchorTag}</div>
         <p>Thank you for joining us!</p>
         `,

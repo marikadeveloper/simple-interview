@@ -17,6 +17,12 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AdminRegisterInput = {
+  email: Scalars['String']['input'];
+  fullName: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
 export type Answer = {
   __typename?: 'Answer';
   hasReplay: Scalars['Boolean']['output'];
@@ -31,14 +37,6 @@ export type Answer = {
 export type AuthInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
-};
-
-export type CandidateInvitation = {
-  __typename?: 'CandidateInvitation';
-  createdAt: Scalars['String']['output'];
-  email: Scalars['String']['output'];
-  id: Scalars['Int']['output'];
-  used: Scalars['Boolean']['output'];
 };
 
 export type ChangePasswordInput = {
@@ -128,7 +126,6 @@ export type Mutation = {
   changePassword?: Maybe<User>;
   confirmInterviewCompletion: Scalars['Boolean']['output'];
   createAnswer?: Maybe<Answer>;
-  createCandidateInvitation: Scalars['Boolean']['output'];
   createInterview?: Maybe<Interview>;
   createInterviewTemplate?: Maybe<InterviewTemplate>;
   createQuestion?: Maybe<Question>;
@@ -153,12 +150,12 @@ export type Mutation = {
 
 
 export type MutationAdminRegisterArgs = {
-  input: RegisterInput;
+  input: AdminRegisterInput;
 };
 
 
 export type MutationCandidateRegisterArgs = {
-  input: RegisterInput;
+  input: PreRegisterInput;
 };
 
 
@@ -174,11 +171,6 @@ export type MutationConfirmInterviewCompletionArgs = {
 
 export type MutationCreateAnswerArgs = {
   input: CreateAnswerInput;
-};
-
-
-export type MutationCreateCandidateInvitationArgs = {
-  email: Scalars['String']['input'];
 };
 
 
@@ -240,7 +232,7 @@ export type MutationForgotPasswordArgs = {
 
 
 export type MutationInterviewerRegisterArgs = {
-  input: RegisterInput;
+  input: PreRegisterInput;
 };
 
 
@@ -282,11 +274,15 @@ export type MutationUpdateTagArgs = {
   text: Scalars['String']['input'];
 };
 
+export type PreRegisterInput = {
+  email: Scalars['String']['input'];
+  fullName: Scalars['String']['input'];
+};
+
 export type Query = {
   __typename?: 'Query';
   answer?: Maybe<Answer>;
   getCandidateInterview?: Maybe<Interview>;
-  getCandidateInvitations?: Maybe<Array<CandidateInvitation>>;
   getInterview?: Maybe<Interview>;
   getInterviewTemplate?: Maybe<InterviewTemplate>;
   getInterviewTemplates?: Maybe<Array<InterviewTemplate>>;
@@ -307,11 +303,6 @@ export type QueryAnswerArgs = {
 
 export type QueryGetCandidateInterviewArgs = {
   id: Scalars['Int']['input'];
-};
-
-
-export type QueryGetCandidateInvitationsArgs = {
-  used?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -360,12 +351,6 @@ export type QuestionInput = {
   title: Scalars['String']['input'];
 };
 
-export type RegisterInput = {
-  email: Scalars['String']['input'];
-  fullName: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-};
-
 export type SaveKeystrokesInput = {
   answerId: Scalars['Int']['input'];
   keystrokes: Array<KeystrokeInput>;
@@ -389,6 +374,7 @@ export type User = {
   fullName: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   interviews?: Maybe<Array<Interview>>;
+  isActive: Scalars['Boolean']['output'];
   role: UserRole;
   updatedAt: Scalars['String']['output'];
 };
@@ -446,13 +432,6 @@ export type CreateAnswerMutationVariables = Exact<{
 
 
 export type CreateAnswerMutation = { __typename?: 'Mutation', createAnswer?: { __typename?: 'Answer', id: number } | null };
-
-export type CreateCandidateInvitationMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-}>;
-
-
-export type CreateCandidateInvitationMutation = { __typename?: 'Mutation', createCandidateInvitation: boolean };
 
 export type CreateInterviewMutationVariables = Exact<{
   input: InterviewInput;
@@ -539,21 +518,21 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
 export type AdminRegisterMutationVariables = Exact<{
-  input: RegisterInput;
+  input: AdminRegisterInput;
 }>;
 
 
 export type AdminRegisterMutation = { __typename?: 'Mutation', adminRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null };
 
 export type InterviewerRegisterMutationVariables = Exact<{
-  input: RegisterInput;
+  input: PreRegisterInput;
 }>;
 
 
 export type InterviewerRegisterMutation = { __typename?: 'Mutation', interviewerRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null };
 
 export type CandidateRegisterMutationVariables = Exact<{
-  input: RegisterInput;
+  input: PreRegisterInput;
 }>;
 
 
@@ -611,13 +590,6 @@ export type GetCandidateInterviewQueryVariables = Exact<{
 
 
 export type GetCandidateInterviewQuery = { __typename?: 'Query', getCandidateInterview?: { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null } | null };
-
-export type GetCandidateInvitationsQueryVariables = Exact<{
-  used?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type GetCandidateInvitationsQuery = { __typename?: 'Query', getCandidateInvitations?: Array<{ __typename?: 'CandidateInvitation', id: number, email: string, used: boolean, createdAt: string }> | null };
 
 export type GetInterviewForReplayQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -851,15 +823,6 @@ export const CreateAnswerDocument = gql`
 export function useCreateAnswerMutation() {
   return Urql.useMutation<CreateAnswerMutation, CreateAnswerMutationVariables>(CreateAnswerDocument);
 };
-export const CreateCandidateInvitationDocument = gql`
-    mutation CreateCandidateInvitation($email: String!) {
-  createCandidateInvitation(email: $email)
-}
-    `;
-
-export function useCreateCandidateInvitationMutation() {
-  return Urql.useMutation<CreateCandidateInvitationMutation, CreateCandidateInvitationMutationVariables>(CreateCandidateInvitationDocument);
-};
 export const CreateInterviewDocument = gql`
     mutation CreateInterview($input: InterviewInput!) {
   createInterview(input: $input) {
@@ -979,7 +942,7 @@ export function useLogoutMutation() {
   return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const AdminRegisterDocument = gql`
-    mutation AdminRegister($input: RegisterInput!) {
+    mutation AdminRegister($input: AdminRegisterInput!) {
   adminRegister(input: $input) {
     ...User
   }
@@ -990,7 +953,7 @@ export function useAdminRegisterMutation() {
   return Urql.useMutation<AdminRegisterMutation, AdminRegisterMutationVariables>(AdminRegisterDocument);
 };
 export const InterviewerRegisterDocument = gql`
-    mutation InterviewerRegister($input: RegisterInput!) {
+    mutation InterviewerRegister($input: PreRegisterInput!) {
   interviewerRegister(input: $input) {
     ...User
   }
@@ -1001,7 +964,7 @@ export function useInterviewerRegisterMutation() {
   return Urql.useMutation<InterviewerRegisterMutation, InterviewerRegisterMutationVariables>(InterviewerRegisterDocument);
 };
 export const CandidateRegisterDocument = gql`
-    mutation CandidateRegister($input: RegisterInput!) {
+    mutation CandidateRegister($input: PreRegisterInput!) {
   candidateRegister(input: $input) {
     ...User
   }
@@ -1083,20 +1046,6 @@ export const GetCandidateInterviewDocument = gql`
 
 export function useGetCandidateInterviewQuery(options: Omit<Urql.UseQueryArgs<GetCandidateInterviewQueryVariables>, 'query'>) {
   return Urql.useQuery<GetCandidateInterviewQuery, GetCandidateInterviewQueryVariables>({ query: GetCandidateInterviewDocument, ...options });
-};
-export const GetCandidateInvitationsDocument = gql`
-    query GetCandidateInvitations($used: Boolean) {
-  getCandidateInvitations(used: $used) {
-    id
-    email
-    used
-    createdAt
-  }
-}
-    `;
-
-export function useGetCandidateInvitationsQuery(options?: Omit<Urql.UseQueryArgs<GetCandidateInvitationsQueryVariables>, 'query'>) {
-  return Urql.useQuery<GetCandidateInvitationsQuery, GetCandidateInvitationsQueryVariables>({ query: GetCandidateInvitationsDocument, ...options });
 };
 export const GetInterviewForReplayDocument = gql`
     query GetInterviewForReplay($id: Int!) {

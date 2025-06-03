@@ -1,16 +1,16 @@
-mutation AdminRegister($input: RegisterInput!) {
+mutation AdminRegister($input: AdminRegisterInput!) {
   adminRegister(input: $input) {
     ...User
   }
 }
 
-mutation InterviewerRegister($input: RegisterInput!) {
+mutation InterviewerRegister($input: PreRegisterInput!) {
   interviewerRegister(input: $input) {
     ...User
   }
 }
 
-mutation CandidateRegister($input: RegisterInput!) {
+mutation CandidateRegister($input: PreRegisterInput!) {
   candidateRegister(input: $input) {
     ...User
   }

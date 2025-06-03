@@ -22,7 +22,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   RegisterInput,
-  useCreateCandidateInvitationMutation,
   useInterviewerRegisterMutation,
   UserRole,
 } from '@/generated/graphql';
@@ -38,7 +37,6 @@ interface UserCreateDialogProps {}
 export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [, interviewerRegister] = useInterviewerRegisterMutation();
-  const [, createCandidateInvitation] = useCreateCandidateInvitationMutation();
   const { user } = useAuth();
 
   // reset form on close
@@ -71,9 +69,7 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
       }).then(() => setIsOpen(false));
     }
     if (role === UserRole.Candidate) {
-      createCandidateInvitation({
-        email: rest.email,
-      }).then(() => setIsOpen(false));
+      // TODO
     }
   }
 

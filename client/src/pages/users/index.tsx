@@ -5,7 +5,6 @@ import { useGetUsersQuery, User, UserRole } from '@/generated/graphql';
 import { z } from 'zod';
 import { columns } from './columns';
 import { CreateUserDialog } from './components/CreateUserDialog';
-import { PendingInvitesDialog } from './components/PendingInvitesDialog';
 
 export const userRoles: {
   value: UserRole;
@@ -47,7 +46,6 @@ const Users = () => {
           </PageSubtitle>
         </div>
         <div className='flex items-center gap-2'>
-          <PendingInvitesDialog />
           <CreateUserDialog />
         </div>
       </div>

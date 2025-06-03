@@ -8,8 +8,8 @@ import Interview from './pages/interview';
 import InterviewFeedback from './pages/interview-feedback';
 
 const AdminSignupPage = lazy(() => import('./pages/auth/AdminSignupPage'));
-const CandidateSignupPage = lazy(
-  () => import('./pages/auth/CandidateSignupPage'),
+const ChangePasswordPage = lazy(
+  () => import('./pages/auth/ChangePasswordPage'),
 );
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const Dashboard = lazy(() => import('./pages/dashboard'));
@@ -31,10 +31,10 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path='/candidate-signup'
+        path='/change-password'
         element={
           <PublicRoute>
-            <CandidateSignupPage />
+            <ChangePasswordPage />
           </PublicRoute>
         }
       />

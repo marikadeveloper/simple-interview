@@ -3,4 +3,5 @@ fragment User on User {
   email
   fullName
   role
+  isActive
 }

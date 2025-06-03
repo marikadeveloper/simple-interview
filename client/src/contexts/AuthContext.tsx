@@ -10,18 +10,11 @@ import {
   useLoginMutation,
   useLogoutMutation,
   useMeQuery,
-  UserRole,
+  UserFragment,
 } from '../generated/graphql';
 
-type User = {
-  id: string;
-  email: string;
-  fullName: string;
-  role: UserRole;
-};
-
 interface AuthContextType {
-  user: User | null;
+  user: UserFragment | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (
@@ -39,7 +32,7 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserFragment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [{ data, fetching }] = useMeQuery();
@@ -50,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!fetching) {
       if (data?.me) {
-        setUser(data.me as unknown as User);
+        setUser(data.me as unknown as UserFragment);
       } else {
         setUser(null);
       }
@@ -62,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const response = await loginMutation({ input: { email, password } });
 
     if (response.data?.login) {
-      setUser(response.data.login as unknown as User);
+      setUser(response.data.login as unknown as UserFragment);
       return { success: true };
     }
 

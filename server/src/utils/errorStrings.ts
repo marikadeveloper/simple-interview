@@ -18,6 +18,7 @@ export const errorStrings = {
     onlyOneAdminAllowed: 'only one admin user allowed',
     duplicateEmail: 'email already taken',
     invalidInvitation: 'invalid invitation',
+    invalidOldPassword: 'invalid old password',
   },
   interviewTemplate: {
     notFound: 'interview template not found',

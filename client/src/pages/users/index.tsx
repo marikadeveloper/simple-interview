@@ -2,7 +2,6 @@ import { DataTable } from '@/components/ui/data-table';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import { useGetUsersQuery, User, UserRole } from '@/generated/graphql';
-import { z } from 'zod';
 import { columns } from './columns';
 import { CreateUserDialog } from './components/CreateUserDialog';
 
@@ -13,21 +12,6 @@ export const userRoles: {
   { value: UserRole.Interviewer, label: 'Interviewer' },
   { value: UserRole.Candidate, label: 'Candidate' },
 ];
-
-const interviewerSchema = z.object({
-  role: z.literal(UserRole.Interviewer),
-  email: z.string().email(),
-  fullName: z.string().min(2).max(50),
-  password: z.string().min(8).max(50),
-});
-const candidateSchema = z.object({
-  role: z.literal(UserRole.Candidate),
-  email: z.string().email(),
-});
-export const formSchema = z.discriminatedUnion('role', [
-  interviewerSchema,
-  candidateSchema,
-]);
 
 const Users = () => {
   const [{ data }] = useGetUsersQuery({

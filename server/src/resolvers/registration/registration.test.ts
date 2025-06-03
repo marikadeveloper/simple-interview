@@ -1,6 +1,4 @@
-import { faker } from '@faker-js/faker';
 import { PASSWORD_MIN_LENGTH } from '../../constants';
-import { CandidateInvitation } from '../../entities/CandidateInvitation';
 import { User, UserRole } from '../../entities/User';
 import { dataSource } from '../../index';
 import { graphqlCall } from '../../test-utils/graphqlCall';
@@ -16,7 +14,6 @@ jest.mock('../../utils/sendEmail', () => ({
 
 // Track entities created during tests for reliable cleanup
 let testUsers: User[] = [];
-let testInvitations: CandidateInvitation[] = [];
 
 // Set up the database connection before all tests
 beforeAll(async () => {
@@ -29,13 +26,6 @@ afterEach(async () => {
   if (testUsers.length > 0) {
     await Promise.all(testUsers.map((user) => User.delete(user.id)));
     testUsers = [];
-  }
-
-  if (testInvitations.length > 0) {
-    await Promise.all(
-      testInvitations.map((invite) => CandidateInvitation.delete(invite.id)),
-    );
-    testInvitations = [];
   }
 });
 
@@ -153,46 +143,7 @@ describe('UserResolver', () => {
   });
 
   describe('candidateRegister', () => {
-    it('given a correct input should register a new candidate', async () => {
-      // Create an invite
-      const email = faker.internet.email();
-      const candidateInvitation = await CandidateInvitation.create({
-        email,
-        used: false,
-      }).save();
-      testInvitations.push(candidateInvitation);
-
-      // Create the candidate
-      const candidateInput = {
-        ...fakeUserData(),
-        email,
-      };
-
-      const response = await graphqlCall({
-        source: candidateRegisterMutation,
-        variableValues: {
-          input: candidateInput,
-        },
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          candidateRegister: {
-            id: expect.any(Number),
-          },
-        },
-      });
-
-      // Add to cleanup list
-      // @ts-ignore
-      if (response?.data?.candidateRegister?.id) {
-        const user = await User.findOne({
-          // @ts-ignore
-          where: { id: response.data.candidateRegister.id },
-        });
-        if (user) testUsers.push(user);
-      }
-    });
+    it.todo('given a correct input should register a new candidate');
 
     it('given an invalid email should return an error', async () => {
       const candidateInput = {

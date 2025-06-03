@@ -201,6 +201,11 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
 
   return (
     <div className='keystroke-replay w-full max-w-4xl mx-auto p-4 space-y-4'>
+      {language && (
+        <div className='language-indicator text-xs font-mono py-1 px-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-t-md w-fit'>
+          {language}
+        </div>
+      )}
       <SyntaxHighlighter
         language={language}
         style={atomOneLight}>

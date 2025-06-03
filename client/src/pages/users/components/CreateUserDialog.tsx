@@ -21,9 +21,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   PreRegisterInput,
-  useCandidateRegisterMutation,
-  useInterviewerRegisterMutation,
   UserRole,
+  useUserRegisterMutation,
 } from '@/generated/graphql';
 import NotAuthorizedPage from '@/pages/auth/NotAuthorizedPage';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,15 +34,13 @@ const formSchema = z.object({
   role: z.nativeEnum(UserRole),
   email: z.string().email(),
   fullName: z.string().min(2).max(50),
-  password: z.string().min(8).max(50),
 });
 
 interface UserCreateDialogProps {}
 
 export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [, interviewerRegister] = useInterviewerRegisterMutation();
-  const [, candidateRegister] = useCandidateRegisterMutation();
+  const [, userRegister] = useUserRegisterMutation();
   const { user } = useAuth();
 
   // reset form on close
@@ -58,7 +55,6 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
     defaultValues: {
       fullName: undefined,
       email: undefined,
-      password: undefined,
       role:
         user?.role === UserRole.Interviewer
           ? UserRole.Candidate
@@ -67,21 +63,11 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const { role, ...rest } = values;
-    if (role === UserRole.Interviewer) {
-      interviewerRegister({
-        input: {
-          ...(rest as PreRegisterInput),
-        },
-      }).then(() => setIsOpen(false));
-    }
-    if (role === UserRole.Candidate) {
-      candidateRegister({
-        input: {
-          ...(rest as PreRegisterInput),
-        },
-      }).then(() => setIsOpen(false));
-    }
+    userRegister({
+      input: {
+        ...(values as PreRegisterInput),
+      },
+    }).then(() => setIsOpen(false));
   }
 
   if (!user) {
@@ -90,21 +76,21 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
 
   const renderTrigger = () => {
     if (user.role === UserRole.Interviewer) {
-      return 'Invite Candidate';
+      return 'Add Candidate';
     }
     return 'Add User';
   };
 
   const renderTitle = () => {
     if (user.role === UserRole.Interviewer) {
-      return 'Invite Candidate';
+      return 'Add Candidate';
     }
     return 'Create User';
   };
 
   const renderDescription = () => {
     if (user.role === UserRole.Interviewer) {
-      return 'Create a candidate invitation for the application.';
+      return 'Create a candidate account for the application.';
     }
     return 'Create a user account for the application.';
   };
@@ -190,23 +176,6 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
                   <FormControl>
                     <Input
                       placeholder='Jane Doe'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='password'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='password'
-                      placeholder='********'
                       {...field}
                     />
                   </FormControl>

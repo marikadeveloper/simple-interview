@@ -122,7 +122,6 @@ export type KeystrokeInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   adminRegister?: Maybe<User>;
-  candidateRegister?: Maybe<User>;
   changePassword?: Maybe<User>;
   confirmInterviewCompletion: Scalars['Boolean']['output'];
   createAnswer?: Maybe<Answer>;
@@ -137,7 +136,6 @@ export type Mutation = {
   deleteUser: Scalars['Boolean']['output'];
   evaluateInterview: Scalars['Boolean']['output'];
   forgotPassword: Scalars['Boolean']['output'];
-  interviewerRegister?: Maybe<User>;
   login?: Maybe<User>;
   logout: Scalars['Boolean']['output'];
   saveKeystrokes: Scalars['Boolean']['output'];
@@ -146,16 +144,12 @@ export type Mutation = {
   updateQuestion?: Maybe<Question>;
   updateQuestionSortOrder: Scalars['Boolean']['output'];
   updateTag?: Maybe<Tag>;
+  userRegister?: Maybe<User>;
 };
 
 
 export type MutationAdminRegisterArgs = {
   input: AdminRegisterInput;
-};
-
-
-export type MutationCandidateRegisterArgs = {
-  input: PreRegisterInput;
 };
 
 
@@ -231,11 +225,6 @@ export type MutationForgotPasswordArgs = {
 };
 
 
-export type MutationInterviewerRegisterArgs = {
-  input: PreRegisterInput;
-};
-
-
 export type MutationLoginArgs = {
   input: AuthInput;
 };
@@ -274,9 +263,15 @@ export type MutationUpdateTagArgs = {
   text: Scalars['String']['input'];
 };
 
+
+export type MutationUserRegisterArgs = {
+  input: PreRegisterInput;
+};
+
 export type PreRegisterInput = {
   email: Scalars['String']['input'];
   fullName: Scalars['String']['input'];
+  role: Scalars['String']['input'];
 };
 
 export type Query = {
@@ -531,19 +526,12 @@ export type AdminRegisterMutationVariables = Exact<{
 
 export type AdminRegisterMutation = { __typename?: 'Mutation', adminRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
 
-export type InterviewerRegisterMutationVariables = Exact<{
+export type UserRegisterMutationVariables = Exact<{
   input: PreRegisterInput;
 }>;
 
 
-export type InterviewerRegisterMutation = { __typename?: 'Mutation', interviewerRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
-
-export type CandidateRegisterMutationVariables = Exact<{
-  input: PreRegisterInput;
-}>;
-
-
-export type CandidateRegisterMutation = { __typename?: 'Mutation', candidateRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
+export type UserRegisterMutation = { __typename?: 'Mutation', userRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
 
 export type SaveKeystrokesMutationVariables = Exact<{
   input: SaveKeystrokesInput;
@@ -971,27 +959,16 @@ export const AdminRegisterDocument = gql`
 export function useAdminRegisterMutation() {
   return Urql.useMutation<AdminRegisterMutation, AdminRegisterMutationVariables>(AdminRegisterDocument);
 };
-export const InterviewerRegisterDocument = gql`
-    mutation InterviewerRegister($input: PreRegisterInput!) {
-  interviewerRegister(input: $input) {
+export const UserRegisterDocument = gql`
+    mutation UserRegister($input: PreRegisterInput!) {
+  userRegister(input: $input) {
     ...User
   }
 }
     ${UserFragmentDoc}`;
 
-export function useInterviewerRegisterMutation() {
-  return Urql.useMutation<InterviewerRegisterMutation, InterviewerRegisterMutationVariables>(InterviewerRegisterDocument);
-};
-export const CandidateRegisterDocument = gql`
-    mutation CandidateRegister($input: PreRegisterInput!) {
-  candidateRegister(input: $input) {
-    ...User
-  }
-}
-    ${UserFragmentDoc}`;
-
-export function useCandidateRegisterMutation() {
-  return Urql.useMutation<CandidateRegisterMutation, CandidateRegisterMutationVariables>(CandidateRegisterDocument);
+export function useUserRegisterMutation() {
+  return Urql.useMutation<UserRegisterMutation, UserRegisterMutationVariables>(UserRegisterDocument);
 };
 export const SaveKeystrokesDocument = gql`
     mutation SaveKeystrokes($input: SaveKeystrokesInput!) {

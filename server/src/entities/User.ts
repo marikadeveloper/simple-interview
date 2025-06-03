@@ -11,9 +11,9 @@ import {
 import { Interview } from './Interview';
 
 export enum UserRole {
-  ADMIN = 'admin',
-  INTERVIEWER = 'interviewer',
-  CANDIDATE = 'candidate',
+  ADMIN = 'ADMIN',
+  INTERVIEWER = 'INTERVIEWER',
+  CANDIDATE = 'CANDIDATE',
 }
 
 // Register the enum with Type-GraphQL

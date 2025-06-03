@@ -39,6 +39,7 @@ export class RegistrationResolver {
         password: hashedPassword,
         fullName: input.fullName,
         role: UserRole.ADMIN,
+        isActive: true,
       }).save();
 
       // Store user id session
@@ -66,6 +67,7 @@ export class RegistrationResolver {
         password: hashedPassword,
         fullName: input.fullName,
         role: UserRole.CANDIDATE,
+        isActive: false, // Candidates are inactive by default
       }).save();
 
       // send email to candidate with random password
@@ -106,6 +108,7 @@ export class RegistrationResolver {
         password: hashedPassword,
         fullName: input.fullName,
         role: UserRole.INTERVIEWER,
+        isActive: false,
       }).save();
 
       // send email to interviewer

@@ -70,6 +70,14 @@ export class InterviewResolver {
       throw new Error(errorStrings.user.notCandidate);
     }
 
+    // Check if interviewer exists
+    const interviewer = await User.findOneBy({
+      id: input.interviewerId,
+    });
+    if (!interviewer) {
+      throw new Error(errorStrings.user.notFound);
+    }
+
     // Check if the date is valid
     const date = new Date(deadline);
     if (isNaN(date.getTime())) {
@@ -87,6 +95,7 @@ export class InterviewResolver {
       user: { id: candidateId },
       deadline,
       status: InterviewStatus.PENDING,
+      interviewer: { id: input.interviewerId },
     }).save();
 
     return interview;

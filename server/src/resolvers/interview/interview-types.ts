@@ -9,6 +9,9 @@ export class InterviewInput {
   @Field(() => Int)
   candidateId: number;
 
+  @Field(() => Int)
+  interviewerId: number;
+
   @Field(() => String)
   deadline: string;
 }

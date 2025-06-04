@@ -65,6 +65,7 @@ export type Interview = {
   evaluationValue?: Maybe<InterviewEvaluation>;
   id: Scalars['Int']['output'];
   interviewTemplate: InterviewTemplate;
+  interviewer: User;
   status: InterviewStatus;
   updatedAt: Scalars['String']['output'];
   user: User;
@@ -86,6 +87,7 @@ export type InterviewInput = {
   candidateId: Scalars['Int']['input'];
   deadline: Scalars['String']['input'];
   interviewTemplateId: Scalars['Int']['input'];
+  interviewerId: Scalars['Int']['input'];
 };
 
 /** Interview status enumeration */
@@ -380,6 +382,7 @@ export type User = {
   fullName: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   interviews?: Maybe<Array<Interview>>;
+  interviewsAsInterviewer?: Maybe<Array<Interview>>;
   isActive: Scalars['Boolean']['output'];
   role: UserRole;
   updatedAt: Scalars['String']['output'];

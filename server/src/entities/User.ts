@@ -62,4 +62,8 @@ export class User extends BaseEntity {
   @Field(() => [Interview], { nullable: true })
   @OneToMany(() => Interview, (interview) => interview.user)
   interviews?: Interview[];
+
+  @Field(() => [Interview], { nullable: true })
+  @OneToMany(() => Interview, (interview) => interview.interviewer)
+  interviewsAsInterviewer?: Interview[];
 }

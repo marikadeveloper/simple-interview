@@ -30,6 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   useCreateInterviewMutation,
   useGetInterviewTemplatesQuery,
@@ -40,7 +41,7 @@ import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
 import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { interviewFormSchema as formSchema } from '../schema';
@@ -51,18 +52,23 @@ interface CreateInterviewDialogProps {}
 export const CreateInterviewDialog: React.FC<
   CreateInterviewDialogProps
 > = ({}) => {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
   const [{ data: interviewTemplatesData }] = useGetInterviewTemplatesQuery({
     pause: !isOpen,
   });
-  const [{ data: candidatesData }] = useGetUsersQuery({
+  const [{ data: usersData }] = useGetUsersQuery({
     variables: {
-      filters: {
-        role: UserRole.Candidate,
-      },
+      filters: {},
     },
   });
   const [, createInterview] = useCreateInterviewMutation();
+  const candidatesData = useMemo(() => {
+    return usersData?.getUsers?.filter((user) => user.role === 'CANDIDATE');
+  }, [usersData]);
+  const interviewersData = useMemo(() => {
+    return usersData?.getUsers?.filter((user) => user.role === 'INTERVIEWER');
+  }, [usersData]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,6 +76,8 @@ export const CreateInterviewDialog: React.FC<
       interviewTemplateId: '',
       candidateId: '',
       deadline: oneWeekFromNow,
+      interviewerId:
+        user?.role === UserRole.Interviewer ? user.id.toString() : '',
     },
   });
 
@@ -86,6 +94,7 @@ export const CreateInterviewDialog: React.FC<
         interviewTemplateId: parseInt(values.interviewTemplateId),
         candidateId: parseInt(values.candidateId),
         deadline: dayjs(values.deadline).format('YYYY-MM-DD'),
+        interviewerId: parseInt(values.interviewerId),
       },
     });
     setIsOpen(false);
@@ -94,7 +103,8 @@ export const CreateInterviewDialog: React.FC<
 
   const interviewTemplates =
     interviewTemplatesData?.getInterviewTemplates || [];
-  const candidates = candidatesData?.getUsers || [];
+  const candidates = candidatesData || [];
+  const interviewers = interviewersData || [];
 
   return (
     <>
@@ -246,6 +256,87 @@ export const CreateInterviewDialog: React.FC<
                   </FormItem>
                 )}
               />
+              {/*  */}
+              {user?.role === UserRole.Interviewer && (
+                <div>
+                  <FormItem>
+                    <FormLabel>Interviewer</FormLabel>
+                  </FormItem>
+                  <p className='mt-2 text-sm text-muted-foreground'>
+                    You are automatically assigned as the interviewer.
+                  </p>
+                </div>
+              )}
+              {user?.role === UserRole.Admin && (
+                <FormField
+                  control={form.control}
+                  name='interviewerId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Interviewer</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant='outline'
+                              role='combobox'
+                              className={cn(
+                                'w-[240px] justify-between',
+                                !field.value && 'text-muted-foreground',
+                              )}>
+                              {field.value
+                                ? interviewers.find(
+                                    (interviewer) =>
+                                      interviewer.id.toString() === field.value,
+                                  )?.fullName
+                                : 'Select interviewer'}
+                              <ChevronsUpDown className='opacity-50' />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className='w-[200px] p-0'>
+                          <Command>
+                            <CommandInput
+                              placeholder='Search interviewer...'
+                              className='h-9'
+                            />
+                            <CommandList>
+                              <CommandEmpty>
+                                No interviewers found.
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {interviewers.map((interviewer) => (
+                                  <CommandItem
+                                    value={interviewer.id.toString()}
+                                    key={interviewer.id}
+                                    onSelect={() => {
+                                      form.setValue(
+                                        'interviewerId',
+                                        interviewer.id.toString(),
+                                      );
+                                    }}>
+                                    {interviewer.fullName}
+                                    <Check
+                                      className={cn(
+                                        'ml-auto',
+                                        interviewer.id.toString() ===
+                                          field.value
+                                          ? 'opacity-100'
+                                          : 'opacity-0',
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               {/*  */}
               <FormField
                 control={form.control}

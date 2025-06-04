@@ -195,6 +195,7 @@ describe('Interview Resolver', () => {
       interviewTemplateId,
       candidateId: candidateUser.id,
       deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
+      interviewerId: interviewerUser.id,
     };
     const response = await graphqlCall({
       source: createInterviewMutation,
@@ -234,6 +235,7 @@ describe('Interview Resolver', () => {
       interviewTemplateId,
       candidateId: candidateUser.id,
       deadline: 'invalid-date-string',
+      interviewerId: interviewerUser.id,
     };
     const response = await graphqlCall({
       source: createInterviewMutation,
@@ -260,6 +262,7 @@ describe('Interview Resolver', () => {
       interviewTemplateId,
       candidateId: candidateUser.id,
       deadline: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day in the past
+      interviewerId: interviewerUser.id,
     };
     const response = await graphqlCall({
       source: createInterviewMutation,

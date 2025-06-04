@@ -7,7 +7,10 @@ import { isAuth } from '../../middleware/isAuth';
 import { MyContext } from '../../types';
 import { errorStrings } from '../../utils/errorStrings';
 import { sendEmail } from '../../utils/sendEmail';
-import { ChangePasswordInput } from './password-types';
+import {
+  ChangePasswordInput,
+  ForgotPasswordChangeInput,
+} from './password-types';
 
 @Resolver()
 export class PasswordResolver {
@@ -20,13 +23,6 @@ export class PasswordResolver {
     if (input.newPassword.length < PASSWORD_MIN_LENGTH) {
       throw new Error(errorStrings.user.passwordTooShort);
     }
-
-    // const key = FORGET_PASSWORD_PREFIX + input.token;
-    // const userId = await redis.get(key);
-
-    // if (!userId) {
-    //   throw new Error(errorStrings.user.tokenExpired);
-    // }
 
     const userId = req.session.userId;
     const user = await User.findOneBy({ id: userId });
@@ -53,15 +49,13 @@ export class PasswordResolver {
       await user.save();
     }
 
-    // delete token
-    // await redis.del(key);
     // log in user
     req.session.userId = user.id;
     return user;
   }
 
   @Mutation(() => Boolean)
-  async forgotPassword(
+  async forgotPasswordRequest(
     @Arg('email') email: string,
     @Ctx() { redis }: MyContext,
   ): Promise<boolean> {
@@ -90,6 +84,40 @@ export class PasswordResolver {
       <p>Thank you!</p>
       `,
     );
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async forgotPasswordChange(
+    @Arg('input') input: ForgotPasswordChangeInput,
+    @Ctx() { req, redis }: MyContext,
+  ): Promise<boolean> {
+    const { token, newPassword } = input;
+
+    if (newPassword.length < PASSWORD_MIN_LENGTH) {
+      throw new Error(errorStrings.user.passwordTooShort);
+    }
+
+    const key = FORGET_PASSWORD_PREFIX + token;
+    const userId = await redis.get(key);
+    if (!userId) {
+      throw new Error(errorStrings.user.tokenExpired);
+    }
+
+    const user = await User.findOneBy({ id: parseInt(userId, 10) });
+    if (!user) {
+      throw new Error(errorStrings.user.notFound);
+    }
+
+    // update password
+    user.password = await argon2.hash(newPassword);
+    await user.save();
+
+    // delete token
+    await redis.del(key);
+
+    // log in user
+    req.session.userId = user.id;
     return true;
   }
 }

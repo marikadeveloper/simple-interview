@@ -222,6 +222,12 @@ export const createUrqlClient = () => {
                 id: _args.id as number,
               });
             },
+            evaluateInterview: (_result, _args, cache, _info) => {
+              cache.invalidate({
+                __typename: 'Interview',
+                id: _args.id as number,
+              });
+            },
 
             // register: (_result, _args, cache, _info) => {
             //   betterUpdateQuery<RegisterMutation, MeQuery>(

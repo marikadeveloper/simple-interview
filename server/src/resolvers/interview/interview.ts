@@ -10,7 +10,11 @@ import {
   UseMiddleware,
 } from 'type-graphql';
 import { Answer } from '../../entities/Answer';
-import { Interview, InterviewStatus } from '../../entities/Interview';
+import {
+  Interview,
+  InterviewEvaluation,
+  InterviewStatus,
+} from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { User, UserRole } from '../../entities/User';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
@@ -42,6 +46,36 @@ export class InterviewResolver {
     }
 
     return InterviewStatus.PENDING;
+  }
+
+  @FieldResolver(() => InterviewEvaluation, { nullable: true })
+  async evaluationValue(
+    @Root() interview: Interview,
+    @Ctx() { req }: MyContext,
+  ): Promise<InterviewEvaluation | null> {
+    const userId = req.session.userId;
+    // If the user is a candidate, they can not see the evaluation value
+    const user: User = (await User.findOneBy({ id: userId })) as User;
+    if (user.role === UserRole.CANDIDATE) {
+      return null;
+    }
+    // Otherwise, return the evaluation value
+    return interview.evaluationValue || null;
+  }
+
+  @FieldResolver(() => String, { nullable: true })
+  async evaluationNotes(
+    @Root() interview: Interview,
+    @Ctx() { req }: MyContext,
+  ): Promise<String | null> {
+    const userId = req.session.userId;
+    // If the user is a candidate, they can not see the evaluation value
+    const user: User = (await User.findOneBy({ id: userId })) as User;
+    if (user.role === UserRole.CANDIDATE) {
+      return null;
+    }
+    // Otherwise, return the evaluation value
+    return interview.evaluationNotes || null;
   }
 
   @Mutation(() => Interview, { nullable: true })

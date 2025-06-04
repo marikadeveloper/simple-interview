@@ -8,18 +8,18 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useChangePasswordMutation } from '@/generated/graphql';
+import { useForgotPasswordChangeMutation } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { z } from 'zod';
 
 const formSchema = z
   .object({
-    oldPassword: z.string().min(8).max(50),
     newPassword: z.string().min(8).max(50),
     confirmPassword: z.string().min(8).max(50),
+    token: z.string(),
     // Ensure newPassword and confirmPassword match
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
@@ -27,29 +27,30 @@ const formSchema = z
   });
 
 export default function ChangePasswordPage() {
+  const { token } = useParams();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
-  const [, changePassword] = useChangePasswordMutation();
+  const [, forgotPasswordChange] = useForgotPasswordChangeMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      oldPassword: '',
       newPassword: '',
       confirmPassword: '',
+      token,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { oldPassword, newPassword } = values;
+    const { newPassword, token } = values;
     setErrors({});
 
     try {
-      const result = await changePassword({
-        input: { oldPassword, newPassword },
+      const result = await forgotPasswordChange({
+        input: { newPassword, token },
       });
 
-      if (result.data?.changePassword) {
+      if (result.data?.forgotPasswordChange) {
         navigate('/dashboard');
       }
     } catch (error) {
@@ -62,6 +63,9 @@ export default function ChangePasswordPage() {
       <div className='w-full max-w-md space-y-8 rounded-lg border bg-card p-6 shadow-md'>
         <div className='text-center'>
           <h1 className='text-2xl font-bold tracking-tight'>Change Password</h1>
+          <p className='text-sm text-muted-foreground'>
+            Choose a new password to secure your account.
+          </p>
         </div>
 
         {errors.general && (
@@ -74,23 +78,6 @@ export default function ChangePasswordPage() {
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className='space-y-8'>
-            <FormField
-              control={form.control}
-              name='oldPassword'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Old Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='password'
-                      placeholder='********'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name='newPassword'

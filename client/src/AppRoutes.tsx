@@ -14,6 +14,9 @@ const FirstPasswordChangePage = lazy(
 const ChangePasswordPage = lazy(
   () => import('./pages/auth/ChangePasswordPage'),
 );
+const ForgotPasswordPage = lazy(
+  () => import('./pages/auth/ForgotPasswordPage'),
+);
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const Dashboard = lazy(() => import('./pages/dashboard'));
 const InterviewTemplate = lazy(() => import('./pages/interview-template'));
@@ -30,6 +33,14 @@ export const AppRoutes = () => {
         element={
           <PublicRoute>
             <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path='/forgot-password'
+        element={
+          <PublicRoute>
+            <ForgotPasswordPage />
           </PublicRoute>
         }
       />

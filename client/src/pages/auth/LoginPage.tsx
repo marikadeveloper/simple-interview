@@ -123,13 +123,11 @@ export default function LoginPage() {
         </form>
 
         <div className='mt-4 text-center text-sm grid gap-1'>
-          <p className='text-muted-foreground'>Don't have an account? </p>
           <Link
-            to='/candidate-signup'
+            to='/forgot-password'
             className='font-medium text-primary hover:underline'>
-            Register as a candidate
+            Forgot your password?
           </Link>
-          <p className='text-muted-foreground'>or</p>
           <Link
             to='/admin-signup'
             className='font-medium text-primary hover:underline'>

@@ -17,6 +17,7 @@ import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { MyContext } from '../../types';
 import { errorStrings } from '../../utils/errorStrings';
+import { sendEmail } from '../../utils/sendEmail';
 import { InterviewEvaluationInput, InterviewInput } from './interview-types';
 
 @Resolver(Interview)
@@ -194,6 +195,7 @@ export class InterviewResolver {
 
     const interview = await Interview.findOne({
       where: { id, user: { id: userId } },
+      relations: ['interviewer', 'user', 'interviewTemplate'],
     });
 
     if (!interview) {
@@ -202,6 +204,21 @@ export class InterviewResolver {
 
     interview.status = InterviewStatus.COMPLETED;
     await interview.save();
+
+    // Notify the interviewer about the completion via email
+    const interviewer = await User.findOneBy({
+      id: interview.interviewer.id,
+    });
+    if (!interviewer) {
+      throw new Error(errorStrings.user.notFound);
+    }
+
+    const anchorTag = `<a href="${process.env.CLIENT_URL}/interviews/${interview.id}">View Interview</a>`;
+    await sendEmail(
+      interviewer.email,
+      'Interview Completed',
+      `${interview.user.fullName} has completed the ${interview.interviewTemplate.name} interview. You can view the interview here: ${anchorTag}`,
+    );
 
     return true;
   }

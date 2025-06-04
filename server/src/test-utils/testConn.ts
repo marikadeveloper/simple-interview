@@ -1,7 +1,6 @@
 import path from 'path';
 import { DataSource } from 'typeorm';
 import { Answer } from '../entities/Answer';
-import { CandidateInvitation } from '../entities/CandidateInvitation';
 import { Interview } from '../entities/Interview';
 import { InterviewTemplate } from '../entities/InterviewTemplate';
 import { Question } from '../entities/Question';
@@ -20,14 +19,6 @@ export const testConn = (drop: boolean = false) => {
     dropSchema: drop,
     logging: false,
     migrations: [path.join(__dirname, './migrations/*')],
-    entities: [
-      User,
-      CandidateInvitation,
-      Interview,
-      InterviewTemplate,
-      Question,
-      Answer,
-      Tag,
-    ],
+    entities: [User, Interview, InterviewTemplate, Question, Answer, Tag],
   });
 };

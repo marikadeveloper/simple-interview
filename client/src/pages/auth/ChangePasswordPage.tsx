@@ -8,45 +8,48 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useCandidateRegisterMutation } from '@/generated/graphql';
+import { useChangePasswordMutation } from '@/generated/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useNavigate } from 'react-router';
 import { z } from 'zod';
 
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8).max(50),
-  fullName: z.string().min(2).max(50),
-});
+const formSchema = z
+  .object({
+    oldPassword: z.string().min(8).max(50),
+    newPassword: z.string().min(8).max(50),
+    confirmPassword: z.string().min(8).max(50),
+    // Ensure newPassword and confirmPassword match
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'New password and confirm password must match',
+  });
 
-export default function CandidateSignupPage() {
+export default function ChangePasswordPage() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [queryParams] = useSearchParams();
-  const email = queryParams.get('email');
   const navigate = useNavigate();
-  const [, candidateRegister] = useCandidateRegisterMutation();
+  const [, changePassword] = useChangePasswordMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: email || '',
-      password: '',
-      fullName: '',
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { email, password, fullName } = values;
+    const { oldPassword, newPassword } = values;
     setErrors({});
 
     try {
-      const result = await candidateRegister({
-        input: { email, password, fullName },
+      const result = await changePassword({
+        input: { oldPassword, newPassword },
       });
 
-      if (result.data?.candidateRegister) {
+      if (result.data?.changePassword) {
         navigate('/dashboard');
       }
     } catch (error) {
@@ -58,12 +61,7 @@ export default function CandidateSignupPage() {
     <div className='flex min-h-screen items-center justify-center bg-background p-4'>
       <div className='w-full max-w-md space-y-8 rounded-lg border bg-card p-6 shadow-md'>
         <div className='text-center'>
-          <h1 className='text-2xl font-bold tracking-tight'>
-            Candidate Registration
-          </h1>
-          <p className='text-sm text-muted-foreground'>
-            Create your candidate account
-          </p>
+          <h1 className='text-2xl font-bold tracking-tight'>Change Password</h1>
         </div>
 
         {errors.general && (
@@ -78,13 +76,14 @@ export default function CandidateSignupPage() {
             className='space-y-8'>
             <FormField
               control={form.control}
-              name='email'
+              name='oldPassword'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Old Password</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='jane@doe.it'
+                      type='password'
+                      placeholder='********'
                       {...field}
                     />
                   </FormControl>
@@ -94,13 +93,14 @@ export default function CandidateSignupPage() {
             />
             <FormField
               control={form.control}
-              name='fullName'
+              name='newPassword'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>New Password</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='John Doe'
+                      type='password'
+                      placeholder='********'
                       {...field}
                     />
                   </FormControl>
@@ -110,10 +110,10 @@ export default function CandidateSignupPage() {
             />
             <FormField
               control={form.control}
-              name='password'
+              name='confirmPassword'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Confirm New Password</FormLabel>
                   <FormControl>
                     <Input
                       type='password'
@@ -132,17 +132,6 @@ export default function CandidateSignupPage() {
             </Button>
           </form>
         </Form>
-
-        <div className='mt-4 text-center text-sm'>
-          <p className='text-muted-foreground'>
-            Already have an account?{' '}
-            <Link
-              to='/login'
-              className='font-medium text-primary hover:underline'>
-              Sign in
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );

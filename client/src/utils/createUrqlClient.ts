@@ -65,13 +65,26 @@ const errorExchange: Exchange =
 //   };
 // };
 
-const invalidateAll = (cache: Cache, queryName: string) => {
-  const allFields = cache.inspectFields('Query');
-  const fieldInfos = allFields.filter((info) => info.fieldName === queryName);
-  fieldInfos.forEach((fi) => {
-    cache.invalidate('Query', queryName, fi.arguments || {});
-  });
-};
+// const invalidateAll = (cache: Cache, queryName: string) => {
+//   const allFields = cache.inspectFields('Query');
+//   const fieldInfos = allFields.filter((info) => info.fieldName === queryName);
+//   fieldInfos.forEach((fi) => {
+//     cache.invalidate('Query', queryName, fi.arguments || {});
+//   });
+// };
+const invalidateAll = (
+  cache: Cache,
+  name: string,
+  args?: { input: { id: any } },
+) =>
+  args
+    ? cache.invalidate({ __typename: name, id: args.input.id })
+    : cache
+        .inspectFields('Query')
+        .filter((field) => field.fieldName === name)
+        .forEach((field) => {
+          cache.invalidate('Query', field.fieldKey);
+        });
 
 export const createUrqlClient = () => {
   let cookie = '';
@@ -188,7 +201,7 @@ export const createUrqlClient = () => {
             },
 
             createInterview: (_result, _args, cache, _info) => {
-              cache.invalidate('Interview');
+              invalidateAll(cache, 'getInterviews');
             },
             updateInterview: (_result, _args, cache, _info) => {
               cache.invalidate({
@@ -197,6 +210,12 @@ export const createUrqlClient = () => {
               });
             },
             deleteInterview: (_result, _args, cache, _info) => {
+              cache.invalidate({
+                __typename: 'Interview',
+                id: _args.id as number,
+              });
+            },
+            confirmInterviewCompletion: (_result, _args, cache, _info) => {
               cache.invalidate({
                 __typename: 'Interview',
                 id: _args.id as number,

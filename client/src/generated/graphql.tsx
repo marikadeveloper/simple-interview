@@ -17,6 +17,12 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AdminRegisterInput = {
+  email: Scalars['String']['input'];
+  fullName: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
 export type Answer = {
   __typename?: 'Answer';
   hasReplay: Scalars['Boolean']['output'];
@@ -33,17 +39,9 @@ export type AuthInput = {
   password: Scalars['String']['input'];
 };
 
-export type CandidateInvitation = {
-  __typename?: 'CandidateInvitation';
-  createdAt: Scalars['String']['output'];
-  email: Scalars['String']['output'];
-  id: Scalars['Int']['output'];
-  used: Scalars['Boolean']['output'];
-};
-
 export type ChangePasswordInput = {
   newPassword: Scalars['String']['input'];
-  token: Scalars['String']['input'];
+  oldPassword: Scalars['String']['input'];
 };
 
 export type CreateAnswerInput = {
@@ -124,11 +122,9 @@ export type KeystrokeInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   adminRegister?: Maybe<User>;
-  candidateRegister?: Maybe<User>;
   changePassword?: Maybe<User>;
   confirmInterviewCompletion: Scalars['Boolean']['output'];
   createAnswer?: Maybe<Answer>;
-  createCandidateInvitation: Scalars['Boolean']['output'];
   createInterview?: Maybe<Interview>;
   createInterviewTemplate?: Maybe<InterviewTemplate>;
   createQuestion?: Maybe<Question>;
@@ -140,7 +136,6 @@ export type Mutation = {
   deleteUser: Scalars['Boolean']['output'];
   evaluateInterview: Scalars['Boolean']['output'];
   forgotPassword: Scalars['Boolean']['output'];
-  interviewerRegister?: Maybe<User>;
   login?: Maybe<User>;
   logout: Scalars['Boolean']['output'];
   saveKeystrokes: Scalars['Boolean']['output'];
@@ -149,16 +144,12 @@ export type Mutation = {
   updateQuestion?: Maybe<Question>;
   updateQuestionSortOrder: Scalars['Boolean']['output'];
   updateTag?: Maybe<Tag>;
+  userRegister?: Maybe<User>;
 };
 
 
 export type MutationAdminRegisterArgs = {
-  input: RegisterInput;
-};
-
-
-export type MutationCandidateRegisterArgs = {
-  input: RegisterInput;
+  input: AdminRegisterInput;
 };
 
 
@@ -174,11 +165,6 @@ export type MutationConfirmInterviewCompletionArgs = {
 
 export type MutationCreateAnswerArgs = {
   input: CreateAnswerInput;
-};
-
-
-export type MutationCreateCandidateInvitationArgs = {
-  email: Scalars['String']['input'];
 };
 
 
@@ -239,11 +225,6 @@ export type MutationForgotPasswordArgs = {
 };
 
 
-export type MutationInterviewerRegisterArgs = {
-  input: RegisterInput;
-};
-
-
 export type MutationLoginArgs = {
   input: AuthInput;
 };
@@ -282,11 +263,21 @@ export type MutationUpdateTagArgs = {
   text: Scalars['String']['input'];
 };
 
+
+export type MutationUserRegisterArgs = {
+  input: PreRegisterInput;
+};
+
+export type PreRegisterInput = {
+  email: Scalars['String']['input'];
+  fullName: Scalars['String']['input'];
+  role: Scalars['String']['input'];
+};
+
 export type Query = {
   __typename?: 'Query';
   answer?: Maybe<Answer>;
   getCandidateInterview?: Maybe<Interview>;
-  getCandidateInvitations?: Maybe<Array<CandidateInvitation>>;
   getInterview?: Maybe<Interview>;
   getInterviewTemplate?: Maybe<InterviewTemplate>;
   getInterviewTemplates?: Maybe<Array<InterviewTemplate>>;
@@ -307,11 +298,6 @@ export type QueryAnswerArgs = {
 
 export type QueryGetCandidateInterviewArgs = {
   id: Scalars['Int']['input'];
-};
-
-
-export type QueryGetCandidateInvitationsArgs = {
-  used?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -360,12 +346,6 @@ export type QuestionInput = {
   title: Scalars['String']['input'];
 };
 
-export type RegisterInput = {
-  email: Scalars['String']['input'];
-  fullName: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-};
-
 export type SaveKeystrokesInput = {
   answerId: Scalars['Int']['input'];
   keystrokes: Array<KeystrokeInput>;
@@ -389,6 +369,7 @@ export type User = {
   fullName: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   interviews?: Maybe<Array<Interview>>;
+  isActive: Scalars['Boolean']['output'];
   role: UserRole;
   updatedAt: Scalars['String']['output'];
 };
@@ -411,13 +392,13 @@ export type AnswerFragment = { __typename?: 'Answer', id: number, text: string, 
 
 export type AnswerWithKeystrokesFragment = { __typename?: 'Answer', id: number, text: string, language: string, keystrokes?: Array<{ __typename?: 'Keystroke', relativeTimestamp: number, snapshot: string }> | null, question: { __typename?: 'Question', id: number, title: string, description: string } };
 
-export type InterviewListItemFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } };
+export type InterviewListItemFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } };
 
-export type CandidateInterviewFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null };
+export type CandidateInterviewFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null };
 
-export type ReplayInterviewFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, keystrokes?: Array<{ __typename?: 'Keystroke', relativeTimestamp: number, snapshot: string }> | null, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null };
+export type ReplayInterviewFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, keystrokes?: Array<{ __typename?: 'Keystroke', relativeTimestamp: number, snapshot: string }> | null, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null };
 
-export type FeedbackInterviewFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, evaluationNotes?: string | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null };
+export type FeedbackInterviewFragment = { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, evaluationNotes?: string | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null };
 
 export type InterviewTemplateFragment = { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null };
 
@@ -431,7 +412,14 @@ export type QuestionWithInterviewTemplateFragment = { __typename?: 'Question', i
 
 export type TagFragment = { __typename?: 'Tag', id: number, text: string };
 
-export type UserFragment = { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole };
+export type UserFragment = { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean };
+
+export type ChangePasswordMutationVariables = Exact<{
+  input: ChangePasswordInput;
+}>;
+
+
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
 
 export type ConfirmInterviewCompletionMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -446,13 +434,6 @@ export type CreateAnswerMutationVariables = Exact<{
 
 
 export type CreateAnswerMutation = { __typename?: 'Mutation', createAnswer?: { __typename?: 'Answer', id: number } | null };
-
-export type CreateCandidateInvitationMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-}>;
-
-
-export type CreateCandidateInvitationMutation = { __typename?: 'Mutation', createCandidateInvitation: boolean };
 
 export type CreateInterviewMutationVariables = Exact<{
   input: InterviewInput;
@@ -531,7 +512,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null };
+export type LoginMutation = { __typename?: 'Mutation', login?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -539,25 +520,18 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
 export type AdminRegisterMutationVariables = Exact<{
-  input: RegisterInput;
+  input: AdminRegisterInput;
 }>;
 
 
-export type AdminRegisterMutation = { __typename?: 'Mutation', adminRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null };
+export type AdminRegisterMutation = { __typename?: 'Mutation', adminRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
 
-export type InterviewerRegisterMutationVariables = Exact<{
-  input: RegisterInput;
+export type UserRegisterMutationVariables = Exact<{
+  input: PreRegisterInput;
 }>;
 
 
-export type InterviewerRegisterMutation = { __typename?: 'Mutation', interviewerRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null };
-
-export type CandidateRegisterMutationVariables = Exact<{
-  input: RegisterInput;
-}>;
-
-
-export type CandidateRegisterMutation = { __typename?: 'Mutation', candidateRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null };
+export type UserRegisterMutation = { __typename?: 'Mutation', userRegister?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
 
 export type SaveKeystrokesMutationVariables = Exact<{
   input: SaveKeystrokesInput;
@@ -610,28 +584,21 @@ export type GetCandidateInterviewQueryVariables = Exact<{
 }>;
 
 
-export type GetCandidateInterviewQuery = { __typename?: 'Query', getCandidateInterview?: { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null } | null };
-
-export type GetCandidateInvitationsQueryVariables = Exact<{
-  used?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type GetCandidateInvitationsQuery = { __typename?: 'Query', getCandidateInvitations?: Array<{ __typename?: 'CandidateInvitation', id: number, email: string, used: boolean, createdAt: string }> | null };
+export type GetCandidateInterviewQuery = { __typename?: 'Query', getCandidateInterview?: { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null } | null };
 
 export type GetInterviewForReplayQueryVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
 
 
-export type GetInterviewForReplayQuery = { __typename?: 'Query', getInterview?: { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, keystrokes?: Array<{ __typename?: 'Keystroke', relativeTimestamp: number, snapshot: string }> | null, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null } | null };
+export type GetInterviewForReplayQuery = { __typename?: 'Query', getInterview?: { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, keystrokes?: Array<{ __typename?: 'Keystroke', relativeTimestamp: number, snapshot: string }> | null, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null } | null };
 
 export type GetInterviewForFeedbackQueryVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
 
 
-export type GetInterviewForFeedbackQuery = { __typename?: 'Query', getInterview?: { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, evaluationNotes?: string | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null } | null };
+export type GetInterviewForFeedbackQuery = { __typename?: 'Query', getInterview?: { __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, evaluationNotes?: string | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, sortOrder: number }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, answers?: Array<{ __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } }> | null } | null };
 
 export type GetInterviewTemplateQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -650,7 +617,7 @@ export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTem
 export type GetInterviewsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetInterviewsQuery = { __typename?: 'Query', getInterviews?: Array<{ __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } }> | null };
+export type GetInterviewsQuery = { __typename?: 'Query', getInterviews?: Array<{ __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } }> | null };
 
 export type GetQuestionsQueryVariables = Exact<{
   interviewTemplateId: Scalars['Int']['input'];
@@ -669,12 +636,12 @@ export type GetUsersQueryVariables = Exact<{
 }>;
 
 
-export type GetUsersQuery = { __typename?: 'Query', getUsers?: Array<{ __typename?: 'User', id: number, email: string, fullName: string, role: UserRole }> | null };
+export type GetUsersQuery = { __typename?: 'Query', getUsers?: Array<{ __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }> | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } | null };
 
 export const TagFragmentDoc = gql`
     fragment Tag on Tag {
@@ -700,6 +667,7 @@ export const UserFragmentDoc = gql`
   email
   fullName
   role
+  isActive
 }
     `;
 export const InterviewListItemFragmentDoc = gql`
@@ -831,6 +799,17 @@ export const QuestionWithInterviewTemplateFragmentDoc = gql`
   }
 }
     ${InterviewTemplateFragmentDoc}`;
+export const ChangePasswordDocument = gql`
+    mutation ChangePassword($input: ChangePasswordInput!) {
+  changePassword(input: $input) {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+
+export function useChangePasswordMutation() {
+  return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
+};
 export const ConfirmInterviewCompletionDocument = gql`
     mutation ConfirmInterviewCompletion($id: Int!) {
   confirmInterviewCompletion(id: $id)
@@ -850,15 +829,6 @@ export const CreateAnswerDocument = gql`
 
 export function useCreateAnswerMutation() {
   return Urql.useMutation<CreateAnswerMutation, CreateAnswerMutationVariables>(CreateAnswerDocument);
-};
-export const CreateCandidateInvitationDocument = gql`
-    mutation CreateCandidateInvitation($email: String!) {
-  createCandidateInvitation(email: $email)
-}
-    `;
-
-export function useCreateCandidateInvitationMutation() {
-  return Urql.useMutation<CreateCandidateInvitationMutation, CreateCandidateInvitationMutationVariables>(CreateCandidateInvitationDocument);
 };
 export const CreateInterviewDocument = gql`
     mutation CreateInterview($input: InterviewInput!) {
@@ -979,7 +949,7 @@ export function useLogoutMutation() {
   return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const AdminRegisterDocument = gql`
-    mutation AdminRegister($input: RegisterInput!) {
+    mutation AdminRegister($input: AdminRegisterInput!) {
   adminRegister(input: $input) {
     ...User
   }
@@ -989,27 +959,16 @@ export const AdminRegisterDocument = gql`
 export function useAdminRegisterMutation() {
   return Urql.useMutation<AdminRegisterMutation, AdminRegisterMutationVariables>(AdminRegisterDocument);
 };
-export const InterviewerRegisterDocument = gql`
-    mutation InterviewerRegister($input: RegisterInput!) {
-  interviewerRegister(input: $input) {
+export const UserRegisterDocument = gql`
+    mutation UserRegister($input: PreRegisterInput!) {
+  userRegister(input: $input) {
     ...User
   }
 }
     ${UserFragmentDoc}`;
 
-export function useInterviewerRegisterMutation() {
-  return Urql.useMutation<InterviewerRegisterMutation, InterviewerRegisterMutationVariables>(InterviewerRegisterDocument);
-};
-export const CandidateRegisterDocument = gql`
-    mutation CandidateRegister($input: RegisterInput!) {
-  candidateRegister(input: $input) {
-    ...User
-  }
-}
-    ${UserFragmentDoc}`;
-
-export function useCandidateRegisterMutation() {
-  return Urql.useMutation<CandidateRegisterMutation, CandidateRegisterMutationVariables>(CandidateRegisterDocument);
+export function useUserRegisterMutation() {
+  return Urql.useMutation<UserRegisterMutation, UserRegisterMutationVariables>(UserRegisterDocument);
 };
 export const SaveKeystrokesDocument = gql`
     mutation SaveKeystrokes($input: SaveKeystrokesInput!) {
@@ -1083,20 +1042,6 @@ export const GetCandidateInterviewDocument = gql`
 
 export function useGetCandidateInterviewQuery(options: Omit<Urql.UseQueryArgs<GetCandidateInterviewQueryVariables>, 'query'>) {
   return Urql.useQuery<GetCandidateInterviewQuery, GetCandidateInterviewQueryVariables>({ query: GetCandidateInterviewDocument, ...options });
-};
-export const GetCandidateInvitationsDocument = gql`
-    query GetCandidateInvitations($used: Boolean) {
-  getCandidateInvitations(used: $used) {
-    id
-    email
-    used
-    createdAt
-  }
-}
-    `;
-
-export function useGetCandidateInvitationsQuery(options?: Omit<Urql.UseQueryArgs<GetCandidateInvitationsQueryVariables>, 'query'>) {
-  return Urql.useQuery<GetCandidateInvitationsQuery, GetCandidateInvitationsQueryVariables>({ query: GetCandidateInvitationsDocument, ...options });
 };
 export const GetInterviewForReplayDocument = gql`
     query GetInterviewForReplay($id: Int!) {

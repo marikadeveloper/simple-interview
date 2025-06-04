@@ -11,9 +11,9 @@ import {
 import { Interview } from './Interview';
 
 export enum UserRole {
-  ADMIN = 'admin',
-  INTERVIEWER = 'interviewer',
-  CANDIDATE = 'candidate',
+  ADMIN = 'ADMIN',
+  INTERVIEWER = 'INTERVIEWER',
+  CANDIDATE = 'CANDIDATE',
 }
 
 // Register the enum with Type-GraphQL
@@ -46,6 +46,10 @@ export class User extends BaseEntity {
     enum: UserRole,
   })
   role!: UserRole;
+
+  @Field(() => Boolean)
+  @Column({ default: false })
+  isActive: boolean;
 
   @Field(() => String)
   @CreateDateColumn({ type: 'date' })

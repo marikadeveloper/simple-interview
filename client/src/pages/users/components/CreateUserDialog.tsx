@@ -11,7 +11,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,24 +20,27 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  RegisterInput,
-  useCreateCandidateInvitationMutation,
-  useInterviewerRegisterMutation,
+  PreRegisterInput,
   UserRole,
+  useUserRegisterMutation,
 } from '@/generated/graphql';
 import NotAuthorizedPage from '@/pages/auth/NotAuthorizedPage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { formSchema } from '..';
+
+const formSchema = z.object({
+  role: z.nativeEnum(UserRole),
+  email: z.string().email(),
+  fullName: z.string().min(2).max(50),
+});
 
 interface UserCreateDialogProps {}
 
 export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [, interviewerRegister] = useInterviewerRegisterMutation();
-  const [, createCandidateInvitation] = useCreateCandidateInvitationMutation();
+  const [, userRegister] = useUserRegisterMutation();
   const { user } = useAuth();
 
   // reset form on close
@@ -53,7 +55,6 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
     defaultValues: {
       fullName: undefined,
       email: undefined,
-      password: undefined,
       role:
         user?.role === UserRole.Interviewer
           ? UserRole.Candidate
@@ -62,19 +63,11 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const { role, ...rest } = values;
-    if (role === UserRole.Interviewer) {
-      interviewerRegister({
-        input: {
-          ...(rest as RegisterInput),
-        },
-      }).then(() => setIsOpen(false));
-    }
-    if (role === UserRole.Candidate) {
-      createCandidateInvitation({
-        email: rest.email,
-      }).then(() => setIsOpen(false));
-    }
+    userRegister({
+      input: {
+        ...(values as PreRegisterInput),
+      },
+    }).then(() => setIsOpen(false));
   }
 
   if (!user) {
@@ -83,21 +76,21 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
 
   const renderTrigger = () => {
     if (user.role === UserRole.Interviewer) {
-      return 'Invite Candidate';
+      return 'Add Candidate';
     }
     return 'Add User';
   };
 
   const renderTitle = () => {
     if (user.role === UserRole.Interviewer) {
-      return 'Invite Candidate';
+      return 'Add Candidate';
     }
     return 'Create User';
   };
 
   const renderDescription = () => {
     if (user.role === UserRole.Interviewer) {
-      return 'Create a candidate invitation for the application.';
+      return 'Create a candidate account for the application.';
     }
     return 'Create a user account for the application.';
   };
@@ -164,11 +157,6 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  {form.watch('role') === UserRole.Candidate && (
-                    <FormDescription>
-                      An email invitation will be sent to this email.
-                    </FormDescription>
-                  )}
                   <FormControl>
                     <Input
                       placeholder='jane@doe.it'
@@ -179,43 +167,22 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
                 </FormItem>
               )}
             />
-            {form.watch('role') === UserRole.Interviewer && (
-              <>
-                <FormField
-                  control={form.control}
-                  name='fullName'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Jane Doe'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='password'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='password'
-                          placeholder='********'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
+            <FormField
+              control={form.control}
+              name='fullName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='Jane Doe'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </form>
         </Form>
         <DialogFooter>

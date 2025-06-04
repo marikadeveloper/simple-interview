@@ -26,5 +26,17 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
+  if (
+    [UserRole.Candidate, UserRole.Interviewer].includes(user.role) &&
+    !user.isActive
+  ) {
+    return (
+      <Navigate
+        to='/change-password'
+        replace
+      />
+    );
+  }
+
   return <>{children}</>;
 };

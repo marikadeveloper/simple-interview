@@ -56,6 +56,12 @@ const InterviewStatusLabel = ({ status }: { status: InterviewStatus }) => {
           Completed
         </span>
       );
+    default:
+      return (
+        <span className='text-xs bg-gray-500/50 px-2 py-1 rounded-full'>
+          Unknown Status
+        </span>
+      );
   }
 };
 

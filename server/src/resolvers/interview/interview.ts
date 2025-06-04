@@ -99,6 +99,22 @@ export class InterviewResolver {
       interviewer: { id: input.interviewerId },
     }).save();
 
+    // Notify the candidate about the interview via email
+    const anchorTag = `<a href="${process.env.CLIENT_URL}/interviews>Your Interviews</a>`;
+    await sendEmail(
+      candidate.email,
+      'Interview Scheduled',
+      `You have been scheduled for an interview for the ${interviewTemplate.name} position. Please check your interviews here: ${anchorTag}`,
+    );
+
+    // Notify the interviewer about the interview via email
+    const interviewerAnchorTag = `<a href="${process.env.CLIENT_URL}/interviews">See Interviews</a>`;
+    await sendEmail(
+      interviewer.email,
+      'Interview Assigned',
+      `You have been assigned to an interview for the ${interviewTemplate.name} position. You can see the interview here: ${interviewerAnchorTag}`,
+    );
+
     return interview;
   }
 
@@ -258,6 +274,8 @@ export class InterviewResolver {
       relations: ['interviewTemplate', 'user', 'interviewer'],
     });
 
+    const originalInterviewerId = interview?.interviewer?.id;
+
     if (!interview) {
       throw new Error(errorStrings.interview.notFound);
     }
@@ -317,6 +335,16 @@ export class InterviewResolver {
         interviewer: { id: interviewerId },
       },
     );
+
+    if (interviewerId !== originalInterviewerId) {
+      // Notify the new interviewer about the interview via email
+      const interviewerAnchorTag = `<a href="${process.env.CLIENT_URL}/interviews">See Interviews</a>`;
+      await sendEmail(
+        interviewer.email,
+        'Interview Assigned',
+        `You have been assigned to an interview for the ${interviewTemplate.name} position. You can see the interview here: ${interviewerAnchorTag}`,
+      );
+    }
 
     return interview;
   }

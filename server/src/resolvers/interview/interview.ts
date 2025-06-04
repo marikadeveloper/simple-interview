@@ -113,14 +113,21 @@ export class InterviewResolver {
     if (user.role === UserRole.CANDIDATE) {
       const interviews = await Interview.find({
         where: { user: { id: userId } },
-        relations: ['interviewTemplate', 'user'],
+        relations: ['interviewTemplate', 'user', 'interviewer'],
         order: { deadline: 'DESC' },
       });
 
       return interviews;
+    } else if (user.role === UserRole.INTERVIEWER) {
+      const interviews = await Interview.find({
+        where: { interviewer: { id: userId } },
+        relations: ['interviewTemplate', 'user', 'interviewer'],
+        order: { deadline: 'DESC' },
+      });
+      return interviews;
     } else {
       const interviews = await Interview.find({
-        relations: ['interviewTemplate', 'user'],
+        relations: ['interviewTemplate', 'user', 'interviewer'],
         order: { deadline: 'DESC' },
       });
       return interviews;
@@ -231,7 +238,7 @@ export class InterviewResolver {
     // check if the interview exists
     const interview = await Interview.findOne({
       where: { id },
-      relations: ['interviewTemplate', 'user'],
+      relations: ['interviewTemplate', 'user', 'interviewer'],
     });
 
     if (!interview) {
@@ -242,7 +249,7 @@ export class InterviewResolver {
       throw new Error(errorStrings.interview.canNotUpdate);
     }
 
-    const { interviewTemplateId, candidateId, deadline } = input;
+    const { interviewTemplateId, candidateId, deadline, interviewerId } = input;
 
     // Check if interview template exists
     const interviewTemplate = await InterviewTemplate.findOneBy({
@@ -261,6 +268,14 @@ export class InterviewResolver {
 
     if (!candidate) {
       throw new Error(errorStrings.user.notCandidate);
+    }
+
+    // Check if interviewer exists
+    const interviewer = await User.findOneBy({
+      id: interviewerId,
+    });
+    if (!interviewer) {
+      throw new Error(errorStrings.user.notFound);
     }
 
     // Check if the date is valid
@@ -282,6 +297,7 @@ export class InterviewResolver {
         user: { id: candidateId },
         deadline,
         status: InterviewStatus.PENDING,
+        interviewer: { id: interviewerId },
       },
     );
 

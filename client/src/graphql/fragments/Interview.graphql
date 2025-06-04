@@ -6,6 +6,9 @@ fragment InterviewListItem on Interview {
   user {
     ...User
   }
+  interviewer {
+    ...User
+  }
   deadline
   status
   evaluationValue

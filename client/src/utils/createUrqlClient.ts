@@ -114,6 +114,7 @@ export const createUrqlClient = () => {
               );
               // delete other cache
               invalidateAll(cache, 'getUsers');
+              invalidateAll(cache, 'getInterviews');
             },
 
             login: (_result, _args, cache, _info) => {

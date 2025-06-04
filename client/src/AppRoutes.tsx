@@ -8,6 +8,9 @@ import Interview from './pages/interview';
 import InterviewFeedback from './pages/interview-feedback';
 
 const AdminSignupPage = lazy(() => import('./pages/auth/AdminSignupPage'));
+const FirstPasswordChangePage = lazy(
+  () => import('./pages/auth/FirstPasswordChangePage'),
+);
 const ChangePasswordPage = lazy(
   () => import('./pages/auth/ChangePasswordPage'),
 );
@@ -31,7 +34,7 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path='/change-password'
+        path='/change-password/:token'
         element={
           <PublicRoute>
             <ChangePasswordPage />
@@ -48,6 +51,14 @@ export const AppRoutes = () => {
       />
 
       {/* Protected routes - require authentication */}
+      <Route
+        path='/first-password-change'
+        element={
+          <ProtectedRoute>
+            <FirstPasswordChangePage />
+          </ProtectedRoute>
+        }
+      />
       <Route element={<Layout />}>
         <Route
           path='/dashboard'

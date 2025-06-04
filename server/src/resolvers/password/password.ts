@@ -73,7 +73,7 @@ export class PasswordResolver {
       'EX',
       1000 * 60 * 60 * 24 * 3, // 3 days
     );
-    const anchorTag = `<a href="http://localhost:3000/change-password/${token}">Reset password</a>`;
+    const anchorTag = `<a href="${process.env.CLIENT_URL}/change-password/${token}">Reset password</a>`;
     await sendEmail(
       email,
       'Reset Password',

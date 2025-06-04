@@ -32,7 +32,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   ) {
     return (
       <Navigate
-        to='/change-password'
+        to='/first-password-change'
         replace
       />
     );

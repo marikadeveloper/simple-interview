@@ -8,6 +8,9 @@ export const interviewFormSchema = z.object({
   candidateId: z.string().min(1, {
     message: 'Candidate is required.',
   }),
+  interviewerId: z.string().min(1, {
+    message: 'Interviewer is required.',
+  }),
   deadline: z
     .date()
     .refine((date) => date > new Date(), {

@@ -114,6 +114,7 @@ export const createUrqlClient = () => {
               );
               // delete other cache
               invalidateAll(cache, 'getUsers');
+              invalidateAll(cache, 'getInterviews');
             },
 
             login: (_result, _args, cache, _info) => {
@@ -216,6 +217,12 @@ export const createUrqlClient = () => {
               });
             },
             confirmInterviewCompletion: (_result, _args, cache, _info) => {
+              cache.invalidate({
+                __typename: 'Interview',
+                id: _args.id as number,
+              });
+            },
+            evaluateInterview: (_result, _args, cache, _info) => {
               cache.invalidate({
                 __typename: 'Interview',
                 id: _args.id as number,

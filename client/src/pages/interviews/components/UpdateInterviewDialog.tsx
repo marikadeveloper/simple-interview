@@ -31,6 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   InterviewListItemFragment,
   InterviewStatus,
@@ -49,7 +50,7 @@ import {
   ChevronsUpDown,
   Pencil,
 } from 'lucide-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { interviewFormSchema as formSchema } from '../schema';
@@ -60,17 +61,23 @@ interface UpdateInterviewDialogProps {
 export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
   interview,
 }) => {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
   const [{ data: interviewTemplatesData }] = useGetInterviewTemplatesQuery({
     pause: !isOpen,
   });
-  const [{ data: candidatesData }] = useGetUsersQuery({
+  const [{ data: usersData }] = useGetUsersQuery({
     variables: {
-      filters: {
-        role: UserRole.Candidate,
-      },
+      filters: {},
     },
   });
+  const candidatesData = useMemo(() => {
+    return usersData?.getUsers?.filter((user) => user.role === 'CANDIDATE');
+  }, [usersData]);
+  const interviewersData = useMemo(() => {
+    return usersData?.getUsers?.filter((user) => user.role === 'INTERVIEWER');
+  }, [usersData]);
+
   const [, updateInterview] = useUpdateInterviewMutation();
   const canUpdate: boolean = interview.status === InterviewStatus.Pending;
 
@@ -80,6 +87,7 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
       interviewTemplateId: interview.interviewTemplate.id.toString(),
       candidateId: interview.user.id.toString(),
       deadline: dayjs(interview.deadline).toDate(),
+      interviewerId: interview.interviewer?.id.toString() || '',
     },
   });
 
@@ -98,6 +106,7 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
         interviewTemplateId: parseInt(values.interviewTemplateId),
         candidateId: parseInt(values.candidateId),
         deadline: dayjs(values.deadline).format('YYYY-MM-DD'),
+        interviewerId: parseInt(values.interviewerId),
       },
     });
     setIsOpen(false);
@@ -106,7 +115,8 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
 
   const interviewTemplates =
     interviewTemplatesData?.getInterviewTemplates || [];
-  const candidates = candidatesData?.getUsers || [];
+  const candidates = candidatesData || [];
+  const interviewers = interviewersData || [];
 
   const InterviewForm = () => (
     <Form {...form}>
@@ -246,6 +256,74 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
             </FormItem>
           )}
         />
+        {/*  */}
+        {user?.role === UserRole.Admin && (
+          <FormField
+            control={form.control}
+            name='interviewerId'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Interviewer</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant='outline'
+                        role='combobox'
+                        className={cn(
+                          'w-[240px] justify-between',
+                          !field.value && 'text-muted-foreground',
+                        )}>
+                        {field.value
+                          ? interviewers.find(
+                              (interviewer) =>
+                                interviewer.id.toString() === field.value,
+                            )?.fullName
+                          : 'Select interviewer'}
+                        <ChevronsUpDown className='opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-[200px] p-0'>
+                    <Command>
+                      <CommandInput
+                        placeholder='Search interviewer...'
+                        className='h-9'
+                      />
+                      <CommandList>
+                        <CommandEmpty>No interviewers found.</CommandEmpty>
+                        <CommandGroup>
+                          {interviewers.map((interviewer) => (
+                            <CommandItem
+                              value={interviewer.id.toString()}
+                              key={interviewer.id}
+                              onSelect={() => {
+                                form.setValue(
+                                  'interviewerId',
+                                  interviewer.id.toString(),
+                                );
+                              }}>
+                              {interviewer.fullName}
+                              <Check
+                                className={cn(
+                                  'ml-auto',
+                                  interviewer.id.toString() === field.value
+                                    ? 'opacity-100'
+                                    : 'opacity-0',
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         {/*  */}
         <FormField
           control={form.control}

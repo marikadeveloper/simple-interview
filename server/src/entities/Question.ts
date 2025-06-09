@@ -10,11 +10,6 @@ import {
 } from 'typeorm';
 import { InterviewTemplate } from './InterviewTemplate';
 
-/**
- * TODO:
- * - add a "hint" field
- */
-
 @ObjectType()
 @Entity()
 export class Question extends BaseEntity {

@@ -8,6 +8,7 @@ import 'reflect-metadata';
 import { BaseEntity, DataSource } from 'typeorm';
 import { closeRedis, initRedis, redis, redisClient } from './config/redis';
 import { COOKIE_NAME } from './constants';
+import { createUserLoader } from './loaders/createUserLoader';
 import { testConn } from './test-utils/testConn';
 import { createSchema } from './utils/createSchema';
 import { prodConn } from './utils/prodConn';
@@ -55,6 +56,7 @@ export const setupServer = async () => {
       req,
       res,
       redis,
+      userLoader: createUserLoader(),
     }),
   });
   await apolloServer.start();

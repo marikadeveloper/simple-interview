@@ -11,6 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Interview } from './Interview';
+import { InterviewTemplateQuestionBank } from './InterviewTemplateQuestionBank';
 import { Question } from './Question';
 import { Tag } from './Tag';
 
@@ -37,9 +38,17 @@ export class InterviewTemplate extends BaseEntity {
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @OneToMany(() => Question, (question) => question.interviewTemplate)
-  @Field(() => [Question])
-  questions: Question[];
+  @OneToMany(() => Question, (question) => question.interviewTemplate, {
+    nullable: true,
+  })
+  @Field(() => [Question], { nullable: true })
+  questions?: Question[];
+
+  @OneToMany(
+    () => InterviewTemplateQuestionBank,
+    (tplQuestionBank) => tplQuestionBank.interviewTemplate,
+  )
+  interviewTemplateQuestionBanks: InterviewTemplateQuestionBank[];
 
   @OneToMany(() => Interview, (interview) => interview.interviewTemplate)
   interviews: Interview[];

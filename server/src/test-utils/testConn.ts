@@ -3,7 +3,9 @@ import { DataSource } from 'typeorm';
 import { Answer } from '../entities/Answer';
 import { Interview } from '../entities/Interview';
 import { InterviewTemplate } from '../entities/InterviewTemplate';
+import { InterviewTemplateQuestionBank } from '../entities/InterviewTemplateQuestionBank';
 import { Question } from '../entities/Question';
+import { QuestionBank } from '../entities/QuestionBank';
 import { Tag } from '../entities/Tag';
 import { User } from '../entities/User';
 
@@ -19,6 +21,15 @@ export const testConn = (drop: boolean = false) => {
     dropSchema: drop,
     logging: false,
     migrations: [path.join(__dirname, './migrations/*')],
-    entities: [User, Interview, InterviewTemplate, Question, Answer, Tag],
+    entities: [
+      User,
+      Interview,
+      InterviewTemplate,
+      Question,
+      Answer,
+      Tag,
+      QuestionBank,
+      InterviewTemplateQuestionBank,
+    ],
   });
 };

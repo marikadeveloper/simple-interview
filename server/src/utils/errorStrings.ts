@@ -30,6 +30,8 @@ export const errorStrings = {
     canNotUpdate:
       'you can only update interviews that are in the PENDING status',
     canNotEvaluate: 'you can only evaluate interviews that are completed',
+    noQuestions:
+      'interview template must have either questions or a question bank',
   },
   question: {
     notFound: 'question not found',
@@ -37,5 +39,8 @@ export const errorStrings = {
   tag: {
     emptyText: 'Tag cannot be empty',
     duplicate: 'Tag already exists',
+  },
+  questionBank: {
+    notFound: 'question bank not found',
   },
 };

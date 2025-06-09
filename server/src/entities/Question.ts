@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { InterviewTemplate } from './InterviewTemplate';
+import { QuestionBank } from './QuestionBank';
 
 @ObjectType()
 @Entity()
@@ -37,11 +38,18 @@ export class Question extends BaseEntity {
   @Column()
   sortOrder: number;
 
-  @Field(() => InterviewTemplate)
+  @Field(() => InterviewTemplate, { nullable: true })
   @ManyToOne(
     () => InterviewTemplate,
     (interviewTemplate) => interviewTemplate.questions,
-    { onDelete: 'CASCADE' },
+    { onDelete: 'CASCADE', nullable: true },
   )
-  interviewTemplate!: InterviewTemplate;
+  interviewTemplate?: InterviewTemplate;
+
+  @Field(() => QuestionBank, { nullable: true })
+  @ManyToOne(() => QuestionBank, (questionBank) => questionBank.questions, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  questionBank?: QuestionBank;
 }

@@ -82,23 +82,28 @@ export class QuestionResolver {
       return false;
     }
 
-    const interviewTemplateId = question.interviewTemplate.id;
-    const deletedSortOrder = question.sortOrder;
+    if (question.interviewTemplate) {
+      const interviewTemplateId = question.interviewTemplate.id;
+      const deletedSortOrder = question.sortOrder;
 
-    await Question.delete({ id });
+      await Question.delete({ id });
 
-    // Update sortOrder of subsequent questions
-    await Question.createQueryBuilder()
-      .update(Question)
-      .set({ sortOrder: () => '"sortOrder" - 1' })
-      .where(
-        '"interviewTemplateId" = :interviewTemplateId AND "sortOrder" > :deletedSortOrder',
-        {
-          interviewTemplateId,
-          deletedSortOrder,
-        },
-      )
-      .execute();
+      // Update sortOrder of subsequent questions
+      await Question.createQueryBuilder()
+        .update(Question)
+        .set({ sortOrder: () => '"sortOrder" - 1' })
+        .where(
+          '"interviewTemplateId" = :interviewTemplateId AND "sortOrder" > :deletedSortOrder',
+          {
+            interviewTemplateId,
+            deletedSortOrder,
+          },
+        )
+        .execute();
+    } else if (question.questionBank) {
+      // If the question is part of a question bank, delete it without updating sortOrder
+      await Question.delete({ id });
+    }
 
     return true;
   }

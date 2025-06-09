@@ -26,6 +26,16 @@ import { InterviewEvaluationInput, InterviewInput } from './interview-types';
 
 @Resolver(Interview)
 export class InterviewResolver {
+  @FieldResolver(() => User)
+  user(@Root() interview: Interview, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(interview.user.id);
+  }
+
+  @FieldResolver(() => User)
+  interviewer(@Root() interview: Interview, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(interview.interviewer.id);
+  }
+
   @FieldResolver(() => InterviewStatus)
   async status(@Root() interview: Interview): Promise<InterviewStatus> {
     if (interview.status === InterviewStatus.COMPLETED) {

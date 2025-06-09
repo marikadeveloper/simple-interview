@@ -41,4 +41,20 @@ export class QuestionBankResolver {
     await questionBank.save();
     return questionBank;
   }
+
+  @Mutation(() => QuestionBank, { nullable: true })
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async updateQuestionBank(
+    @Arg('id') id: number,
+    @Arg('name') name: string,
+  ): Promise<QuestionBank | null> {
+    const questionBank = await QuestionBank.findOneBy({ id });
+    if (!questionBank) {
+      throw new Error(errorStrings.questionBank.notFound);
+    }
+    questionBank.name = name;
+    await questionBank.save();
+    return questionBank;
+  }
 }

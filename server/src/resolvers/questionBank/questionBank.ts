@@ -57,4 +57,16 @@ export class QuestionBankResolver {
     await questionBank.save();
     return questionBank;
   }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async deleteQuestionBank(@Arg('id') id: number): Promise<boolean> {
+    const questionBank = await QuestionBank.findOneBy({ id });
+    if (!questionBank) {
+      throw new Error(errorStrings.questionBank.notFound);
+    }
+    await QuestionBank.delete({ id });
+    return true;
+  }
 }

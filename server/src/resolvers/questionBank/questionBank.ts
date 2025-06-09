@@ -1,8 +1,8 @@
-import { errorStrings } from 'src/utils/errorStrings';
 import { Arg, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { QuestionBank } from '../../entities/QuestionBank';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
+import { errorStrings } from '../../utils/errorStrings';
 
 @Resolver(QuestionBank)
 export class QuestionBankResolver {

@@ -12,7 +12,11 @@ import { Question } from '../../entities/Question';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { errorStrings } from '../../utils/errorStrings';
-import { QuestionInput, UpdateQuestionSortOrderInput } from './question-types';
+import {
+  QuestionCreateInput,
+  QuestionUpdateInput,
+  UpdateQuestionSortOrderInput,
+} from './question-types';
 
 @Resolver(Question)
 export class QuestionResolver {
@@ -34,21 +38,36 @@ export class QuestionResolver {
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async createQuestion(
-    @Arg('interviewTemplateId', () => Int) interviewTemplateId: number,
-    @Arg('input', () => QuestionInput) input: QuestionInput,
+    @Arg('input', () => QuestionCreateInput) input: QuestionCreateInput,
   ): Promise<Question | null> {
-    // Get existing questions for the template to determine sortOrder
-    const existingQuestions = await Question.find({
-      where: { interviewTemplate: { id: interviewTemplateId } },
-    });
-    const sortOrder = existingQuestions.length;
+    let question: Question | null = null;
 
-    const question = await Question.create({
-      title: input.title,
-      description: input.description,
-      interviewTemplate: { id: interviewTemplateId },
-      sortOrder, // Set sortOrder
-    }).save();
+    if (!input.interviewTemplateId && !input.questionBankId) {
+      throw new Error(errorStrings.question.missingTemplateOrBank);
+    }
+
+    if (input.interviewTemplateId) {
+      // Get existing questions for the template to determine sortOrder
+      const existingQuestions = await Question.find({
+        where: { interviewTemplate: { id: input.interviewTemplateId } },
+      });
+      const sortOrder = existingQuestions.length;
+
+      question = await Question.create({
+        title: input.title,
+        description: input.description,
+        interviewTemplate: { id: input.interviewTemplateId },
+        sortOrder, // Set sortOrder
+      }).save();
+    }
+    if (input.questionBankId) {
+      // If the question is part of a question bank, set the questionBankId
+      question = await Question.create({
+        title: input.title,
+        description: input.description,
+        questionBank: { id: input.questionBankId },
+      }).save();
+    }
 
     return question;
   }
@@ -58,7 +77,7 @@ export class QuestionResolver {
   @UseMiddleware(isAdminOrInterviewer)
   async updateQuestion(
     @Arg('id', () => Int) id: number,
-    @Arg('input', () => QuestionInput) input: QuestionInput,
+    @Arg('input', () => QuestionUpdateInput) input: QuestionUpdateInput,
   ): Promise<Question | null> {
     const question = await Question.findOne({ where: { id } });
     if (!question) {

@@ -35,6 +35,8 @@ export const errorStrings = {
   },
   question: {
     notFound: 'question not found',
+    missingTemplateOrBank:
+      'question must belong to an interview template or a question bank',
   },
   tag: {
     emptyText: 'Tag cannot be empty',

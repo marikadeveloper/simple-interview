@@ -1,5 +1,5 @@
 import { errorStrings } from 'src/utils/errorStrings';
-import { Arg, Query, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { QuestionBank } from '../../entities/QuestionBank';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
@@ -11,7 +11,6 @@ export class QuestionBankResolver {
   @UseMiddleware(isAdminOrInterviewer)
   async getQuestionBanks(): Promise<QuestionBank[] | null> {
     const questionBanks = await QuestionBank.find({
-      relations: ['questions'],
       order: { name: 'ASC' },
     });
 
@@ -29,6 +28,17 @@ export class QuestionBankResolver {
     if (!questionBank) {
       throw new Error(errorStrings.questionBank.notFound);
     }
+    return questionBank;
+  }
+
+  @Mutation(() => QuestionBank, { nullable: true })
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async createQuestionBank(
+    @Arg('name') name: string,
+  ): Promise<QuestionBank | null> {
+    const questionBank = QuestionBank.create({ name });
+    await questionBank.save();
     return questionBank;
   }
 }

@@ -1,18 +1,15 @@
 import { Field, InputType, Int } from 'type-graphql';
 
 @InputType()
-export class QuestionInput {
-  @Field(() => String)
-  title: string;
-  @Field(() => String)
-  description: string;
+export class QuestionCreateInput {
+  @Field(() => String) title: string;
+  @Field(() => String) description: string;
+  @Field(() => Int, { nullable: true }) questionBankId?: number;
+  @Field(() => Int, { nullable: true }) interviewTemplateId?: number;
 }
 
-@InputType() // New InputType for updating sort order
-export class UpdateQuestionSortOrderInput {
-  @Field(() => Int)
-  questionId: number;
-
-  @Field(() => Int)
-  newSortOrder: number; // The new 0-based index for the question
+@InputType()
+export class QuestionUpdateInput {
+  @Field(() => String) title: string;
+  @Field(() => String) description: string;
 }

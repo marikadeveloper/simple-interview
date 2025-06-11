@@ -1,0 +1,5 @@
+mutation UpdateQuestionBank($id: Int!, $name: String!) {
+  updateQuestionBank(id: $id, name: $name) {
+    ...QuestionBank
+  }
+}

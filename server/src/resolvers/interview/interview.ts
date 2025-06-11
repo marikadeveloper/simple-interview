@@ -96,15 +96,6 @@ export class InterviewResolver {
   ): Promise<Interview | null> {
     const { interviewTemplateId, candidateId, deadline } = input;
 
-    // Check if interview template exists
-    const interviewTemplate = await InterviewTemplate.findOneBy({
-      id: interviewTemplateId,
-    });
-
-    if (!interviewTemplate) {
-      throw new Error(errorStrings.interviewTemplate.notFound);
-    }
-
     // Check if candidate exists
     const candidate = await User.findOneBy({
       id: candidateId,
@@ -133,6 +124,18 @@ export class InterviewResolver {
     const now = new Date();
     if (date < now) {
       throw new Error(errorStrings.date.mustBeInTheFuture);
+    }
+
+    if (interviewTemplateId) {
+    }
+
+    // Check if interview template exists
+    const interviewTemplate = await InterviewTemplate.findOneBy({
+      id: interviewTemplateId,
+    });
+
+    if (!interviewTemplate) {
+      throw new Error(errorStrings.interviewTemplate.notFound);
     }
 
     const interview = await Interview.create({

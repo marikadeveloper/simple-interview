@@ -8,11 +8,15 @@ import {
 } from 'type-graphql';
 import { In } from 'typeorm';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
+import { Question } from '../../entities/Question';
 import { Tag } from '../../entities/Tag';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { errorStrings } from '../../utils/errorStrings';
-import { InterviewTemplateInput } from './interviewTemplate-types';
+import {
+  AddQuestionsFromQuestionBankInput,
+  InterviewTemplateInput,
+} from './interviewTemplate-types';
 
 @Resolver(InterviewTemplate)
 export class InterviewTemplateResolver {
@@ -54,8 +58,7 @@ export class InterviewTemplateResolver {
   ): Promise<InterviewTemplate | null> {
     const interviewTemplate = await InterviewTemplate.findOne({
       where: { id },
-      relations: ['questions', 'tags'],
-      order: { questions: { sortOrder: 'ASC' } },
+      relations: ['questions', 'questions.questionBank', 'tags'],
     });
     if (!interviewTemplate) {
       throw new Error(errorStrings.interviewTemplate.notFound);
@@ -122,6 +125,52 @@ export class InterviewTemplateResolver {
     if (!interviewTemplate.affected) {
       return false;
     }
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async addQuestionsFromQuestionBank(
+    @Arg('input', () => AddQuestionsFromQuestionBankInput)
+    input: AddQuestionsFromQuestionBankInput,
+  ): Promise<boolean> {
+    const { interviewTemplateId, questionIds } = input;
+
+    // Check if interview template exists
+    const interviewTemplate = await InterviewTemplate.findOne({
+      where: { id: interviewTemplateId },
+      relations: ['questions'],
+    });
+
+    if (!interviewTemplate) {
+      throw new Error(errorStrings.interviewTemplate.notFound);
+    }
+
+    // Get the questions to add
+    const questionsToAdd = await Question.findBy({
+      id: In(questionIds),
+    });
+
+    if (questionsToAdd.length !== questionIds.length) {
+      throw new Error('Some questions were not found');
+    }
+
+    // Initialize questions array if it doesn't exist
+    if (!interviewTemplate.questions) {
+      interviewTemplate.questions = [];
+    }
+
+    // Filter out questions that are already in the template
+    const existingQuestionIds = interviewTemplate.questions.map((q) => q.id);
+    const newQuestions = questionsToAdd.filter(
+      (q) => !existingQuestionIds.includes(q.id),
+    );
+
+    // Add the new questions to the template
+    interviewTemplate.questions.push(...newQuestions);
+    await interviewTemplate.save();
+
     return true;
   }
 }

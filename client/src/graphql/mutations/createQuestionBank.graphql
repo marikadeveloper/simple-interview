@@ -1,0 +1,5 @@
+mutation CreateQuestionBank($name: String!) {
+  createQuestionBank(name: $name) {
+    ...QuestionBank
+  }
+}

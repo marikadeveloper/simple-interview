@@ -13,8 +13,8 @@ import { Crown, ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { toast } from 'sonner';
+
 const InterviewFeedback: React.FC = () => {
   const { id } = useParams();
   const [{ data, fetching, error }] = useGetInterviewForFeedbackQuery({
@@ -176,7 +176,6 @@ const InterviewFeedback: React.FC = () => {
             <div className='bg-gray-50 rounded p-4'>
               <SyntaxHighlighter
                 language={answer.language}
-                style={atomOneLight}
                 className='rounded'>
                 {answer.text}
               </SyntaxHighlighter>

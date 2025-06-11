@@ -187,6 +187,7 @@ export const createUrqlClient = () => {
 
             createQuestion: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplate');
+              invalidateAll(cache, 'getQuestionBank');
             },
             updateQuestion: (_result, _args, cache, _info) => {
               cache.invalidate({
@@ -226,6 +227,23 @@ export const createUrqlClient = () => {
               cache.invalidate({
                 __typename: 'Interview',
                 id: _args.id as number,
+              });
+            },
+
+            createQuestionBank: (_result, _args, cache, _info) => {
+              invalidateAll(cache, 'getQuestionBanks');
+            },
+            updateQuestionBank: (_result, _args, cache, _info) => {
+              cache.invalidate({
+                __typename: 'QuestionBank',
+                id: _args.id as number,
+              });
+            },
+            addQuestionsFromQuestionBank: (_result, _args, cache, _info) => {
+              const input = _args.input as any;
+              cache.invalidate({
+                __typename: 'InterviewTemplate',
+                id: input?.interviewTemplateId as number,
               });
             },
 

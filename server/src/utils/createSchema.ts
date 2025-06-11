@@ -5,6 +5,7 @@ import { InterviewResolver } from '../resolvers/interview/interview';
 import { InterviewTemplateResolver } from '../resolvers/interviewTemplate/interviewTemplate';
 import { PasswordResolver } from '../resolvers/password/password';
 import { QuestionResolver } from '../resolvers/question/question';
+import { QuestionBankResolver } from '../resolvers/questionBank/questionBank';
 import { RegistrationResolver } from '../resolvers/registration/registration';
 import { TagResolver } from '../resolvers/tag/tag';
 import { UserResolver } from '../resolvers/user/user';
@@ -21,6 +22,7 @@ export const createSchema = () =>
       QuestionResolver,
       InterviewResolver,
       AnswerResolver,
+      QuestionBankResolver,
     ],
     validate: false,
   });

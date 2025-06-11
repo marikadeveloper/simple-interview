@@ -42,7 +42,7 @@ export const createFakeQuestion = async (
   } as Omit<Question, 'id'>;
   const question = (await Question.create({
     ...data,
-    interviewTemplate: { id: interviewTemplateId },
   }).save()) as Question;
+  console.log(interviewTemplateId);
   return question;
 };

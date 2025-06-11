@@ -21,6 +21,10 @@ const interviewTemplates: NavLink = {
   label: 'Interview Templates',
   route: '/interview-templates',
 };
+const questionBanks: NavLink = {
+  label: 'Question Banks',
+  route: '/question-banks',
+};
 // everyone
 const interviews: NavLink = {
   label: 'Interviews',
@@ -33,6 +37,7 @@ export function useNavLinks() {
     const links: NavLink[] = [dashboard, interviews];
     if (user?.role === UserRole.Interviewer || user?.role === UserRole.Admin) {
       links.push(interviewTemplates);
+      links.push(questionBanks);
       links.push(users);
     }
     return links;

@@ -1,5 +1,5 @@
-mutation CreateQuestion($interviewTemplateId: Int!, $input: QuestionInput!) {
-  createQuestion(interviewTemplateId: $interviewTemplateId, input: $input) {
+mutation CreateQuestion($input: QuestionCreateInput!) {
+  createQuestion(input: $input) {
     ...Question
   }
 }

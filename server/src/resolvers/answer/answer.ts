@@ -6,6 +6,7 @@ import {
   Resolver,
   UseMiddleware,
 } from 'type-graphql';
+import { In } from 'typeorm';
 import { Answer } from '../../entities/Answer';
 import { Interview, InterviewStatus } from '../../entities/Interview';
 import { Question } from '../../entities/Question';
@@ -45,7 +46,7 @@ export class AnswerResolver {
 
     const question = await Question.findOneBy({
       id: input.questionId,
-      interviewTemplate: { id: interview.interviewTemplate.id },
+      interviewTemplates: { id: In([interview.interviewTemplate.id]) },
     });
 
     if (!question) {

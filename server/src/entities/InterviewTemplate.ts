@@ -37,7 +37,9 @@ export class InterviewTemplate extends BaseEntity {
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @OneToMany(() => Question, (question) => question.interviewTemplate)
+  @ManyToMany(() => Question, (question) => question.interviewTemplates, {
+    nullable: true,
+  })
   @Field(() => [Question])
   questions: Question[];
 

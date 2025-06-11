@@ -4,11 +4,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { InterviewTemplate } from './InterviewTemplate';
+import { QuestionBank } from './QuestionBank';
 
 @ObjectType()
 @Entity()
@@ -33,15 +36,22 @@ export class Question extends BaseEntity {
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @Field(() => Int)
-  @Column()
-  sortOrder: number;
+  @Field(() => QuestionBank, { nullable: true })
+  @ManyToOne(() => QuestionBank, (questionBank) => questionBank.questions, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  questionBank?: QuestionBank;
 
-  @Field(() => InterviewTemplate)
-  @ManyToOne(
+  @ManyToMany(
     () => InterviewTemplate,
     (interviewTemplate) => interviewTemplate.questions,
-    { onDelete: 'CASCADE' },
+    {
+      nullable: true,
+      onDelete: 'CASCADE',
+    },
   )
-  interviewTemplate!: InterviewTemplate;
+  @JoinTable()
+  @Field(() => [InterviewTemplate], { nullable: true })
+  interviewTemplates?: InterviewTemplate[];
 }

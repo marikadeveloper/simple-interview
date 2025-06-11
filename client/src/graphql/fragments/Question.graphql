@@ -4,16 +4,18 @@ fragment Question on Question {
   description
   updatedAt
   createdAt
-  sortOrder
-}
-
-fragment QuestionWithInterviewTemplate on Question {
-  id
-  title
-  description
-  updatedAt
-  createdAt
-  interviewTemplate {
-    ...InterviewTemplate
+  questionBank {
+    ...QuestionBank
   }
 }
+
+# fragment QuestionWithInterviewTemplate on Question {
+#   id
+#   title
+#   description
+#   updatedAt
+#   createdAt
+#   interviewTemplate {
+#     ...InterviewTemplate
+#   }
+# }

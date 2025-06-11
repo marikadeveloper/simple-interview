@@ -1,4 +1,3 @@
-import { DropIndicator } from '@/components/DropIndicator';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -18,55 +17,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  QuestionCreateInput,
   QuestionFragment,
-  QuestionInput,
   useCreateQuestionMutation,
   useDeleteQuestionMutation,
   useUpdateQuestionMutation,
 } from '@/generated/graphql';
 import { cn } from '@/lib/utils';
-import {
-  attachClosestEdge,
-  extractClosestEdge,
-  type Edge,
-} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import {
-  draggable,
-  dropTargetForElements,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
-import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { GripVertical, Pencil, Trash } from 'lucide-react';
-import React, { HTMLAttributes, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { Pencil, Trash } from 'lucide-react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import invariant from 'tiny-invariant';
 import { z } from 'zod';
-import { getQuestionData, isQuestionData } from './utils';
-
-type CardState =
-  | {
-      type: 'idle';
-    }
-  | {
-      type: 'preview';
-      container: HTMLElement;
-    }
-  | {
-      type: 'is-dragging';
-    }
-  | {
-      type: 'is-dragging-over';
-      closestEdge: Edge | null;
-    };
-const stateStyles: {
-  [Key in CardState['type']]?: HTMLAttributes<HTMLDivElement>['className'];
-} = {
-  'is-dragging': 'opacity-40',
-};
-const idle: CardState = { type: 'idle' };
 
 export const formSchema = z.object({
   title: z.string().min(2, {
@@ -78,21 +40,23 @@ export const formSchema = z.object({
 });
 interface QuestionCardProps {
   templateId?: string;
+  questionBankId?: string;
   question?: QuestionFragment;
 }
 export const QuestionCard: React.FC<QuestionCardProps> = ({
   templateId,
+  questionBankId,
   question,
 }) => {
   const mode: 'create' | 'edit' | 'unsupported' = question
     ? 'edit'
-    : templateId
+    : templateId || questionBankId
     ? 'create'
     : 'unsupported';
   //
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [state, setState] = useState<CardState>(idle);
-  const [formVisible, setFormVisible] = useState(!!templateId);
+  const [formVisible, setFormVisible] = useState(
+    !!templateId || !!questionBankId,
+  );
   //
   const [, createQuestion] = useCreateQuestionMutation();
   const [, updateQuestion] = useUpdateQuestionMutation();
@@ -106,91 +70,17 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     },
   });
 
-  useEffect(() => {
-    if (!question) return;
-
-    const element = ref.current;
-    invariant(element);
-    return combine(
-      draggable({
-        element,
-        getInitialData() {
-          return getQuestionData(question);
-        },
-        onGenerateDragPreview({ nativeSetDragImage }) {
-          setCustomNativeDragPreview({
-            nativeSetDragImage,
-            getOffset: pointerOutsideOfPreview({
-              x: '16px',
-              y: '8px',
-            }),
-            render({ container }) {
-              setState({ type: 'preview', container });
-            },
-          });
-        },
-        onDragStart() {
-          setState({ type: 'is-dragging' });
-        },
-        onDrop() {
-          setState(idle);
-        },
-      }),
-      dropTargetForElements({
-        element,
-        canDrop({ source }) {
-          // not allowing dropping on yourself
-          if (source.element === element) {
-            return false;
-          }
-          // only allowing tasks to be dropped on me
-          return isQuestionData(source.data);
-        },
-        getData({ input }) {
-          const data = getQuestionData(question);
-          return attachClosestEdge(data, {
-            element,
-            input,
-            allowedEdges: ['top', 'bottom'],
-          });
-        },
-        getIsSticky() {
-          return true;
-        },
-        onDragEnter({ self }) {
-          const closestEdge = extractClosestEdge(self.data);
-          setState({ type: 'is-dragging-over', closestEdge });
-        },
-        onDrag({ self }) {
-          const closestEdge = extractClosestEdge(self.data);
-
-          // Only need to update react state if nothing has changed.
-          // Prevents re-rendering.
-          setState((current) => {
-            if (
-              current.type === 'is-dragging-over' &&
-              current.closestEdge === closestEdge
-            ) {
-              return current;
-            }
-            return { type: 'is-dragging-over', closestEdge };
-          });
-        },
-        onDragLeave() {
-          setState(idle);
-        },
-        onDrop() {
-          setState(idle);
-        },
-      }),
-    );
-  }, [question]);
-
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    const input: QuestionInput = {
+    const input: QuestionCreateInput = {
       title: values.title,
       description: values.description,
     };
+    if (questionBankId) {
+      input.questionBankId = parseInt(questionBankId);
+    }
+    if (templateId) {
+      input.interviewTemplateId = parseInt(templateId);
+    }
     if (mode === 'edit') {
       if (!question) return; // Ensures question is defined
       await updateQuestion({
@@ -199,9 +89,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       });
       setFormVisible(false);
     } else if (mode === 'create') {
-      if (!templateId) return; // Ensures templateId is defined
+      if (!templateId && !questionBankId) return; // Ensures templateId is defined
       await createQuestion({
-        interviewTemplateId: parseInt(templateId),
         input,
       });
       form.reset();
@@ -229,18 +118,20 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       <div className='relative'>
         <Card
           data-question-id={question ? question.id : undefined}
-          ref={ref}
           className={cn(
             'w-full bg-white',
             formVisible ? 'gap-6' : 'gap-2',
             mode === 'create' && 'border-dashed border-2 shadow-none',
-            mode === 'edit' && 'hover:bg-slate-50 hover:cursor-grab',
-            stateStyles[state.type] ?? '',
           )}>
           <CardHeader>
             <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-2'>
-                {mode === 'edit' && <GripVertical size={16} />}
+              <div className='flex flex-col items-start gap-2'>
+                {/* Question Bank Label */}
+                {question?.questionBank && (
+                  <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200'>
+                    From: {question.questionBank.name}
+                  </span>
+                )}
                 <CardTitle>
                   {question ? form.watch('title') : 'Create Question'}
                 </CardTitle>
@@ -324,23 +215,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             </Button>
           </CardFooter>
         </Card>
-        {state.type === 'is-dragging-over' && state.closestEdge ? (
-          <DropIndicator
-            edge={state.closestEdge}
-            gap={'4px'}
-          />
-        ) : null}
       </div>
-      {state.type === 'preview' && question
-        ? createPortal(<DragPreview question={question} />, state.container)
-        : null}
     </>
   );
 };
-
-// A simplified version of our card for the user to drag around
-function DragPreview({ question }: { question: QuestionFragment }) {
-  return (
-    <div className='border-solid rounded p-2 bg-white'>{question.title}</div>
-  );
-}

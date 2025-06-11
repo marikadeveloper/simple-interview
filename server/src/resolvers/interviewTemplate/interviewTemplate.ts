@@ -52,7 +52,6 @@ export class InterviewTemplateResolver {
   async getInterviewTemplate(
     @Arg('id', () => Int) id: number,
   ): Promise<InterviewTemplate | null> {
-    // TODO: interviewTemplateQuestionBanks ??
     const interviewTemplate = await InterviewTemplate.findOne({
       where: { id },
       relations: ['questions', 'tags'],

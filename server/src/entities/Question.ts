@@ -4,6 +4,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -38,18 +40,22 @@ export class Question extends BaseEntity {
   @Column()
   sortOrder: number;
 
-  @Field(() => InterviewTemplate, { nullable: true })
-  @ManyToOne(
-    () => InterviewTemplate,
-    (interviewTemplate) => interviewTemplate.questions,
-    { onDelete: 'CASCADE', nullable: true },
-  )
-  interviewTemplate?: InterviewTemplate;
-
   @Field(() => QuestionBank, { nullable: true })
   @ManyToOne(() => QuestionBank, (questionBank) => questionBank.questions, {
     onDelete: 'CASCADE',
     nullable: true,
   })
   questionBank?: QuestionBank;
+
+  @ManyToMany(
+    () => InterviewTemplate,
+    (interviewTemplate) => interviewTemplate.questions,
+    {
+      nullable: true,
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinTable()
+  @Field(() => [InterviewTemplate], { nullable: true })
+  interviewTemplates?: InterviewTemplate[];
 }

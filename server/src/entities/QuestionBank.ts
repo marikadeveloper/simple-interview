@@ -6,7 +6,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { InterviewTemplateQuestionBank } from './InterviewTemplateQuestionBank';
 import { Question } from './Question';
 
 @ObjectType()
@@ -20,13 +19,7 @@ export class QuestionBank extends BaseEntity {
   @Column()
   name!: string;
 
-  @OneToMany(() => Question, (question) => question.interviewTemplate)
+  @OneToMany(() => Question, (question) => question.questionBank)
   @Field(() => [Question])
   questions: Question[];
-
-  @OneToMany(
-    () => InterviewTemplateQuestionBank,
-    (tplQuestionBank) => tplQuestionBank.questionBank,
-  )
-  interviewTemplateQuestionBanks: InterviewTemplateQuestionBank[];
 }

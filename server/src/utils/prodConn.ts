@@ -3,7 +3,6 @@ import { DataSource } from 'typeorm';
 import { Answer } from '../entities/Answer';
 import { Interview } from '../entities/Interview';
 import { InterviewTemplate } from '../entities/InterviewTemplate';
-import { InterviewTemplateQuestionBank } from '../entities/InterviewTemplateQuestionBank';
 import { Question } from '../entities/Question';
 import { QuestionBank } from '../entities/QuestionBank';
 import { Tag } from '../entities/Tag';
@@ -28,6 +27,5 @@ export const prodConn = () =>
       Answer,
       Tag,
       QuestionBank,
-      InterviewTemplateQuestionBank,
     ],
   });

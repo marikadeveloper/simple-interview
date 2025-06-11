@@ -4,8 +4,8 @@ import { Field, InputType, Int } from 'type-graphql';
 export class QuestionCreateInput {
   @Field(() => String) title: string;
   @Field(() => String) description: string;
-  @Field(() => Int, { nullable: true }) interviewTemplateId?: number;
   @Field(() => Int, { nullable: true }) questionBankId?: number;
+  @Field(() => Int, { nullable: true }) interviewTemplateId?: number;
 }
 
 @InputType()

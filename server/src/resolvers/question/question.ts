@@ -1,39 +1,13 @@
-import {
-  Arg,
-  Int,
-  Mutation,
-  Query,
-  Resolver,
-  UseMiddleware,
-} from 'type-graphql';
-import { EntityManager } from 'typeorm'; // Corrected imports
-import { dataSource } from '../../';
+import { Arg, Int, Mutation, Resolver, UseMiddleware } from 'type-graphql';
+import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { errorStrings } from '../../utils/errorStrings';
-import {
-  QuestionCreateInput,
-  QuestionUpdateInput,
-  UpdateQuestionSortOrderInput,
-} from './question-types';
+import { QuestionCreateInput, QuestionUpdateInput } from './question-types';
 
 @Resolver(Question)
 export class QuestionResolver {
-  @Query(() => [Question], { nullable: true })
-  @UseMiddleware(isAuth)
-  async getQuestions(
-    @Arg('interviewTemplateId', () => Int) interviewTemplateId: number,
-  ): Promise<Question[] | null> {
-    const questions = await Question.find({
-      where: { interviewTemplate: { id: interviewTemplateId } },
-      relations: ['interviewTemplate'],
-      order: { sortOrder: 'ASC' }, // Add order by sortOrder
-    });
-
-    return questions;
-  }
-
   @Mutation(() => Question, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
@@ -42,24 +16,11 @@ export class QuestionResolver {
   ): Promise<Question | null> {
     let question: Question | null = null;
 
-    if (!input.interviewTemplateId && !input.questionBankId) {
+    if (!input.questionBankId && !input.interviewTemplateId) {
+      // If the question is not part of a question bank or interview template, throw an error
       throw new Error(errorStrings.question.missingTemplateOrBank);
     }
 
-    if (input.interviewTemplateId) {
-      // Get existing questions for the template to determine sortOrder
-      const existingQuestions = await Question.find({
-        where: { interviewTemplate: { id: input.interviewTemplateId } },
-      });
-      const sortOrder = existingQuestions.length;
-
-      question = await Question.create({
-        title: input.title,
-        description: input.description,
-        interviewTemplate: { id: input.interviewTemplateId },
-        sortOrder, // Set sortOrder
-      }).save();
-    }
     if (input.questionBankId) {
       // If the question is part of a question bank, set the questionBankId
       question = await Question.create({
@@ -67,8 +28,29 @@ export class QuestionResolver {
         description: input.description,
         questionBank: { id: input.questionBankId },
       }).save();
-    }
+    } else {
+      question = await Question.create({
+        title: input.title,
+        description: input.description,
+      }).save();
 
+      // assign the question to the interview template NN relation
+      if (input.interviewTemplateId) {
+        const interviewTemplate = await InterviewTemplate.findOneBy({
+          id: input.interviewTemplateId,
+        });
+        if (!interviewTemplate) {
+          throw new Error(errorStrings.interviewTemplate.notFound);
+        }
+
+        // If the interview template exists, add the question to it
+        if (!interviewTemplate.questions) {
+          interviewTemplate.questions = [];
+        }
+        interviewTemplate.questions.push(question);
+        await interviewTemplate.save();
+      }
+    }
     return question;
   }
 
@@ -95,39 +77,39 @@ export class QuestionResolver {
   async deleteQuestion(@Arg('id', () => Int) id: number): Promise<boolean> {
     const question = await Question.findOne({
       where: { id },
-      relations: ['interviewTemplate'],
     });
     if (!question) {
       return false;
     }
 
-    if (question.interviewTemplate) {
-      const interviewTemplateId = question.interviewTemplate.id;
-      const deletedSortOrder = question.sortOrder;
+    // fix sort order
+    // if (question.interviewTemplate) {
+    //   const interviewTemplateId = question.interviewTemplate.id;
+    //   const deletedSortOrder = question.sortOrder;
 
-      await Question.delete({ id });
+    //   await Question.delete({ id });
 
-      // Update sortOrder of subsequent questions
-      await Question.createQueryBuilder()
-        .update(Question)
-        .set({ sortOrder: () => '"sortOrder" - 1' })
-        .where(
-          '"interviewTemplateId" = :interviewTemplateId AND "sortOrder" > :deletedSortOrder',
-          {
-            interviewTemplateId,
-            deletedSortOrder,
-          },
-        )
-        .execute();
-    } else if (question.questionBank) {
-      // If the question is part of a question bank, delete it without updating sortOrder
-      await Question.delete({ id });
-    }
+    //   // Update sortOrder of subsequent questions
+    //   await Question.createQueryBuilder()
+    //     .update(Question)
+    //     .set({ sortOrder: () => '"sortOrder" - 1' })
+    //     .where(
+    //       '"interviewTemplateId" = :interviewTemplateId AND "sortOrder" > :deletedSortOrder',
+    //       {
+    //         interviewTemplateId,
+    //         deletedSortOrder,
+    //       },
+    //     )
+    //     .execute();
+    // }
+
+    await Question.delete({ id });
 
     return true;
   }
 
-  @Mutation(() => Boolean) // New mutation for updating sort order
+  /*
+  @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async updateQuestionSortOrder(
@@ -234,4 +216,5 @@ export class QuestionResolver {
       },
     );
   }
+    */
 }

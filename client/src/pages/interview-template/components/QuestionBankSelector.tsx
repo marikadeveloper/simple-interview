@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -27,8 +28,8 @@ import {
   useGetQuestionBankQuery,
   useGetQuestionBanksQuery,
 } from '@/generated/graphql';
-import { Database } from 'lucide-react';
-import React, { useState } from 'react';
+import { Database, Search } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 interface QuestionBankSelectorProps {
@@ -43,7 +44,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
     number | null
   >(null);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
-  const [isQuestionBankOpen, setIsQuestionBankOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [{ data: questionBanksData }] = useGetQuestionBanksQuery();
   const [{ data: selectedQuestionBankData }] = useGetQuestionBankQuery({
@@ -56,6 +57,20 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
   const questionBanks = questionBanksData?.getQuestionBanks || [];
   const selectedQuestionBank = selectedQuestionBankData?.getQuestionBank;
 
+  // Filter questions based on search query
+  const filteredQuestions = useMemo(() => {
+    if (!selectedQuestionBank?.questions || !searchQuery.trim()) {
+      return selectedQuestionBank?.questions || [];
+    }
+
+    const query = searchQuery.toLowerCase();
+    return selectedQuestionBank.questions.filter(
+      (question) =>
+        question.title.toLowerCase().includes(query) ||
+        question.description.toLowerCase().includes(query),
+    );
+  }, [selectedQuestionBank?.questions, searchQuery]);
+
   const handleQuestionToggle = (questionId: number) => {
     setSelectedQuestions((prev) => {
       if (prev.includes(questionId)) {
@@ -67,11 +82,25 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
   };
 
   const handleSelectAll = () => {
-    if (!selectedQuestionBank?.questions) return;
-    if (selectedQuestions.length === selectedQuestionBank.questions.length) {
-      setSelectedQuestions([]);
+    if (!filteredQuestions) return;
+
+    // Check if all filtered questions are selected
+    const allFilteredSelected = filteredQuestions.every((q) =>
+      selectedQuestions.includes(q.id),
+    );
+
+    if (allFilteredSelected) {
+      // Deselect all filtered questions
+      setSelectedQuestions((prev) =>
+        prev.filter((id) => !filteredQuestions.some((q) => q.id === id)),
+      );
     } else {
-      setSelectedQuestions(selectedQuestionBank.questions.map((q) => q.id));
+      // Select all filtered questions
+      setSelectedQuestions((prev) => {
+        const newIds = filteredQuestions.map((q) => q.id);
+        const uniqueIds = [...new Set([...prev, ...newIds])];
+        return uniqueIds;
+      });
     }
   };
 
@@ -101,6 +130,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
         setIsOpen(false);
         setSelectedQuestionBankId(null);
         setSelectedQuestions([]);
+        setSearchQuery('');
       }
     } catch (error) {
       toast.error('An error occurred while adding questions');
@@ -148,7 +178,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
 
           <div className='space-y-4 flex-1 overflow-hidden'>
             {/* Question Bank Selector */}
-            <div className='space-y-2'>
+            <div className='grid gap-3'>
               <label className='text-sm font-medium'>Question Bank</label>
               <Select
                 value={selectedQuestionBankId?.toString() || ''}
@@ -156,7 +186,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
                   const id = value ? parseInt(value) : null;
                   setSelectedQuestionBankId(id);
                   setSelectedQuestions([]);
-                  setIsQuestionBankOpen(true);
+                  setSearchQuery(''); // Clear search when changing question bank
                 }}>
                 <SelectTrigger className='w-full'>
                   <SelectValue placeholder='Select question bank' />
@@ -178,43 +208,62 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
               <div className='space-y-3 flex-1 overflow-hidden'>
                 <div className='flex items-center justify-between'>
                   <label className='text-sm font-medium'>
-                    Questions ({selectedQuestionBank.questions?.length || 0})
+                    Questions ({filteredQuestions.length} of{' '}
+                    {selectedQuestionBank.questions?.length || 0})
                   </label>
                   <Button
                     variant='outline'
                     size='sm'
                     onClick={handleSelectAll}>
-                    {selectedQuestions.length ===
-                    selectedQuestionBank.questions?.length
+                    {filteredQuestions.every((q) =>
+                      selectedQuestions.includes(q.id),
+                    )
                       ? 'Deselect All'
                       : 'Select All'}
                   </Button>
                 </div>
 
+                {/* Search Input */}
+                <div className='relative'>
+                  <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400' />
+                  <Input
+                    placeholder='Search questions...'
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className='pl-10'
+                  />
+                </div>
+
                 <div className='border rounded-md p-2 max-h-[300px] overflow-y-auto'>
                   <div className='space-y-3'>
-                    {selectedQuestionBank.questions?.map((question) => (
-                      <div
-                        key={question.id}
-                        className='flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50'>
-                        <Checkbox
-                          id={`question-${question.id}`}
-                          checked={selectedQuestions.includes(question.id)}
-                          onCheckedChange={() =>
-                            handleQuestionToggle(question.id)
-                          }
-                        />
-                        <div className='flex-1 min-w-0'>
-                          <label
-                            htmlFor={`question-${question.id}`}
-                            className='text-sm font-medium cursor-pointer'>
-                            {question.title}
-                          </label>
+                    {filteredQuestions.length > 0 ? (
+                      filteredQuestions.map((question) => (
+                        <div
+                          key={question.id}
+                          className='flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50'>
+                          <Checkbox
+                            id={`question-${question.id}`}
+                            checked={selectedQuestions.includes(question.id)}
+                            onCheckedChange={() =>
+                              handleQuestionToggle(question.id)
+                            }
+                          />
+                          <div className='flex-1 min-w-0'>
+                            <label
+                              htmlFor={`question-${question.id}`}
+                              className='text-sm font-medium cursor-pointer'>
+                              {question.title}
+                            </label>
+                          </div>
                         </div>
-                      </div>
-                    )) || (
+                      ))
+                    ) : selectedQuestionBank.questions?.length === 0 ? (
                       <p className='text-sm text-gray-500 text-center py-4'>
                         No questions in this question bank
+                      </p>
+                    ) : (
+                      <p className='text-sm text-gray-500 text-center py-4'>
+                        No questions match your search
                       </p>
                     )}
                   </div>
@@ -230,6 +279,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
                 setIsOpen(false);
                 setSelectedQuestionBankId(null);
                 setSelectedQuestions([]);
+                setSearchQuery('');
               }}>
               Cancel
             </Button>

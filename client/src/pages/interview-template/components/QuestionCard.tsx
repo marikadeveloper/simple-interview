@@ -50,11 +50,13 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const mode: 'create' | 'edit' | 'unsupported' = question
     ? 'edit'
-    : templateId
+    : templateId || questionBankId
     ? 'create'
     : 'unsupported';
   //
-  const [formVisible, setFormVisible] = useState(!!templateId);
+  const [formVisible, setFormVisible] = useState(
+    !!templateId || !!questionBankId,
+  );
   //
   const [, createQuestion] = useCreateQuestionMutation();
   const [, updateQuestion] = useUpdateQuestionMutation();
@@ -87,7 +89,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       });
       setFormVisible(false);
     } else if (mode === 'create') {
-      if (!templateId) return; // Ensures templateId is defined
+      if (!templateId && !questionBankId) return; // Ensures templateId is defined
       await createQuestion({
         input,
       });

@@ -40,7 +40,7 @@ const QuestionBank = () => {
       </div>
 
       <div className='py-14'>
-        <QuestionCard templateId={id} />
+        <QuestionCard questionBankId={id} />
         <div className='mt-4'>
           <QuestionList
             key={questionBank.questions?.length}

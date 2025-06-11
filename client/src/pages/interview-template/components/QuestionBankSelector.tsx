@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import {
   useAddQuestionsFromQuestionBankMutation,
+  useGetInterviewTemplateQuery,
   useGetQuestionBankQuery,
   useGetQuestionBanksQuery,
 } from '@/generated/graphql';
@@ -51,11 +52,25 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
     variables: { id: selectedQuestionBankId! },
     pause: !selectedQuestionBankId,
   });
+  const [{ data: currentTemplateData }] = useGetInterviewTemplateQuery({
+    variables: { id: parseInt(templateId) },
+  });
   const [, addQuestionsFromQuestionBank] =
     useAddQuestionsFromQuestionBankMutation();
 
   const questionBanks = questionBanksData?.getQuestionBanks || [];
   const selectedQuestionBank = selectedQuestionBankData?.getQuestionBank;
+  const currentTemplate = currentTemplateData?.getInterviewTemplate;
+
+  // Get IDs of questions already in the current template
+  const existingQuestionIds = useMemo(() => {
+    return currentTemplate?.questions?.map((q) => q.id) || [];
+  }, [currentTemplate?.questions]);
+
+  // Check if a question is already in the template
+  const isQuestionInTemplate = (questionId: number) => {
+    return existingQuestionIds.includes(questionId);
+  };
 
   // Filter questions based on search query
   const filteredQuestions = useMemo(() => {
@@ -84,20 +99,25 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
   const handleSelectAll = () => {
     if (!filteredQuestions) return;
 
-    // Check if all filtered questions are selected
-    const allFilteredSelected = filteredQuestions.every((q) =>
+    // Only consider questions that are not already in the template
+    const selectableQuestions = filteredQuestions.filter(
+      (q) => !isQuestionInTemplate(q.id),
+    );
+
+    // Check if all selectable filtered questions are selected
+    const allSelectableSelected = selectableQuestions.every((q) =>
       selectedQuestions.includes(q.id),
     );
 
-    if (allFilteredSelected) {
-      // Deselect all filtered questions
+    if (allSelectableSelected) {
+      // Deselect all selectable filtered questions
       setSelectedQuestions((prev) =>
-        prev.filter((id) => !filteredQuestions.some((q) => q.id === id)),
+        prev.filter((id) => !selectableQuestions.some((q) => q.id === id)),
       );
     } else {
-      // Select all filtered questions
+      // Select all selectable filtered questions
       setSelectedQuestions((prev) => {
-        const newIds = filteredQuestions.map((q) => q.id);
+        const newIds = selectableQuestions.map((q) => q.id);
         const uniqueIds = [...new Set([...prev, ...newIds])];
         return uniqueIds;
       });
@@ -209,15 +229,35 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
                 <div className='flex items-center justify-between'>
                   <label className='text-sm font-medium'>
                     Questions ({filteredQuestions.length} of{' '}
-                    {selectedQuestionBank.questions?.length || 0})
+                    {selectedQuestionBank.questions?.length || 0}
+                    {existingQuestionIds.length > 0 &&
+                      filteredQuestions.some((q) =>
+                        isQuestionInTemplate(q.id),
+                      ) && (
+                        <span className='text-gray-500'>
+                          ,{' '}
+                          {
+                            filteredQuestions.filter((q) =>
+                              isQuestionInTemplate(q.id),
+                            ).length
+                          }{' '}
+                          already added
+                        </span>
+                      )}
+                    )
                   </label>
                   <Button
                     variant='outline'
                     size='sm'
-                    onClick={handleSelectAll}>
-                    {filteredQuestions.every((q) =>
-                      selectedQuestions.includes(q.id),
-                    )
+                    onClick={handleSelectAll}
+                    disabled={
+                      filteredQuestions.filter(
+                        (q) => !isQuestionInTemplate(q.id),
+                      ).length === 0
+                    }>
+                    {filteredQuestions
+                      .filter((q) => !isQuestionInTemplate(q.id))
+                      .every((q) => selectedQuestions.includes(q.id))
                       ? 'Deselect All'
                       : 'Select All'}
                   </Button>
@@ -237,26 +277,45 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
                 <div className='border rounded-md p-2 max-h-[200px] overflow-y-auto'>
                   <div className='space-y-2'>
                     {filteredQuestions.length > 0 ? (
-                      filteredQuestions.map((question) => (
-                        <div
-                          key={question.id}
-                          className='flex items-center space-x-3 p-1.5 border rounded-lg hover:bg-gray-50'>
-                          <Checkbox
-                            id={`question-${question.id}`}
-                            checked={selectedQuestions.includes(question.id)}
-                            onCheckedChange={() =>
-                              handleQuestionToggle(question.id)
-                            }
-                          />
-                          <div className='flex-1 min-w-0'>
-                            <label
-                              htmlFor={`question-${question.id}`}
-                              className='text-sm font-medium cursor-pointer'>
-                              {question.title}
-                            </label>
+                      filteredQuestions.map((question) => {
+                        const isAlreadyInTemplate = isQuestionInTemplate(
+                          question.id,
+                        );
+                        return (
+                          <div
+                            key={question.id}
+                            className={`flex items-center space-x-3 p-1.5 border rounded-lg ${
+                              isAlreadyInTemplate
+                                ? 'bg-gray-50 border-gray-200 opacity-60'
+                                : 'hover:bg-gray-50'
+                            }`}>
+                            <Checkbox
+                              id={`question-${question.id}`}
+                              checked={selectedQuestions.includes(question.id)}
+                              disabled={isAlreadyInTemplate}
+                              onCheckedChange={() =>
+                                handleQuestionToggle(question.id)
+                              }
+                            />
+                            <div className='flex-1 min-w-0'>
+                              <label
+                                htmlFor={`question-${question.id}`}
+                                className={`text-sm font-medium ${
+                                  isAlreadyInTemplate
+                                    ? 'cursor-default text-gray-500'
+                                    : 'cursor-pointer'
+                                }`}>
+                                {question.title}
+                                {isAlreadyInTemplate && (
+                                  <span className='ml-2 text-xs text-gray-400'>
+                                    (Already in template)
+                                  </span>
+                                )}
+                              </label>
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : selectedQuestionBank.questions?.length === 0 ? (
                       <p className='text-sm text-gray-500 text-center py-4'>
                         No questions in this question bank

@@ -58,7 +58,6 @@ const InterviewTemplate = () => {
       </div>
 
       <div className='py-14'>
-        {/* TODO: can add here question bank selection */}
         <QuestionBankSelector templateId={id} />
         <div className='mt-4'>
           <QuestionCard templateId={id} />

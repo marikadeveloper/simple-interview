@@ -8,14 +8,3 @@ fragment Question on Question {
     ...QuestionBank
   }
 }
-
-# fragment QuestionWithInterviewTemplate on Question {
-#   id
-#   title
-#   description
-#   updatedAt
-#   createdAt
-#   interviewTemplate {
-#     ...InterviewTemplate
-#   }
-# }

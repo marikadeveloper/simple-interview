@@ -8,14 +8,6 @@ import {
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -24,17 +16,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   useAddQuestionsFromQuestionBankMutation,
   useGetQuestionBankQuery,
   useGetQuestionBanksQuery,
 } from '@/generated/graphql';
-import { cn } from '@/lib/utils';
-import { Check, ChevronsUpDown, Database } from 'lucide-react';
+import { Database } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -157,51 +150,27 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
             {/* Question Bank Selector */}
             <div className='space-y-2'>
               <label className='text-sm font-medium'>Question Bank</label>
-              <Popover
-                open={isQuestionBankOpen}
-                onOpenChange={setIsQuestionBankOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant='outline'
-                    role='combobox'
-                    aria-expanded={isQuestionBankOpen}
-                    className='w-full justify-between'>
-                    {selectedQuestionBank
-                      ? selectedQuestionBank.name
-                      : 'Select question bank...'}
-                    <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className='w-full p-0'>
-                  <Command>
-                    <CommandInput placeholder='Search question banks...' />
-                    <CommandList>
-                      <CommandEmpty>No question banks found.</CommandEmpty>
-                      <CommandGroup>
-                        {questionBanks.map((bank) => (
-                          <CommandItem
-                            key={bank.id}
-                            onSelect={() => {
-                              setSelectedQuestionBankId(bank.id);
-                              setSelectedQuestions([]);
-                              setIsQuestionBankOpen(false);
-                            }}>
-                            <Check
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                selectedQuestionBankId === bank.id
-                                  ? 'opacity-100'
-                                  : 'opacity-0',
-                              )}
-                            />
-                            {bank.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <Select
+                value={selectedQuestionBankId?.toString() || ''}
+                onValueChange={(value) => {
+                  const id = value ? parseInt(value) : null;
+                  setSelectedQuestionBankId(id);
+                  setSelectedQuestions([]);
+                  setIsQuestionBankOpen(true);
+                }}>
+                <SelectTrigger className='w-full'>
+                  <SelectValue placeholder='Select question bank' />
+                </SelectTrigger>
+                <SelectContent>
+                  {questionBanks.map((bank) => (
+                    <SelectItem
+                      key={bank.id}
+                      value={bank.id.toString()}>
+                      {bank.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Questions List */}
@@ -227,7 +196,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
                     {selectedQuestionBank.questions?.map((question) => (
                       <div
                         key={question.id}
-                        className='flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50'>
+                        className='flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50'>
                         <Checkbox
                           id={`question-${question.id}`}
                           checked={selectedQuestions.includes(question.id)}
@@ -241,9 +210,6 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
                             className='text-sm font-medium cursor-pointer'>
                             {question.title}
                           </label>
-                          <p className='text-xs text-gray-600 mt-1 line-clamp-2'>
-                            {question.description}
-                          </p>
                         </div>
                       </div>
                     )) || (

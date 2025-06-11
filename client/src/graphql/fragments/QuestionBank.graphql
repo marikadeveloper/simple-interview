@@ -2,3 +2,10 @@ fragment QuestionBank on QuestionBank {
   id
   name
 }
+
+fragment QuestionBankWithQuestions on QuestionBank {
+  ...QuestionBank
+  questions {
+    ...Question
+  }
+}

@@ -278,7 +278,7 @@ export type MutationUpdateQuestionArgs = {
 
 
 export type MutationUpdateQuestionBankArgs = {
-  id: Scalars['Float']['input'];
+  id: Scalars['Int']['input'];
   name: Scalars['String']['input'];
 };
 
@@ -343,7 +343,7 @@ export type QueryGetInterviewTemplatesArgs = {
 
 
 export type QueryGetQuestionBankArgs = {
-  id: Scalars['Float']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
@@ -445,6 +445,8 @@ export type KeystrokeFragment = { __typename?: 'Keystroke', relativeTimestamp: n
 export type QuestionFragment = { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string };
 
 export type QuestionBankFragment = { __typename?: 'QuestionBank', id: number, name: string };
+
+export type QuestionBankWithQuestionsFragment = { __typename?: 'QuestionBank', id: number, name: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string }> };
 
 export type TagFragment = { __typename?: 'Tag', id: number, text: string };
 
@@ -627,6 +629,14 @@ export type UpdateQuestionMutationVariables = Exact<{
 
 export type UpdateQuestionMutation = { __typename?: 'Mutation', updateQuestion?: { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string } | null };
 
+export type UpdateQuestionBankMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type UpdateQuestionBankMutation = { __typename?: 'Mutation', updateQuestionBank?: { __typename?: 'QuestionBank', id: number, name: string } | null };
+
 export type UpdateTagMutationVariables = Exact<{
   id: Scalars['Int']['input'];
   text: Scalars['String']['input'];
@@ -674,6 +684,13 @@ export type GetInterviewsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetInterviewsQuery = { __typename?: 'Query', getInterviews?: Array<{ __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, interviewer: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } }> | null };
+
+export type GetQuestionBankQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type GetQuestionBankQuery = { __typename?: 'Query', getQuestionBank?: { __typename?: 'QuestionBank', id: number, name: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string }> } | null };
 
 export type GetQuestionBanksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -849,6 +866,15 @@ export const QuestionBankFragmentDoc = gql`
   name
 }
     `;
+export const QuestionBankWithQuestionsFragmentDoc = gql`
+    fragment QuestionBankWithQuestions on QuestionBank {
+  ...QuestionBank
+  questions {
+    ...Question
+  }
+}
+    ${QuestionBankFragmentDoc}
+${QuestionFragmentDoc}`;
 export const ChangePasswordDocument = gql`
     mutation ChangePassword($input: ChangePasswordInput!) {
   changePassword(input: $input) {
@@ -1100,6 +1126,17 @@ export const UpdateQuestionDocument = gql`
 export function useUpdateQuestionMutation() {
   return Urql.useMutation<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument);
 };
+export const UpdateQuestionBankDocument = gql`
+    mutation UpdateQuestionBank($id: Int!, $name: String!) {
+  updateQuestionBank(id: $id, name: $name) {
+    ...QuestionBank
+  }
+}
+    ${QuestionBankFragmentDoc}`;
+
+export function useUpdateQuestionBankMutation() {
+  return Urql.useMutation<UpdateQuestionBankMutation, UpdateQuestionBankMutationVariables>(UpdateQuestionBankDocument);
+};
 export const UpdateTagDocument = gql`
     mutation UpdateTag($id: Int!, $text: String!) {
   updateTag(id: $id, text: $text) {
@@ -1176,6 +1213,17 @@ export const GetInterviewsDocument = gql`
 
 export function useGetInterviewsQuery(options?: Omit<Urql.UseQueryArgs<GetInterviewsQueryVariables>, 'query'>) {
   return Urql.useQuery<GetInterviewsQuery, GetInterviewsQueryVariables>({ query: GetInterviewsDocument, ...options });
+};
+export const GetQuestionBankDocument = gql`
+    query GetQuestionBank($id: Int!) {
+  getQuestionBank(id: $id) {
+    ...QuestionBankWithQuestions
+  }
+}
+    ${QuestionBankWithQuestionsFragmentDoc}`;
+
+export function useGetQuestionBankQuery(options: Omit<Urql.UseQueryArgs<GetQuestionBankQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetQuestionBankQuery, GetQuestionBankQueryVariables>({ query: GetQuestionBankDocument, ...options });
 };
 export const GetQuestionBanksDocument = gql`
     query GetQuestionBanks {

@@ -24,6 +24,7 @@ const InterviewTemplates = lazy(() => import('./pages/interview-templates'));
 const Interviews = lazy(() => import('./pages/interviews'));
 const Users = lazy(() => import('./pages/users'));
 const QuestionBanks = lazy(() => import('./pages/question-banks'));
+const QuestionBank = lazy(() => import('./pages/question-bank'));
 
 export const AppRoutes = () => {
   return (
@@ -128,6 +129,15 @@ export const AppRoutes = () => {
             <ProtectedRoute
               allowedUserRoles={[UserRole.Admin, UserRole.Interviewer]}>
               <QuestionBanks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/question-banks/:id'
+          element={
+            <ProtectedRoute
+              allowedUserRoles={[UserRole.Admin, UserRole.Interviewer]}>
+              <QuestionBank />
             </ProtectedRoute>
           }
         />

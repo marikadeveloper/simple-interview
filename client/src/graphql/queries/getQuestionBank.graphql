@@ -1,0 +1,5 @@
+query GetQuestionBank($id: Int!) {
+  getQuestionBank(id: $id) {
+    ...QuestionBankWithQuestions
+  }
+}

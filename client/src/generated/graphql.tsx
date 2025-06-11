@@ -17,6 +17,11 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AddQuestionsFromQuestionBankInput = {
+  interviewTemplateId: Scalars['Int']['input'];
+  questionIds: Array<Scalars['Int']['input']>;
+};
+
 export type AdminRegisterInput = {
   email: Scalars['String']['input'];
   fullName: Scalars['String']['input'];
@@ -128,6 +133,7 @@ export type KeystrokeInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addQuestionsFromQuestionBank: Scalars['Boolean']['output'];
   adminRegister?: Maybe<User>;
   changePassword?: Maybe<User>;
   confirmInterviewCompletion: Scalars['Boolean']['output'];
@@ -155,6 +161,11 @@ export type Mutation = {
   updateQuestionBank?: Maybe<QuestionBank>;
   updateTag?: Maybe<Tag>;
   userRegister?: Maybe<User>;
+};
+
+
+export type MutationAddQuestionsFromQuestionBankArgs = {
+  input: AddQuestionsFromQuestionBankInput;
 };
 
 
@@ -451,6 +462,13 @@ export type QuestionBankWithQuestionsFragment = { __typename?: 'QuestionBank', i
 export type TagFragment = { __typename?: 'Tag', id: number, text: string };
 
 export type UserFragment = { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean };
+
+export type AddQuestionsFromQuestionBankMutationVariables = Exact<{
+  input: AddQuestionsFromQuestionBankInput;
+}>;
+
+
+export type AddQuestionsFromQuestionBankMutation = { __typename?: 'Mutation', addQuestionsFromQuestionBank: boolean };
 
 export type ChangePasswordMutationVariables = Exact<{
   input: ChangePasswordInput;
@@ -875,6 +893,15 @@ export const QuestionBankWithQuestionsFragmentDoc = gql`
 }
     ${QuestionBankFragmentDoc}
 ${QuestionFragmentDoc}`;
+export const AddQuestionsFromQuestionBankDocument = gql`
+    mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+  addQuestionsFromQuestionBank(input: $input)
+}
+    `;
+
+export function useAddQuestionsFromQuestionBankMutation() {
+  return Urql.useMutation<AddQuestionsFromQuestionBankMutation, AddQuestionsFromQuestionBankMutationVariables>(AddQuestionsFromQuestionBankDocument);
+};
 export const ChangePasswordDocument = gql`
     mutation ChangePassword($input: ChangePasswordInput!) {
   changePassword(input: $input) {

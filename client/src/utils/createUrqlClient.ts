@@ -239,6 +239,13 @@ export const createUrqlClient = () => {
                 id: _args.id as number,
               });
             },
+            addQuestionsFromQuestionBank: (_result, _args, cache, _info) => {
+              const input = _args.input as any;
+              cache.invalidate({
+                __typename: 'InterviewTemplate',
+                id: input?.interviewTemplateId as number,
+              });
+            },
 
             // register: (_result, _args, cache, _info) => {
             //   betterUpdateQuery<RegisterMutation, MeQuery>(

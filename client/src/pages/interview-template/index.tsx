@@ -1,10 +1,12 @@
 import {
   useGetInterviewTemplateQuery,
+  useGetQuestionBanksQuery,
   useGetTagsQuery,
 } from '@/generated/graphql';
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { FormHeading } from './components/FormHeading';
+import { QuestionBankSelector } from './components/QuestionBankSelector';
 import { QuestionCard } from './components/QuestionCard';
 import { QuestionList } from './components/QuestionList';
 import { ReadonlyHeading } from './components/ReadonlyHeading';
@@ -26,6 +28,7 @@ const InterviewTemplate = () => {
         : [],
     [tagsData],
   );
+  const [{ data: questionBanksData }] = useGetQuestionBanksQuery();
 
   if (fetching) {
     return <div>Loading...</div>;
@@ -56,7 +59,10 @@ const InterviewTemplate = () => {
 
       <div className='py-14'>
         {/* TODO: can add here question bank selection */}
-        <QuestionCard templateId={id} />
+        <QuestionBankSelector templateId={id} />
+        <div className='mt-4'>
+          <QuestionCard templateId={id} />
+        </div>
         <div className='mt-4'>
           <QuestionList
             key={interviewTemplate.questions?.length}

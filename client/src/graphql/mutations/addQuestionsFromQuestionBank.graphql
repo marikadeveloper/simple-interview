@@ -1,0 +1,5 @@
+mutation AddQuestionsFromQuestionBank(
+  $input: AddQuestionsFromQuestionBankInput!
+) {
+  addQuestionsFromQuestionBank(input: $input)
+}

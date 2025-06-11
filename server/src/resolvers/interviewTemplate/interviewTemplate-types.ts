@@ -11,3 +11,12 @@ export class InterviewTemplateInput {
   @Field(() => [Int], { nullable: true })
   tagsIds?: number[];
 }
+
+@InputType()
+export class AddQuestionsFromQuestionBankInput {
+  @Field(() => Int)
+  interviewTemplateId!: number;
+
+  @Field(() => [Int])
+  questionIds!: number[];
+}

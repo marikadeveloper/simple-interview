@@ -1,3 +1,4 @@
+import { In } from 'typeorm';
 import { dataSource } from '../../';
 import { Answer } from '../../entities/Answer';
 import { Interview, InterviewStatus } from '../../entities/Interview';
@@ -43,9 +44,9 @@ const createInterviewTemplate = () => {
 };
 const createMockQuestions = async (interviewTemplateId: number) => {
   const questions = [
-    { title: 'Question 1', description: 'Description 1', sortOrder: 0 },
-    { title: 'Question 2', description: 'Description 2', sortOrder: 1 },
-    { title: 'Question 3', description: 'Description 3', sortOrder: 2 },
+    { title: 'Question 1', description: 'Description 1' },
+    { title: 'Question 2', description: 'Description 2' },
+    { title: 'Question 3', description: 'Description 3' },
   ];
 
   await Promise.all(
@@ -53,8 +54,7 @@ const createMockQuestions = async (interviewTemplateId: number) => {
       Question.create({
         title: question.title,
         description: question.description,
-        sortOrder: question.sortOrder,
-        interviewTemplate: { id: interviewTemplateId },
+        // interviewTemplate: { id: interviewTemplateId },
       }).save(),
     ),
   );
@@ -438,7 +438,7 @@ describe('Interview Resolver', () => {
     );
     testInterviews.push(interviewCandidate);
     const questions = await Question.findBy({
-      interviewTemplate: { id: interviewTemplateId },
+      interviewTemplates: { id: In([interviewTemplateId]) },
     });
     // create answer
     const answer = await Answer.create({

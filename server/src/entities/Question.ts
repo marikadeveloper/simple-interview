@@ -36,10 +36,6 @@ export class Question extends BaseEntity {
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @Field(() => Int)
-  @Column()
-  sortOrder: number;
-
   @Field(() => QuestionBank, { nullable: true })
   @ManyToOne(() => QuestionBank, (questionBank) => questionBank.questions, {
     onDelete: 'CASCADE',

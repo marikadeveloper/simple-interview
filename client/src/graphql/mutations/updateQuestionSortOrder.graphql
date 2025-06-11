@@ -1,3 +1,0 @@
-mutation UpdateQuestionSortOrder($input: UpdateQuestionSortOrderInput!) {
-  updateQuestionSortOrder(input: $input)
-}

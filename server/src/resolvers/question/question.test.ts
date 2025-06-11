@@ -51,7 +51,6 @@ const createQuestionMutation = `
       id
       title
       description
-      sortOrder
     }
   }
 `;
@@ -62,16 +61,9 @@ const updateQuestionMutation = `
       id
       title
       description
-      sortOrder
     }
   }
 `;
-
-// const updateQuestionSortOrderMutation = `
-//   mutation UpdateQuestionSortOrder($input: UpdateQuestionSortOrderInput!) {
-//     updateQuestionSortOrder(input: $input)
-//   }
-// `;
 
 const deleteQuestionMutation = `
   mutation DeleteQuestion($id: Int!) {
@@ -123,7 +115,6 @@ describe('QuestionResolver', () => {
             id: expect.any(Number),
             title: questionInput.title,
             description: questionInput.description,
-            sortOrder: expect.any(Number),
           },
         },
       });
@@ -148,7 +139,6 @@ describe('QuestionResolver', () => {
             id: expect.any(Number),
             title: questionInput.title,
             description: questionInput.description,
-            sortOrder: expect.any(Number),
           },
         },
       });
@@ -217,7 +207,6 @@ describe('QuestionResolver', () => {
           id: expect.any(Number),
           title: questionInput1.title,
           description: questionInput1.description,
-          sortOrder: 0,
         },
       },
     });
@@ -235,7 +224,6 @@ describe('QuestionResolver', () => {
           id: expect.any(Number),
           title: questionInput2.title,
           description: questionInput2.description,
-          sortOrder: 1,
         },
       },
     });
@@ -250,9 +238,7 @@ describe('QuestionResolver', () => {
   });
 
   it("should update a question's title and description", async () => {
-    const question = await createFakeQuestion(interviewTemplateId, {
-      sortOrder: 0,
-    });
+    const question = await createFakeQuestion(interviewTemplateId, {});
     testQuestions.push(question);
 
     const updatedQuestionInput = {
@@ -272,16 +258,13 @@ describe('QuestionResolver', () => {
           id: question.id,
           title: updatedQuestionInput.title,
           description: updatedQuestionInput.description,
-          sortOrder: question.sortOrder,
         },
       },
     });
   });
 
   it('should delete a question', async () => {
-    const question = await createFakeQuestion(interviewTemplateId, {
-      sortOrder: 0,
-    });
+    const question = await createFakeQuestion(interviewTemplateId, {});
 
     const response = await graphqlCall({
       source: deleteQuestionMutation,
@@ -300,174 +283,4 @@ describe('QuestionResolver', () => {
 
     expect(deletedQuestion).toBeNull();
   });
-
-  // describe('should update the sort order of questions correctly', () => {
-  //   const prepareTest = async () => {
-  //     const question1 = await createFakeQuestion(interviewTemplateId, {
-  //       sortOrder: 0,
-  //     });
-  //     const question2 = await createFakeQuestion(interviewTemplateId, {
-  //       sortOrder: 1,
-  //     });
-  //     const question3 = await createFakeQuestion(interviewTemplateId, {
-  //       sortOrder: 2,
-  //     });
-  //     testQuestions.push(question1, question2, question3);
-
-  //     return { question1, question2, question3 };
-  //   };
-
-  //   it('moves question 1 down to the end, step by step', async () => {
-  //     const { question1, question2, question3 } = await prepareTest();
-
-  //     // ! Test 1: 1 down
-  //     // Update the sort order
-  //     let response = await graphqlCall({
-  //       source: updateQuestionSortOrderMutation,
-  //       variableValues: {
-  //         input: { questionId: question1!.id, newSortOrder: 1 },
-  //       },
-  //       userId: adminUser.id,
-  //     });
-
-  //     // Get all questions to check their sort order
-  //     let updated_question1 = await Question.findOneBy({ id: question1.id });
-  //     let updated_question2 = await Question.findOneBy({ id: question2.id });
-  //     let updated_question3 = await Question.findOneBy({ id: question3.id });
-
-  //     // Assert
-  //     expect(response).toMatchObject({
-  //       data: {
-  //         updateQuestionSortOrder: true,
-  //       },
-  //     });
-  //     expect(updated_question2?.sortOrder).toBe(0);
-  //     expect(updated_question1?.sortOrder).toBe(1);
-  //     expect(updated_question3?.sortOrder).toBe(2);
-
-  //     // !Test 2: 1 down again
-  //     response = await graphqlCall({
-  //       source: updateQuestionSortOrderMutation,
-  //       variableValues: {
-  //         input: { questionId: question1.id, newSortOrder: 2 },
-  //       },
-  //       userId: adminUser.id,
-  //     });
-
-  //     updated_question1 = await Question.findOneBy({ id: question1.id });
-  //     updated_question2 = await Question.findOneBy({ id: question2.id });
-  //     updated_question3 = await Question.findOneBy({ id: question3.id });
-
-  //     expect(response).toMatchObject({
-  //       data: {
-  //         updateQuestionSortOrder: true,
-  //       },
-  //     });
-  //     expect(updated_question2?.sortOrder).toBe(0);
-  //     expect(updated_question3?.sortOrder).toBe(1);
-  //     expect(updated_question1?.sortOrder).toBe(2);
-  //   });
-
-  //   it('moves question 3 up to the beginning, step by step', async () => {
-  //     const { question1, question2, question3 } = await prepareTest();
-
-  //     // ! Test 1: 3 up
-  //     // Update the sort order
-  //     let response = await graphqlCall({
-  //       source: updateQuestionSortOrderMutation,
-  //       variableValues: {
-  //         input: { questionId: question3!.id, newSortOrder: 0 },
-  //       },
-  //       userId: adminUser.id,
-  //     });
-
-  //     // Get all questions to check their sort order
-  //     let updated_question1 = await Question.findOneBy({ id: question1.id });
-  //     let updated_question2 = await Question.findOneBy({ id: question2.id });
-  //     let updated_question3 = await Question.findOneBy({ id: question3.id });
-
-  //     // Assert
-  //     expect(response).toMatchObject({
-  //       data: {
-  //         updateQuestionSortOrder: true,
-  //       },
-  //     });
-  //     expect(updated_question3?.sortOrder).toBe(0);
-  //     expect(updated_question1?.sortOrder).toBe(1);
-  //     expect(updated_question2?.sortOrder).toBe(2);
-
-  //     // Test 2: 3 up again
-  //     response = await graphqlCall({
-  //       source: updateQuestionSortOrderMutation,
-  //       variableValues: {
-  //         input: { questionId: question3.id, newSortOrder: 0 },
-  //       },
-  //       userId: adminUser.id,
-  //     });
-
-  //     updated_question1 = await Question.findOneBy({ id: question1.id });
-  //     updated_question2 = await Question.findOneBy({ id: question2.id });
-  //     updated_question3 = await Question.findOneBy({ id: question3.id });
-
-  //     expect(response).toMatchObject({
-  //       data: {
-  //         updateQuestionSortOrder: true,
-  //       },
-  //     });
-  //     expect(updated_question3?.sortOrder).toBe(0);
-  //     expect(updated_question1?.sortOrder).toBe(1);
-  //     expect(updated_question2?.sortOrder).toBe(2);
-  //   });
-
-  //   it('moves question 2 first to the beginning, then directly to the end', async () => {
-  //     const { question1, question2, question3 } = await prepareTest();
-
-  //     // ! Test 1: 2 up
-  //     // Update the sort order
-  //     let response = await graphqlCall({
-  //       source: updateQuestionSortOrderMutation,
-  //       variableValues: {
-  //         input: { questionId: question2!.id, newSortOrder: 0 },
-  //       },
-  //       userId: adminUser.id,
-  //     });
-
-  //     // Get all questions to check their sort order
-  //     let updated_question1 = await Question.findOneBy({ id: question1.id });
-  //     let updated_question2 = await Question.findOneBy({ id: question2.id });
-  //     let updated_question3 = await Question.findOneBy({ id: question3.id });
-
-  //     // Assert
-  //     expect(response).toMatchObject({
-  //       data: {
-  //         updateQuestionSortOrder: true,
-  //       },
-  //     });
-  //     expect(updated_question2?.sortOrder).toBe(0);
-  //     expect(updated_question1?.sortOrder).toBe(1);
-  //     expect(updated_question3?.sortOrder).toBe(2);
-
-  //     // Test 2: 2 down
-  //     response = await graphqlCall({
-  //       source: updateQuestionSortOrderMutation,
-  //       variableValues: {
-  //         input: { questionId: question2.id, newSortOrder: 2 },
-  //       },
-  //       userId: adminUser.id,
-  //     });
-
-  //     updated_question1 = await Question.findOneBy({ id: question1.id });
-  //     updated_question2 = await Question.findOneBy({ id: question2.id });
-  //     updated_question3 = await Question.findOneBy({ id: question3.id });
-
-  //     expect(response).toMatchObject({
-  //       data: {
-  //         updateQuestionSortOrder: true,
-  //       },
-  //     });
-  //     expect(updated_question1?.sortOrder).toBe(0);
-  //     expect(updated_question3?.sortOrder).toBe(1);
-  //     expect(updated_question2?.sortOrder).toBe(2);
-  //   });
-  // });
 });

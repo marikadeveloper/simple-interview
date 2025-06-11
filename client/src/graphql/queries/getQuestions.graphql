@@ -1,5 +1,5 @@
-query GetQuestions($interviewTemplateId: Int!) {
-  getQuestions(interviewTemplateId: $interviewTemplateId) {
-    ...Question
-  }
-}
+# query GetQuestions($interviewTemplateId: Int!) {
+#   getQuestions(interviewTemplateId: $interviewTemplateId) {
+#     ...Question
+#   }
+# }

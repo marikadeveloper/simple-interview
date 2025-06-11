@@ -25,8 +25,8 @@ import {
 } from '@/generated/graphql';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { GripVertical, Pencil, Trash } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import { Pencil, Trash } from 'lucide-react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -54,7 +54,6 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     ? 'create'
     : 'unsupported';
   //
-  const ref = useRef<HTMLDivElement | null>(null);
   const [formVisible, setFormVisible] = useState(!!templateId);
   //
   const [, createQuestion] = useCreateQuestionMutation();
@@ -117,17 +116,14 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       <div className='relative'>
         <Card
           data-question-id={question ? question.id : undefined}
-          ref={ref}
           className={cn(
             'w-full bg-white',
             formVisible ? 'gap-6' : 'gap-2',
             mode === 'create' && 'border-dashed border-2 shadow-none',
-            mode === 'edit' && 'hover:bg-slate-50 hover:cursor-grab',
           )}>
           <CardHeader>
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-2'>
-                {mode === 'edit' && <GripVertical size={16} />}
                 <CardTitle>
                   {question ? form.watch('title') : 'Create Question'}
                 </CardTitle>

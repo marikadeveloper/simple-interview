@@ -1,0 +1,3 @@
+mutation DeleteQuestionBank($id: Int!) {
+  deleteQuestionBank(id: $id)
+}

@@ -1,4 +1,11 @@
-import { Arg, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
+import {
+  Arg,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from 'type-graphql';
 import { QuestionBank } from '../../entities/QuestionBank';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
@@ -20,7 +27,9 @@ export class QuestionBankResolver {
   @Query(() => QuestionBank, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
-  async getQuestionBank(@Arg('id') id: number): Promise<QuestionBank | null> {
+  async getQuestionBank(
+    @Arg('id', () => Int) id: number,
+  ): Promise<QuestionBank | null> {
     const questionBank = await QuestionBank.findOne({
       where: { id },
       relations: ['questions'],
@@ -46,7 +55,7 @@ export class QuestionBankResolver {
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async updateQuestionBank(
-    @Arg('id') id: number,
+    @Arg('id', () => Int) id: number,
     @Arg('name') name: string,
   ): Promise<QuestionBank | null> {
     const questionBank = await QuestionBank.findOneBy({ id });
@@ -61,7 +70,7 @@ export class QuestionBankResolver {
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
-  async deleteQuestionBank(@Arg('id') id: number): Promise<boolean> {
+  async deleteQuestionBank(@Arg('id', () => Int) id: number): Promise<boolean> {
     const questionBank = await QuestionBank.findOneBy({ id });
     if (!questionBank) {
       throw new Error(errorStrings.questionBank.notFound);

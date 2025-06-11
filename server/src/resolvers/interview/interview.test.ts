@@ -49,6 +49,8 @@ const createMockQuestions = async (interviewTemplateId: number) => {
     { title: 'Question 3', description: 'Description 3' },
   ];
 
+  console.log(interviewTemplateId);
+
   await Promise.all(
     questions.map((question) =>
       Question.create({

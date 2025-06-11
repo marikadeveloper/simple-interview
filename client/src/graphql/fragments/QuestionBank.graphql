@@ -1,0 +1,4 @@
+fragment QuestionBank on QuestionBank {
+  id
+  name
+}

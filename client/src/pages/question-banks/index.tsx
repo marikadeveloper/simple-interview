@@ -7,6 +7,7 @@ import {
   useGetQuestionBanksQuery,
 } from '@/generated/graphql';
 import { columns } from './columns';
+import { CreateQuestionBankDialog } from './components/CreateQuestionBankDialog';
 
 const QuestionBanks = () => {
   const { user } = useAuth();
@@ -23,7 +24,9 @@ const QuestionBanks = () => {
             Here you can create, delete, and update question banks.
           </PageSubtitle>
         </div>
-        <div className='flex items-center gap-2'></div>
+        <div className='flex items-center gap-2'>
+          <CreateQuestionBankDialog />
+        </div>
       </div>
 
       <div className='py-8'>

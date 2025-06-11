@@ -58,7 +58,7 @@ export class InterviewTemplateResolver {
   ): Promise<InterviewTemplate | null> {
     const interviewTemplate = await InterviewTemplate.findOne({
       where: { id },
-      relations: ['questions', 'tags'],
+      relations: ['questions', 'questions.questionBank', 'tags'],
     });
     if (!interviewTemplate) {
       throw new Error(errorStrings.interviewTemplate.notFound);

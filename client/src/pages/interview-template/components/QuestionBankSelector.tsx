@@ -176,7 +176,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
             </DialogDescription>
           </DialogHeader>
 
-          <div className='space-y-4 flex-1 overflow-hidden'>
+          <div className='space-y-4 flex-1 '>
             {/* Question Bank Selector */}
             <div className='grid gap-3'>
               <label className='text-sm font-medium'>Question Bank</label>
@@ -234,13 +234,13 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
                   />
                 </div>
 
-                <div className='border rounded-md p-2 max-h-[300px] overflow-y-auto'>
-                  <div className='space-y-3'>
+                <div className='border rounded-md p-2 max-h-[200px] overflow-y-auto'>
+                  <div className='space-y-2'>
                     {filteredQuestions.length > 0 ? (
                       filteredQuestions.map((question) => (
                         <div
                           key={question.id}
-                          className='flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50'>
+                          className='flex items-center space-x-3 p-1.5 border rounded-lg hover:bg-gray-50'>
                           <Checkbox
                             id={`question-${question.id}`}
                             checked={selectedQuestions.includes(question.id)}

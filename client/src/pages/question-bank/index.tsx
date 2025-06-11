@@ -1,8 +1,8 @@
+import { QuestionList } from '@/components/QuestionList';
 import { useGetQuestionBankQuery } from '@/generated/graphql';
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import { QuestionCard } from '../interview-template/components/QuestionCard';
-import { QuestionList } from '../interview-template/components/QuestionList';
+import { QuestionCard } from '../../components/QuestionCard';
 import { FormHeading } from './components/FormHeading';
 import { ReadonlyHeading } from './components/ReadonlyHeading';
 

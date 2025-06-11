@@ -1,14 +1,13 @@
+import { QuestionList } from '@/components/QuestionList';
 import {
   useGetInterviewTemplateQuery,
-  useGetQuestionBanksQuery,
   useGetTagsQuery,
 } from '@/generated/graphql';
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
+import { QuestionCard } from '../../components/QuestionCard';
 import { FormHeading } from './components/FormHeading';
 import { QuestionBankSelector } from './components/QuestionBankSelector';
-import { QuestionCard } from './components/QuestionCard';
-import { QuestionList } from './components/QuestionList';
 import { ReadonlyHeading } from './components/ReadonlyHeading';
 
 const InterviewTemplate = () => {
@@ -28,7 +27,6 @@ const InterviewTemplate = () => {
         : [],
     [tagsData],
   );
-  const [{ data: questionBanksData }] = useGetQuestionBanksQuery();
 
   if (fetching) {
     return <div>Loading...</div>;

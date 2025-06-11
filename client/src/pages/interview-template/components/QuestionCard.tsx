@@ -125,7 +125,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           )}>
           <CardHeader>
             <div className='flex items-center justify-between'>
-              <div className='grid gap-2'>
+              <div className='flex flex-col items-start gap-2'>
                 {/* Question Bank Label */}
                 {question?.questionBank && (
                   <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200'>

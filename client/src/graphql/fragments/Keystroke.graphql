@@ -1,4 +1,5 @@
 fragment Keystroke on Keystroke {
+  id
   relativeTimestamp
   snapshot
 }

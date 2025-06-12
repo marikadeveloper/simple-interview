@@ -11,6 +11,10 @@ import { Question } from './Question';
 
 @ObjectType()
 export class Keystroke {
+  @Field(() => Int)
+  @PrimaryGeneratedColumn()
+  id!: number;
+
   @Field(() => String)
   snapshot!: string; // contains a snapshot of the answer text at this keystroke
 

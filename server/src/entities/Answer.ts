@@ -11,8 +11,7 @@ import { Question } from './Question';
 
 @ObjectType()
 export class Keystroke {
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
+  @Field(() => Int, { defaultValue: new Date().getTime() })
   id!: number;
 
   @Field(() => String)

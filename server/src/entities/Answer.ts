@@ -12,13 +12,12 @@ import { Question } from './Question';
 @ObjectType()
 export class Keystroke {
   @Field(() => Int, { defaultValue: new Date().getTime() })
-  id!: number;
+  id?: number;
 
   @Field(() => String)
   snapshot!: string; // contains a snapshot of the answer text at this keystroke
 
   @Field(() => Int)
-  @Column()
   relativeTimestamp!: number;
 }
 

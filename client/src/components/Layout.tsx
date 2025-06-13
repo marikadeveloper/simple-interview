@@ -7,9 +7,6 @@ export const Layout: React.FC = () => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      {/* Navigation */}
-      {/* <Header /> */}
-      {/* Main content */}
       <main className='grid min-h-screen w-full'>
         <SidebarTrigger />
         <div className='min-h-screen bg-background p-8'>

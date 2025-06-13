@@ -1,14 +1,14 @@
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Outlet } from 'react-router';
-import { Header } from './Header';
+import { AppSidebar } from './AppSidebar';
 import { Toaster } from './ui/sonner';
 
 export const Layout: React.FC = () => {
   return (
-    <div className='flex min-h-screen flex-col'>
-      {/* Navigation */}
-      <Header />
-      {/* Main content */}
-      <main className='flex-1'>
+    <SidebarProvider>
+      <AppSidebar />
+      <main className='grid min-h-screen w-full'>
+        <SidebarTrigger />
         <div className='min-h-screen bg-background p-8'>
           <div className='mx-auto max-w-5xl'>
             <Outlet />
@@ -16,6 +16,6 @@ export const Layout: React.FC = () => {
           </div>
         </div>
       </main>
-    </div>
+    </SidebarProvider>
   );
 };

@@ -17,7 +17,7 @@ export function Layout() {
           <div className='p-8'>
             <div className='mx-auto max-w-5xl'>
               <Outlet />
-              <Toaster />
+              <Toaster theme='light' />
             </div>
           </div>
         </div>

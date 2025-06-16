@@ -1,4 +1,5 @@
 import { Arg, Int, Mutation, Resolver, UseMiddleware } from 'type-graphql';
+import { Interview } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
@@ -43,6 +44,16 @@ export class QuestionResolver {
           throw new Error(errorStrings.interviewTemplate.notFound);
         }
 
+        // You can not add questions to an interview template that is used in an interview.
+        const interview = await Interview.findOneBy({
+          interviewTemplate: {
+            id: input.interviewTemplateId,
+          },
+        });
+        if (interview) {
+          throw new Error(errorStrings.interviewTemplate.usedInInterview);
+        }
+
         // If the interview template exists, add the question to it
         if (!interviewTemplate.questions) {
           interviewTemplate.questions = [];
@@ -65,6 +76,27 @@ export class QuestionResolver {
     if (!question) {
       throw new Error(errorStrings.question.notFound);
     }
+
+    // You can not update a question that is used in an interview.
+    const interviewTemplates = await InterviewTemplate.find({
+      where: {
+        questions: {
+          id: question.id,
+        },
+      },
+    });
+
+    for (const interviewTemplate of interviewTemplates) {
+      const interview = await Interview.findOneBy({
+        interviewTemplate: {
+          id: interviewTemplate.id,
+        },
+      });
+      if (interview) {
+        throw new Error(errorStrings.question.usedInInterview);
+      }
+    }
+
     question.title = input.title;
     question.description = input.description;
     await question.save();

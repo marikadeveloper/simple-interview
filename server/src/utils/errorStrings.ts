@@ -22,6 +22,7 @@ export const errorStrings = {
   },
   interviewTemplate: {
     notFound: 'interview template not found',
+    usedInInterview: 'interview template is used in an interview',
   },
   interview: {
     notFound: 'interview not found',
@@ -37,6 +38,7 @@ export const errorStrings = {
     notFound: 'question not found',
     missingTemplateOrBank:
       'question must belong to an interview template or a question bank',
+    usedInInterview: 'question is used in an interview',
   },
   tag: {
     emptyText: 'Tag cannot be empty',

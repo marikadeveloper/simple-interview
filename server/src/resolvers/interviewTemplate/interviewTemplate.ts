@@ -100,6 +100,7 @@ export class InterviewTemplateResolver {
     if (!interviewTemplate) {
       throw new Error(errorStrings.interviewTemplate.notFound);
     }
+
     interviewTemplate.name = input.name;
     interviewTemplate.description = input.description;
 

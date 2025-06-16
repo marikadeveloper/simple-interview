@@ -9,9 +9,11 @@ export function Layout() {
     <SidebarProvider>
       <AppSidebar />
       <div className='grid min-h-screen w-full'>
-        <SidebarTrigger />
         <div className='min-h-screen bg-background'>
-          <AppBreadcrumb />
+          <div className='flex items-center border-b'>
+            <SidebarTrigger className='px-4' />
+            <AppBreadcrumb />
+          </div>
           <div className='p-8'>
             <div className='mx-auto max-w-5xl'>
               <Outlet />

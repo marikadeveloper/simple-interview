@@ -1,6 +1,7 @@
 fragment QuestionBank on QuestionBank {
   id
   name
+  slug
 }
 
 fragment QuestionBankWithQuestions on QuestionBank {

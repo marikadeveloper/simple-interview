@@ -1,5 +1,5 @@
-mutation CreateQuestionBank($name: String!) {
-  createQuestionBank(name: $name) {
+mutation CreateQuestionBank($input: QuestionBankInput!) {
+  createQuestionBank(input: $input) {
     ...QuestionBank
   }
 }

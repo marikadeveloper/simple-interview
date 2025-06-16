@@ -48,10 +48,12 @@ export const CreateQuestionBankDialog: React.FC<
 
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
     const data = await createQuestionBank({
-      name: values.name,
+      input: {
+        name: values.name,
+      },
     });
     setIsOpen(false);
-    navigate(`/question-banks/${data.data?.createQuestionBank?.id}`);
+    navigate(`/question-banks/${data.data?.createQuestionBank?.slug}`);
     form.reset();
   };
 

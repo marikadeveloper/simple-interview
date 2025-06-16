@@ -1,6 +1,6 @@
 import { QuestionList } from '@/components/QuestionList';
 import {
-  useGetInterviewTemplateQuery,
+  useGetInterviewTemplateBySlugQuery,
   useGetTagsQuery,
 } from '@/generated/graphql';
 import { useMemo, useState } from 'react';
@@ -11,10 +11,10 @@ import { QuestionBankSelector } from './components/QuestionBankSelector';
 import { ReadonlyHeading } from './components/ReadonlyHeading';
 
 const InterviewTemplate = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [formVisible, setFormVisible] = useState(false);
-  const [{ fetching, data }] = useGetInterviewTemplateQuery({
-    variables: { id: parseInt(id as string) },
+  const [{ fetching, data }] = useGetInterviewTemplateBySlugQuery({
+    variables: { slug: slug as string },
   });
   const [{ data: tagsData }] = useGetTagsQuery();
   const tags = useMemo(
@@ -32,11 +32,11 @@ const InterviewTemplate = () => {
     return <div>Loading...</div>;
   }
 
-  if (!data?.getInterviewTemplate || !id) {
+  if (!data?.getInterviewTemplateBySlug || !slug) {
     return <div>No template found</div>;
   }
 
-  const interviewTemplate = data.getInterviewTemplate;
+  const interviewTemplate = data.getInterviewTemplateBySlug;
   return (
     <div className='container mx-auto'>
       <div className='flex align-top justify-between'>
@@ -56,9 +56,9 @@ const InterviewTemplate = () => {
       </div>
 
       <div className='py-14'>
-        <QuestionBankSelector templateId={id} />
+        <QuestionBankSelector templateId={interviewTemplate.id.toString()} />
         <div className='mt-4'>
-          <QuestionCard templateId={id} />
+          <QuestionCard templateId={interviewTemplate.id.toString()} />
         </div>
         <div className='mt-4'>
           <QuestionList

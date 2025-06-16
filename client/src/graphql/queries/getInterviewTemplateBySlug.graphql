@@ -1,0 +1,5 @@
+query GetInterviewTemplateBySlug($slug: String!) {
+  getInterviewTemplateBySlug(slug: $slug) {
+    ...InterviewTemplateWithQuestions
+  }
+}

@@ -13,7 +13,7 @@ export const QuestionBankActions: React.FC<QuestionBankActionsProps> = ({
 }) => {
   return (
     <>
-      <Link to={`/question-banks/${questionBank.id}`}>
+      <Link to={`/question-banks/${questionBank.slug}`}>
         <Button
           variant='outline'
           size='icon'

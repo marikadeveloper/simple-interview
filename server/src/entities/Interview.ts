@@ -43,6 +43,10 @@ export class Interview extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Field(() => String)
+  @Column({ unique: true })
+  slug!: string;
+
   @Field(() => InterviewStatus)
   @Column({
     type: 'enum',

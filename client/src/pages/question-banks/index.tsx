@@ -32,7 +32,7 @@ const QuestionBanks = () => {
       <div className='py-8'>
         <DataTable
           columns={columns}
-          data={(data?.getQuestionBanks as QuestionBankFragment[]) || []}
+          data={(data?.questionBanks as QuestionBankFragment[]) || []}
         />
       </div>
     </div>

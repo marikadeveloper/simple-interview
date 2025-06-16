@@ -58,7 +58,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
   const [, addQuestionsFromQuestionBank] =
     useAddQuestionsFromQuestionBankMutation();
 
-  const questionBanks = questionBanksData?.getQuestionBanks || [];
+  const questionBanks = questionBanksData?.questionBanks || [];
   const selectedQuestionBank = selectedQuestionBankData?.getQuestionBank;
   const currentTemplate = currentTemplateData?.getInterviewTemplate;
 

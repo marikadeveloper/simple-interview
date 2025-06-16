@@ -1,0 +1,11 @@
+query GetInterviewForReplayBySlug($slug: String!) {
+  getInterviewBySlug(slug: $slug) {
+    ...ReplayInterview
+  }
+}
+
+query GetInterviewForFeedbackBySlug($slug: String!) {
+  getInterviewBySlug(slug: $slug) {
+    ...FeedbackInterview
+  }
+}

@@ -7,7 +7,7 @@ import {
   FeedbackInterviewFragment,
   InterviewEvaluation,
   useEvaluateInterviewMutation,
-  useGetInterviewForFeedbackQuery,
+  useGetInterviewForFeedbackBySlugQuery,
 } from '@/generated/graphql';
 import { Crown, ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -16,9 +16,9 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { toast } from 'sonner';
 
 const InterviewFeedback: React.FC = () => {
-  const { id } = useParams();
-  const [{ data, fetching, error }] = useGetInterviewForFeedbackQuery({
-    variables: { id: parseInt(id as string) },
+  const { slug } = useParams();
+  const [{ data, fetching, error }] = useGetInterviewForFeedbackBySlugQuery({
+    variables: { slug: slug as string },
   });
   const [, evaluateInterview] = useEvaluateInterviewMutation();
   const [evaluation, setEvaluation] = useState<
@@ -30,19 +30,19 @@ const InterviewFeedback: React.FC = () => {
   >();
 
   useEffect(() => {
-    if (data?.getInterview) {
+    if (data?.getInterviewBySlug) {
       setEvaluation({
-        rating: data.getInterview.evaluationValue,
-        notes: data.getInterview.evaluationNotes,
+        rating: data.getInterviewBySlug.evaluationValue,
+        notes: data.getInterviewBySlug.evaluationNotes,
       });
     }
   }, [data]);
 
   if (fetching) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  if (!data?.getInterview) return <div>No data</div>;
+  if (!data?.getInterviewBySlug) return <div>No data</div>;
 
-  const interview: FeedbackInterviewFragment = data.getInterview;
+  const interview: FeedbackInterviewFragment = data.getInterviewBySlug;
 
   const handleEvaluation = (rating: InterviewEvaluation) => {
     if (evaluation?.rating === rating) {

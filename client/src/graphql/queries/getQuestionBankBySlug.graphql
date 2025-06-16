@@ -1,0 +1,5 @@
+query GetQuestionBankBySlug($slug: String!) {
+  getQuestionBankBySlug(slug: $slug) {
+    ...QuestionBankWithQuestions
+  }
+}

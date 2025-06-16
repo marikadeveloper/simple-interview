@@ -22,6 +22,7 @@ import { isAuth } from '../../middleware/isAuth';
 import { MyContext } from '../../types';
 import { errorStrings } from '../../utils/errorStrings';
 import { sendEmail } from '../../utils/sendEmail';
+import { generateUniqueSlug } from '../../utils/slugify';
 import { InterviewEvaluationInput, InterviewInput } from './interview-types';
 
 @Resolver(Interview)
@@ -94,72 +95,51 @@ export class InterviewResolver {
   async createInterview(
     @Arg('input', () => InterviewInput) input: InterviewInput,
   ): Promise<Interview | null> {
-    const { interviewTemplateId, candidateId, deadline } = input;
-
-    // Check if candidate exists
-    const candidate = await User.findOneBy({
-      id: candidateId,
-      role: UserRole.CANDIDATE,
-    });
-
-    if (!candidate) {
-      throw new Error(errorStrings.user.notCandidate);
-    }
-
-    // Check if interviewer exists
-    const interviewer = await User.findOneBy({
-      id: input.interviewerId,
-    });
-    if (!interviewer) {
-      throw new Error(errorStrings.user.notFound);
-    }
-
-    // Check if the date is valid
-    const date = new Date(deadline);
-    if (isNaN(date.getTime())) {
-      throw new Error(errorStrings.date.invalidFormat);
-    }
-
-    // Check if the date is in the past
-    const now = new Date();
-    if (date < now) {
-      throw new Error(errorStrings.date.mustBeInTheFuture);
-    }
-
-    if (interviewTemplateId) {
-    }
-
-    // Check if interview template exists
-    const interviewTemplate = await InterviewTemplate.findOneBy({
-      id: interviewTemplateId,
+    const interviewTemplate = await InterviewTemplate.findOne({
+      where: { id: input.interviewTemplateId },
+      relations: ['questions'],
     });
 
     if (!interviewTemplate) {
       throw new Error(errorStrings.interviewTemplate.notFound);
     }
 
-    const interview = await Interview.create({
-      interviewTemplate: { id: interviewTemplateId },
-      user: { id: candidateId },
-      deadline,
-      status: InterviewStatus.PENDING,
-      interviewer: { id: input.interviewerId },
-    }).save();
+    if (!interviewTemplate.questions?.length) {
+      throw new Error(errorStrings.interview.noQuestions);
+    }
 
-    // Notify the candidate about the interview via email
-    const anchorTag = `<a href="${process.env.CLIENT_URL}/interviews>Your Interviews</a>`;
-    await sendEmail(
-      candidate.email,
-      'Interview Scheduled',
-      `You have been scheduled for an interview for the ${interviewTemplate.name} position. Please check your interviews here: ${anchorTag}`,
+    const candidate = await User.findOneBy({ id: input.candidateId });
+    if (!candidate) {
+      throw new Error(errorStrings.user.notFound);
+    }
+
+    const interviewer = await User.findOneBy({ id: input.interviewerId });
+    if (!interviewer) {
+      throw new Error(errorStrings.user.notFound);
+    }
+
+    const slug = await generateUniqueSlug(
+      `${candidate.fullName}-${interviewTemplate.name}`,
+      async (slug) => {
+        const existing = await Interview.findOneBy({ slug });
+        return !!existing;
+      },
     );
 
-    // Notify the interviewer about the interview via email
-    const interviewerAnchorTag = `<a href="${process.env.CLIENT_URL}/interviews">See Interviews</a>`;
+    const interview = await Interview.create({
+      interviewTemplate,
+      user: candidate,
+      interviewer,
+      deadline: new Date(input.deadline),
+      status: InterviewStatus.PENDING,
+      slug,
+    }).save();
+
+    // Send email to candidate
     await sendEmail(
-      interviewer.email,
-      'Interview Assigned',
-      `You have been assigned to an interview for the ${interviewTemplate.name} position. You can see the interview here: ${interviewerAnchorTag}`,
+      candidate.email,
+      'Interview Invitation',
+      `You have been invited to an interview. Please log in to your account to start the interview.`,
     );
 
     return interview;
@@ -224,6 +204,30 @@ export class InterviewResolver {
 
   @Query(() => Interview, { nullable: true })
   @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async getInterviewBySlug(
+    @Arg('slug', () => String) slug: string,
+  ): Promise<Interview | null> {
+    const interview = await Interview.findOne({
+      where: { slug },
+      relations: [
+        'interviewTemplate',
+        'interviewTemplate.questions',
+        'user',
+        'answers',
+        'answers.question',
+      ],
+    });
+
+    if (!interview) {
+      throw new Error(errorStrings.interview.notFound);
+    }
+
+    return interview;
+  }
+
+  @Query(() => Interview, { nullable: true })
+  @UseMiddleware(isAuth)
   async getCandidateInterview(
     @Ctx() { req }: MyContext,
     @Arg('id', () => Int) id: number,
@@ -232,6 +236,29 @@ export class InterviewResolver {
 
     const interview = await Interview.findOne({
       where: { id, user: { id: userId } },
+      relations: [
+        'interviewTemplate',
+        'interviewTemplate.questions',
+        'user',
+        'answers',
+        'answers.question',
+      ],
+    });
+
+    if (!interview) {
+      throw new Error(errorStrings.interview.notFound);
+    }
+
+    return interview;
+  }
+
+  @Query(() => Interview, { nullable: true })
+  @UseMiddleware(isAuth)
+  async getCandidateInterviewBySlug(
+    @Arg('slug', () => String) slug: string,
+  ): Promise<Interview | null> {
+    const interview = await Interview.findOne({
+      where: { slug },
       relations: [
         'interviewTemplate',
         'interviewTemplate.questions',

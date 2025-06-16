@@ -5,16 +5,16 @@ import {
   AnswerWithKeystrokesFragment,
   QuestionFragment,
   ReplayInterviewFragment,
-  useGetInterviewForReplayQuery,
+  useGetInterviewForReplayBySlugQuery,
 } from '@/generated/graphql';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { KeystrokeReplay } from '../components/KeystrokeReplay';
 
 export const ReadonlyInterview = () => {
-  const { id } = useParams();
-  const [{ data, fetching, error }] = useGetInterviewForReplayQuery({
-    variables: { id: parseInt(id as string) },
+  const { slug } = useParams();
+  const [{ data, fetching, error }] = useGetInterviewForReplayBySlugQuery({
+    variables: { slug: slug as string },
   });
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -39,14 +39,14 @@ export const ReadonlyInterview = () => {
         Error: {error?.message}
       </div>
     );
-  if (!data.getInterview)
+  if (!data.getInterviewBySlug)
     return (
       <div className='flex items-center justify-center min-h-screen text-red-500'>
         Interview not found
       </div>
     );
 
-  const interview: ReplayInterviewFragment = data.getInterview;
+  const interview: ReplayInterviewFragment = data.getInterviewBySlug;
   const question: QuestionFragment =
     interview.interviewTemplate.questions[currentQuestionIndex];
   const answer: AnswerWithKeystrokesFragment = interview.answers?.find(
@@ -109,7 +109,7 @@ export const ReadonlyInterview = () => {
             </Button>
           )}
           {isLastQuestion && (
-            <Link to={`/interviews/${id}/feedback`}>
+            <Link to={`/interviews/${slug}/feedback`}>
               <Button>Give feedback</Button>
             </Link>
           )}

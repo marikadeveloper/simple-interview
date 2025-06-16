@@ -26,6 +26,10 @@ export class InterviewTemplate extends BaseEntity {
   name!: string;
 
   @Field(() => String)
+  @Column({ unique: true })
+  slug!: string;
+
+  @Field(() => String)
   @Column()
   description!: string;
 

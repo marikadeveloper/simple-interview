@@ -91,7 +91,7 @@ export const AppRoutes = () => {
           }
         />
         <Route
-          path='/interview-templates/:id'
+          path='/interview-templates/:slug'
           element={
             <ProtectedRoute
               allowedUserRoles={[UserRole.Admin, UserRole.Interviewer]}>
@@ -108,7 +108,7 @@ export const AppRoutes = () => {
           }
         />
         <Route
-          path='/interviews/:id'
+          path='/interviews/:slug'
           element={
             <ProtectedRoute>
               <Interview />
@@ -116,7 +116,7 @@ export const AppRoutes = () => {
           }
         />
         <Route
-          path='/interviews/:id/feedback'
+          path='/interviews/:slug/feedback'
           element={
             <ProtectedRoute>
               <InterviewFeedback />
@@ -133,7 +133,7 @@ export const AppRoutes = () => {
           }
         />
         <Route
-          path='/question-banks/:id'
+          path='/question-banks/:slug'
           element={
             <ProtectedRoute
               allowedUserRoles={[UserRole.Admin, UserRole.Interviewer]}>

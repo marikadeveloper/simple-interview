@@ -10,18 +10,14 @@ import { QuestionBank } from '../../entities/QuestionBank';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { errorStrings } from '../../utils/errorStrings';
+import { generateUniqueSlug } from '../../utils/slugify';
+import { QuestionBankInput } from './questionBank-types';
 
 @Resolver(QuestionBank)
 export class QuestionBankResolver {
-  @Query(() => [QuestionBank], { nullable: true })
-  @UseMiddleware(isAuth)
-  @UseMiddleware(isAdminOrInterviewer)
-  async getQuestionBanks(): Promise<QuestionBank[] | null> {
-    const questionBanks = await QuestionBank.find({
-      order: { name: 'ASC' },
-    });
-
-    return questionBanks;
+  @Query(() => [QuestionBank])
+  async questionBanks(): Promise<QuestionBank[]> {
+    return QuestionBank.find();
   }
 
   @Query(() => QuestionBank, { nullable: true })
@@ -40,15 +36,31 @@ export class QuestionBankResolver {
     return questionBank;
   }
 
-  @Mutation(() => QuestionBank, { nullable: true })
+  @Query(() => QuestionBank, { nullable: true })
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async getQuestionBankBySlug(
+    @Arg('slug') slug: string,
+  ): Promise<QuestionBank | null> {
+    return QuestionBank.findOne({ where: { slug } });
+  }
+
+  @Mutation(() => QuestionBank)
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async createQuestionBank(
-    @Arg('name') name: string,
-  ): Promise<QuestionBank | null> {
-    const questionBank = QuestionBank.create({ name });
-    await questionBank.save();
-    return questionBank;
+    @Arg('input') input: QuestionBankInput,
+  ): Promise<QuestionBank> {
+    const slug = await generateUniqueSlug(input.name, async (slug) => {
+      const existing = await QuestionBank.findOneBy({ slug });
+      return !!existing;
+    });
+
+    const questionBank = new QuestionBank();
+    questionBank.name = input.name;
+    questionBank.slug = slug;
+
+    return questionBank.save();
   }
 
   @Mutation(() => QuestionBank, { nullable: true })

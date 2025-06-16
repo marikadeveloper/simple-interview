@@ -13,6 +13,7 @@ import { Tag } from '../../entities/Tag';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { errorStrings } from '../../utils/errorStrings';
+import { generateUniqueSlug } from '../../utils/slugify';
 import {
   AddQuestionsFromQuestionBankInput,
   InterviewTemplateInput,
@@ -66,26 +67,45 @@ export class InterviewTemplateResolver {
     return interviewTemplate;
   }
 
+  @Query(() => InterviewTemplate, { nullable: true })
+  @UseMiddleware(isAuth)
+  @UseMiddleware(isAdminOrInterviewer)
+  async getInterviewTemplateBySlug(
+    @Arg('slug', () => String) slug: string,
+  ): Promise<InterviewTemplate | null> {
+    const interviewTemplate = await InterviewTemplate.findOne({
+      where: { slug },
+      relations: ['questions', 'questions.questionBank', 'tags'],
+    });
+    if (!interviewTemplate) {
+      throw new Error(errorStrings.interviewTemplate.notFound);
+    }
+    return interviewTemplate;
+  }
+
   @Mutation(() => InterviewTemplate, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async createInterviewTemplate(
     @Arg('input', () => InterviewTemplateInput) input: InterviewTemplateInput,
   ): Promise<InterviewTemplate | null> {
-    const interviewTemplate = InterviewTemplate.create({
-      name: input.name,
-      description: input.description,
+    const slug = await generateUniqueSlug(input.name, async (slug) => {
+      const existing = await InterviewTemplate.findOneBy({ slug });
+      return !!existing;
     });
 
-    // If tags are provided, set them
+    const interviewTemplate = await InterviewTemplate.create({
+      name: input.name,
+      description: input.description,
+      slug,
+    }).save();
+
     if (input.tagsIds) {
-      const tags = await Tag.findBy({
-        id: In(input.tagsIds),
-      });
+      const tags = await Tag.findBy({ id: In(input.tagsIds) });
       interviewTemplate.tags = tags;
+      await interviewTemplate.save();
     }
 
-    await interviewTemplate.save();
     return interviewTemplate;
   }
 

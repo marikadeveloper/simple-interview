@@ -19,7 +19,11 @@ export class QuestionBank extends BaseEntity {
   @Column()
   name!: string;
 
+  @Field(() => String)
+  @Column({ unique: true })
+  slug!: string;
+
   @OneToMany(() => Question, (question) => question.questionBank)
-  @Field(() => [Question])
+  @Field(() => [Question], { nullable: true })
   questions: Question[];
 }

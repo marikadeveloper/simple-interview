@@ -1,0 +1,5 @@
+query GetCandidateInterviewBySlug($slug: String!) {
+  getCandidateInterviewBySlug(slug: $slug) {
+    ...CandidateInterview
+  }
+}

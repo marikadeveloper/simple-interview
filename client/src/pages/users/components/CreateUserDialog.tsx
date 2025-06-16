@@ -24,6 +24,7 @@ import {
   UserRole,
   useUserRegisterMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import NotAuthorizedPage from '@/pages/auth/NotAuthorizedPage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -40,7 +41,10 @@ interface UserCreateDialogProps {}
 
 export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [, userRegister] = useUserRegisterMutation();
+  const [, userRegister] = useMutationWithToast(useUserRegisterMutation, {
+    successMessage: 'User created successfully',
+    errorMessage: 'Failed to create user',
+  });
   const { user } = useAuth();
 
   // reset form on close
@@ -62,12 +66,15 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    userRegister({
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const response = await userRegister({
       input: {
         ...(values as PreRegisterInput),
       },
-    }).then(() => setIsOpen(false));
+    });
+    if (response.data?.userRegister) {
+      setIsOpen(false);
+    }
   }
 
   if (!user) {

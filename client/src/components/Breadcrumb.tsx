@@ -6,6 +6,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { pathnameToBreadcrumbLabel } from '@/utils/formatters';
 import { Link, useLocation } from 'react-router';
 
 export function AppBreadcrumb() {
@@ -23,7 +24,7 @@ export function AppBreadcrumb() {
         {pathnames.map((value: string, index: number) => {
           const last = index === pathnames.length - 1;
           const to = `/${pathnames.slice(0, index + 1).join('/')}`;
-          const label = value.charAt(0).toUpperCase() + value.slice(1);
+          const label = pathnameToBreadcrumbLabel(value);
 
           return (
             <BreadcrumbItem key={to}>

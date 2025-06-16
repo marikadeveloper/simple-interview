@@ -4,5 +4,8 @@ export const pathnameToBreadcrumbLabel = (path: string) => {
   // "question-bank" -> "Question Bank"
 
   const pathWithoutDash = path.replace(/-/g, ' ');
-  return pathWithoutDash.charAt(0).toUpperCase() + pathWithoutDash.slice(1);
+  return pathWithoutDash
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 };

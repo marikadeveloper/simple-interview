@@ -14,7 +14,7 @@ export function AppBreadcrumb() {
   const pathnames = location.pathname.split('/').filter((x: string) => x);
 
   return (
-    <Breadcrumb className='px-4 py-2 border-b'>
+    <Breadcrumb className='px-4 py-2'>
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>

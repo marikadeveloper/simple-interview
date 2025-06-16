@@ -187,7 +187,7 @@ export const createUrqlClient = () => {
 
             createQuestion: (_result, _args, cache, _info) => {
               invalidateAll(cache, 'getInterviewTemplate');
-              invalidateAll(cache, 'getQuestionBank');
+              invalidateAll(cache, 'getQuestionBankBySlug');
             },
             updateQuestion: (_result, _args, cache, _info) => {
               cache.invalidate({

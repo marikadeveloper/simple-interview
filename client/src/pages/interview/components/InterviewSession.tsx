@@ -5,6 +5,7 @@ import {
   useCreateAnswerMutation,
   useSaveKeystrokesMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -35,7 +36,13 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
   >({});
 
   const [, createAnswer] = useCreateAnswerMutation();
-  const [, confirmCompletion] = useConfirmInterviewCompletionMutation();
+  const [, confirmCompletion] = useMutationWithToast(
+    useConfirmInterviewCompletionMutation,
+    {
+      successMessage: 'Interview completed successfully',
+      errorMessage: 'Failed to complete interview',
+    },
+  );
   const [, saveKeystrokes] = useSaveKeystrokesMutation();
 
   const currentQuestion =

@@ -239,6 +239,12 @@ export const createUrqlClient = () => {
                 id: _args.id as number,
               });
             },
+            deleteQuestionBank: (_result, _args, cache, _info) => {
+              cache.invalidate({
+                __typename: 'QuestionBank',
+                id: _args.id as number,
+              });
+            },
             addQuestionsFromQuestionBank: (_result, _args, cache, _info) => {
               const input = _args.input as any;
               cache.invalidate({

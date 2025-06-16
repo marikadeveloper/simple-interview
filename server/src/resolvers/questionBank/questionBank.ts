@@ -90,6 +90,7 @@ export class QuestionBankResolver {
     if (!questionBank) {
       throw new Error(errorStrings.questionBank.notFound);
     }
+
     await QuestionBank.delete({ id });
     return true;
   }

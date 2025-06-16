@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCreateQuestionBankMutation } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -29,7 +30,13 @@ export const CreateQuestionBankDialog: React.FC<
   CreateQuestionBankDialogProps
 > = () => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [, createQuestionBank] = useCreateQuestionBankMutation();
+  const [, createQuestionBank] = useMutationWithToast(
+    useCreateQuestionBankMutation,
+    {
+      successMessage: 'Question bank created successfully',
+      errorMessage: 'Failed to create question bank',
+    },
+  );
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,14 +54,17 @@ export const CreateQuestionBankDialog: React.FC<
   }, [isOpen]);
 
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
-    const data = await createQuestionBank({
+    const response = await createQuestionBank({
       input: {
         name: values.name,
       },
     });
-    setIsOpen(false);
-    navigate(`/question-banks/${data.data?.createQuestionBank?.slug}`);
-    form.reset();
+
+    if (response.data?.createQuestionBank) {
+      setIsOpen(false);
+      navigate(`/question-banks/${response.data.createQuestionBank.slug}`);
+      form.reset();
+    }
   };
 
   return (

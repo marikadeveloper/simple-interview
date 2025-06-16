@@ -44,7 +44,7 @@ const QuestionBank = () => {
         <div className='mt-4'>
           <QuestionList
             key={questionBank.questions?.length}
-            questions={questionBank.questions}
+            questions={questionBank.questions || []}
           />
         </div>
       </div>

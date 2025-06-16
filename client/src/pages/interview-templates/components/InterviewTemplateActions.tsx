@@ -13,7 +13,7 @@ export const InterviewTemplateActions: React.FC<
 > = ({ template }) => {
   return (
     <>
-      <Link to={`/interview-templates/${template.id}`}>
+      <Link to={`/interview-templates/${template.slug}`}>
         <Button
           variant='outline'
           size='icon'

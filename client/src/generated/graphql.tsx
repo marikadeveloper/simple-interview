@@ -409,7 +409,7 @@ export type QuestionBank = {
   __typename?: 'QuestionBank';
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
-  questions: Array<Question>;
+  questions?: Maybe<Array<Question>>;
   slug: Scalars['String']['output'];
 };
 
@@ -489,7 +489,7 @@ export type QuestionFragment = { __typename?: 'Question', id: number, title: str
 
 export type QuestionBankFragment = { __typename?: 'QuestionBank', id: number, name: string, slug: string };
 
-export type QuestionBankWithQuestionsFragment = { __typename?: 'QuestionBank', id: number, name: string, slug: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }> };
+export type QuestionBankWithQuestionsFragment = { __typename?: 'QuestionBank', id: number, name: string, slug: string, questions?: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }> | null };
 
 export type TagFragment = { __typename?: 'Tag', id: number, text: string };
 
@@ -535,14 +535,14 @@ export type CreateInterviewTemplateMutationVariables = Exact<{
 }>;
 
 
-export type CreateInterviewTemplateMutation = { __typename?: 'Mutation', createInterviewTemplate?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, slug: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } | null };
+export type CreateInterviewTemplateMutation = { __typename?: 'Mutation', createInterviewTemplate?: { __typename?: 'InterviewTemplate', id: number, slug: string } | null };
 
 export type CreateQuestionMutationVariables = Exact<{
   input: QuestionCreateInput;
 }>;
 
 
-export type CreateQuestionMutation = { __typename?: 'Mutation', createQuestion?: { __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null } | null };
+export type CreateQuestionMutation = { __typename?: 'Mutation', createQuestion?: { __typename?: 'Question', id: number } | null };
 
 export type CreateQuestionBankMutationVariables = Exact<{
   input: QuestionBankInput;
@@ -768,14 +768,14 @@ export type GetQuestionBankQueryVariables = Exact<{
 }>;
 
 
-export type GetQuestionBankQuery = { __typename?: 'Query', getQuestionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }> } | null };
+export type GetQuestionBankQuery = { __typename?: 'Query', getQuestionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string, questions?: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }> | null } | null };
 
 export type GetQuestionBankBySlugQueryVariables = Exact<{
   slug: Scalars['String']['input'];
 }>;
 
 
-export type GetQuestionBankBySlugQuery = { __typename?: 'Query', getQuestionBankBySlug?: { __typename?: 'QuestionBank', id: number, name: string, slug: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }> } | null };
+export type GetQuestionBankBySlugQuery = { __typename?: 'Query', getQuestionBankBySlug?: { __typename?: 'QuestionBank', id: number, name: string, slug: string, questions?: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }> | null } | null };
 
 export type GetQuestionBanksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1024,10 +1024,11 @@ export function useCreateInterviewMutation() {
 export const CreateInterviewTemplateDocument = gql`
     mutation CreateInterviewTemplate($input: InterviewTemplateInput!) {
   createInterviewTemplate(input: $input) {
-    ...InterviewTemplate
+    id
+    slug
   }
 }
-    ${InterviewTemplateFragmentDoc}`;
+    `;
 
 export function useCreateInterviewTemplateMutation() {
   return Urql.useMutation<CreateInterviewTemplateMutation, CreateInterviewTemplateMutationVariables>(CreateInterviewTemplateDocument);
@@ -1035,10 +1036,10 @@ export function useCreateInterviewTemplateMutation() {
 export const CreateQuestionDocument = gql`
     mutation CreateQuestion($input: QuestionCreateInput!) {
   createQuestion(input: $input) {
-    ...Question
+    id
   }
 }
-    ${QuestionFragmentDoc}`;
+    `;
 
 export function useCreateQuestionMutation() {
   return Urql.useMutation<CreateQuestionMutation, CreateQuestionMutationVariables>(CreateQuestionDocument);

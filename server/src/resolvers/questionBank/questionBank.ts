@@ -42,7 +42,10 @@ export class QuestionBankResolver {
   async getQuestionBankBySlug(
     @Arg('slug') slug: string,
   ): Promise<QuestionBank | null> {
-    return QuestionBank.findOne({ where: { slug } });
+    return QuestionBank.findOne({
+      where: { slug },
+      relations: ['questions'],
+    });
   }
 
   @Mutation(() => QuestionBank)

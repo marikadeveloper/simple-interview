@@ -12,12 +12,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { InterviewStatus, useGetInterviewsQuery } from '@/generated/graphql';
 import { format } from 'date-fns';
 import {
+  AlertTriangle,
   Calendar,
   CheckCircle2,
   Clock,
   FileText,
   Star,
   Users,
+  XCircle,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -36,6 +38,19 @@ export default function InterviewerDashboard() {
     (interview) =>
       interview.status === InterviewStatus.Completed &&
       !interview.evaluationValue,
+  );
+
+  const expiringInterviews = interviews.filter((interview) => {
+    if (interview.status === InterviewStatus.Completed) return false;
+    const deadline = new Date(interview.deadline);
+    const today = new Date();
+    const diffTime = deadline.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 2 && diffDays > 0;
+  });
+
+  const expiredInterviews = interviews.filter(
+    (interview) => interview.status === InterviewStatus.Expired,
   );
 
   const getDaysUntilDeadline = (deadline: string) => {
@@ -77,6 +92,20 @@ export default function InterviewerDashboard() {
                   {completedInterviews.length}
                 </span>
                 <span className='text-sm text-muted-foreground'>Completed</span>
+              </div>
+              <div className='flex flex-col items-center justify-center rounded-lg border p-4'>
+                <AlertTriangle className='mb-2 h-6 w-6 text-orange-500' />
+                <span className='text-2xl font-bold'>
+                  {expiringInterviews.length}
+                </span>
+                <span className='text-sm text-muted-foreground'>Expiring</span>
+              </div>
+              <div className='flex flex-col items-center justify-center rounded-lg border p-4'>
+                <XCircle className='mb-2 h-6 w-6 text-red-500' />
+                <span className='text-2xl font-bold'>
+                  {expiredInterviews.length}
+                </span>
+                <span className='text-sm text-muted-foreground'>Expired</span>
               </div>
             </div>
           </CardContent>

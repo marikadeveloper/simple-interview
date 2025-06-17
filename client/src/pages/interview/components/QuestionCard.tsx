@@ -15,7 +15,7 @@ export const QuestionCard = ({
   onAnswerChange,
 }: QuestionCardProps) => {
   return (
-    <div className='max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300'>
+    <div className='max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-sm border border-gray-100'>
       <div className='space-y-4'>
         <h2 className='text-2xl font-bold text-gray-800 tracking-tight'>
           {question.title}

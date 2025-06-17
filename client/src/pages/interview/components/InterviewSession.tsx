@@ -93,6 +93,7 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
     }
 
     if (isLastQuestion) {
+      // TODO: replace this with a dialog
       const confirmed = window.confirm(
         'Are you sure you want to end the interview?',
       );

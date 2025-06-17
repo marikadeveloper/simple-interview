@@ -97,7 +97,7 @@ export const InterviewCard = ({
           <CardFooter>
             <Link
               className='w-full'
-              to={`/interviews/${interview.id}`}>
+              to={`/interviews/${interview.slug}`}>
               <Button className='w-full'>Take the interview</Button>
             </Link>
           </CardFooter>

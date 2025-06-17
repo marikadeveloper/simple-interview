@@ -26,7 +26,7 @@ export const InterviewActions: React.FC<InterviewActionsProps> = ({
       )}
       {interview.status === InterviewStatus.Completed && (
         <>
-          <Link to={`/interviews/${interview.id}`}>
+          <Link to={`/interviews/${interview.slug}`}>
             <ElementWithTooltip
               Element={
                 <Button
@@ -38,7 +38,7 @@ export const InterviewActions: React.FC<InterviewActionsProps> = ({
               tooltip='Replay Interview'
             />
           </Link>
-          <Link to={`/interviews/${interview.id}/feedback`}>
+          <Link to={`/interviews/${interview.slug}/feedback`}>
             <ElementWithTooltip
               Element={
                 <Button

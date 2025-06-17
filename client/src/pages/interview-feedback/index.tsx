@@ -9,18 +9,24 @@ import {
   useEvaluateInterviewMutation,
   useGetInterviewForFeedbackBySlugQuery,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { Crown, ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { toast } from 'sonner';
 
 const InterviewFeedback: React.FC = () => {
   const { slug } = useParams();
   const [{ data, fetching, error }] = useGetInterviewForFeedbackBySlugQuery({
     variables: { slug: slug as string },
   });
-  const [, evaluateInterview] = useEvaluateInterviewMutation();
+  const [, evaluateInterview] = useMutationWithToast(
+    useEvaluateInterviewMutation,
+    {
+      successMessage: 'Evaluation submitted successfully',
+      errorMessage: 'Failed to submit evaluation',
+    },
+  );
   const [evaluation, setEvaluation] = useState<
     | {
         rating?: InterviewEvaluation | null;
@@ -56,18 +62,13 @@ const InterviewFeedback: React.FC = () => {
 
   const submitEvaluation = async () => {
     if (!evaluation?.rating) return;
-    const { data } = await evaluateInterview({
+    await evaluateInterview({
       id: interview.id,
       input: {
         evaluationValue: evaluation.rating,
         evaluationNotes: evaluation?.notes,
       },
     });
-    if (data?.evaluateInterview) {
-      toast('Evaluation submitted successfully');
-    } else {
-      toast('Failed to submit evaluation');
-    }
   };
 
   return (

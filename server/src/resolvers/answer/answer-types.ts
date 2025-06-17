@@ -17,6 +17,9 @@ export class CreateAnswerInput {
 
 @InputType()
 export class KeystrokeInput {
+  @Field(() => Number)
+  id: number;
+
   @Field(() => String)
   snapshot: string;
 

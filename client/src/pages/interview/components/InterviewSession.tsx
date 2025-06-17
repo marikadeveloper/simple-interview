@@ -8,7 +8,6 @@ import {
 import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { toast } from 'sonner';
 import { QuestionCard } from './QuestionCard';
 
 interface InterviewSessionProps {
@@ -35,7 +34,10 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
     >
   >({});
 
-  const [, createAnswer] = useCreateAnswerMutation();
+  const [, createAnswer] = useMutationWithToast(useCreateAnswerMutation, {
+    successMessage: 'Answer created successfully',
+    errorMessage: 'Failed to create answer',
+  });
   const [, confirmCompletion] = useMutationWithToast(
     useConfirmInterviewCompletionMutation,
     {
@@ -43,7 +45,10 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
       errorMessage: 'Failed to complete interview',
     },
   );
-  const [, saveKeystrokes] = useSaveKeystrokesMutation();
+  const [, saveKeystrokes] = useMutationWithToast(useSaveKeystrokesMutation, {
+    successMessage: 'Keystrokes saved successfully',
+    errorMessage: 'Failed to save keystrokes',
+  });
 
   const currentQuestion =
     interview.interviewTemplate.questions[currentQuestionIndex];
@@ -78,17 +83,20 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
       });
 
       if (error) {
-        console.log(error);
-        return toast.error('Failed to save answer. Please try again later.');
+        return;
       }
 
       if (data?.createAnswer) {
-        await saveKeystrokes({
+        const { error } = await saveKeystrokes({
           input: {
             answerId: data.createAnswer.id,
             keystrokes: currentAnswer.keystrokes,
           },
         });
+
+        if (error) {
+          return;
+        }
       }
     }
 
@@ -98,7 +106,10 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
         'Are you sure you want to end the interview?',
       );
       if (confirmed) {
-        await confirmCompletion({ id: interview.id });
+        const { error } = await confirmCompletion({ id: interview.id });
+        if (error) {
+          return;
+        }
         navigate('/dashboard', {
           state: { message: 'Thank you for completing the interview!' },
         });

@@ -77,7 +77,8 @@ export const KeystrokeRecordingTextarea = ({
   }, [state, language, debouncedOutput]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const timestamp = Date.now() - startTimeRef.current;
+    const timestamp = Date.now();
+    const relativeTimestamp = timestamp - startTimeRef.current;
     const textarea = textareaRef.current;
 
     if (!textarea) return;
@@ -85,7 +86,8 @@ export const KeystrokeRecordingTextarea = ({
     if (e.code === 'Space' || e.code === 'Tab') return;
 
     const keystrokeEvent: KeystrokeInput = {
-      relativeTimestamp: timestamp,
+      id: timestamp,
+      relativeTimestamp,
       snapshot: textarea.value,
     };
 

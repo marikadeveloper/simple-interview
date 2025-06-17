@@ -8,21 +8,28 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useDeleteUserMutation, UserFragment } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { Trash } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface DeleteUserConfirmationDialogProps {
   user: UserFragment;
 }
+
 export const DeleteUserConfirmationDialog: React.FC<
   DeleteUserConfirmationDialogProps
 > = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [, deleteUser] = useDeleteUserMutation();
+  const [, deleteUser] = useMutationWithToast(useDeleteUserMutation, {
+    successMessage: 'User deleted successfully',
+    errorMessage: 'Failed to delete user',
+  });
 
   const handleDelete = async () => {
-    await deleteUser({ id: user.id });
-    setIsOpen(false);
+    const response = await deleteUser({ id: user.id });
+    if (response.data?.deleteUser) {
+      setIsOpen(false);
+    }
   };
 
   return (

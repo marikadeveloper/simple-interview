@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Keystroke } from '@/generated/graphql';
+import { KeystrokeFragment } from '@/generated/graphql';
 import { reconstructText } from '@/utils/keystrokeReconstruct';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import React, {
@@ -12,7 +12,7 @@ import React, {
 import SyntaxHighlighter from 'react-syntax-highlighter';
 
 interface KeystrokeReplayProps {
-  keystrokes: Keystroke[];
+  keystrokes: KeystrokeFragment[];
   initialText?: string;
   language?: string;
   speed?: number; // Speed multiplier, 1 = normal speed

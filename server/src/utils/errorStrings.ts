@@ -46,5 +46,6 @@ export const errorStrings = {
   },
   questionBank: {
     notFound: 'question bank not found',
+    inUse: 'question bank is used in an interview template',
   },
 };

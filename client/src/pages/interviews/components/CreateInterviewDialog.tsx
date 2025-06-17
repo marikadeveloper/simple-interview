@@ -37,6 +37,7 @@ import {
   useGetUsersQuery,
   UserRole,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
@@ -62,7 +63,10 @@ export const CreateInterviewDialog: React.FC<
       filters: {},
     },
   });
-  const [, createInterview] = useCreateInterviewMutation();
+  const [, createInterview] = useMutationWithToast(useCreateInterviewMutation, {
+    successMessage: 'Interview created successfully',
+    errorMessage: 'Failed to create interview',
+  });
   const candidatesData = useMemo(() => {
     return usersData?.getUsers?.filter((user) => user.role === 'CANDIDATE');
   }, [usersData]);
@@ -89,7 +93,7 @@ export const CreateInterviewDialog: React.FC<
   }, [isOpen]);
 
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
-    await createInterview({
+    const { error } = await createInterview({
       input: {
         interviewTemplateId: parseInt(values.interviewTemplateId),
         candidateId: parseInt(values.candidateId),
@@ -97,6 +101,9 @@ export const CreateInterviewDialog: React.FC<
         interviewerId: parseInt(values.interviewerId),
       },
     });
+    if (error) {
+      return;
+    }
     setIsOpen(false);
     form.reset();
   };

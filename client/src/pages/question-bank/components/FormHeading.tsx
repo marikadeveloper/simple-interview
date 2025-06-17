@@ -12,6 +12,7 @@ import {
   QuestionBankFragment,
   useUpdateQuestionBankMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
 import { useForm } from 'react-hook-form';
@@ -26,7 +27,13 @@ export const FormHeading: React.FC<FormHeadingProps> = ({
   questionBank,
   setFormVisible,
 }) => {
-  const [, updateQuestionBank] = useUpdateQuestionBankMutation();
+  const [, updateQuestionBank] = useMutationWithToast(
+    useUpdateQuestionBankMutation,
+    {
+      successMessage: 'Question bank updated successfully',
+      errorMessage: 'Failed to update question bank',
+    },
+  );
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,10 +42,13 @@ export const FormHeading: React.FC<FormHeadingProps> = ({
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    await updateQuestionBank({
+    const { error } = await updateQuestionBank({
       id: questionBank.id,
       name: values.name,
     });
+    if (error) {
+      return;
+    }
     setFormVisible(false);
   };
 

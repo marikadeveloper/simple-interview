@@ -86,6 +86,7 @@ export class AnswerResolver {
 
       // Insert all keystrokes
       answer.keystrokes = input.keystrokes.map((keystroke) => ({
+        id: keystroke.id,
         snapshot: keystroke.snapshot,
         relativeTimestamp: keystroke.relativeTimestamp,
       }));

@@ -14,6 +14,7 @@ import {
   useCreateTagMutation,
   useUpdateInterviewTemplateMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -31,8 +32,17 @@ export const FormHeading: React.FC<FormHeadingProps> = ({
   setFormVisible,
 }) => {
   const [tags, setTags] = useState(initialTags);
-  const [, updateInterviewTemplate] = useUpdateInterviewTemplateMutation();
-  const [, createTag] = useCreateTagMutation();
+  const [, updateInterviewTemplate] = useMutationWithToast(
+    useUpdateInterviewTemplateMutation,
+    {
+      successMessage: 'Interview template updated successfully',
+      errorMessage: 'Failed to update interview template',
+    },
+  );
+  const [, createTag] = useMutationWithToast(useCreateTagMutation, {
+    successMessage: 'Tag created successfully',
+    errorMessage: 'Failed to create tag',
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -43,7 +53,7 @@ export const FormHeading: React.FC<FormHeadingProps> = ({
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    await updateInterviewTemplate({
+    const { error } = await updateInterviewTemplate({
       id: interviewTemplate.id,
       input: {
         name: values.name,
@@ -51,6 +61,9 @@ export const FormHeading: React.FC<FormHeadingProps> = ({
         tagsIds: values.tags?.map((tag) => parseInt(tag)) || [],
       },
     });
+    if (error) {
+      return;
+    }
     setFormVisible(false);
   };
 

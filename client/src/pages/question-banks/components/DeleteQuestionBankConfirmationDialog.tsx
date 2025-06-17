@@ -11,6 +11,7 @@ import {
   QuestionBankFragment,
   useDeleteQuestionBankMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { Trash } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -21,11 +22,19 @@ export const DeleteQuestionBankConfirmationDialog: React.FC<
   DeleteQuestionBankConfirmationDialogProps
 > = ({ questionBank }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [, deleteQuestionBank] = useDeleteQuestionBankMutation();
+  const [, deleteQuestionBank] = useMutationWithToast(
+    useDeleteQuestionBankMutation,
+    {
+      successMessage: 'Question bank deleted successfully',
+      errorMessage: 'Failed to delete question bank',
+    },
+  );
 
   const handleDelete = async () => {
-    await deleteQuestionBank({ id: questionBank.id });
-    setIsOpen(false);
+    const response = await deleteQuestionBank({ id: questionBank.id });
+    if (response.data?.deleteQuestionBank) {
+      setIsOpen(false);
+    }
   };
 
   return (

@@ -6,6 +6,7 @@ import {
   Resolver,
   UseMiddleware,
 } from 'type-graphql';
+import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { QuestionBank } from '../../entities/QuestionBank';
 import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
@@ -90,6 +91,15 @@ export class QuestionBankResolver {
     if (!questionBank) {
       throw new Error(errorStrings.questionBank.notFound);
     }
+
+    // if question bank is used in any interview template, throw an error
+    const interviewTemplates = await InterviewTemplate.find({
+      where: { questions: { questionBank: { id } } },
+    });
+    if (interviewTemplates.length > 0) {
+      throw new Error(errorStrings.questionBank.inUse);
+    }
+
     await QuestionBank.delete({ id });
     return true;
   }

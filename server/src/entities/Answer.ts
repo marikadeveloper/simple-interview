@@ -11,8 +11,8 @@ import { Question } from './Question';
 
 @ObjectType()
 export class Keystroke {
-  @Field(() => Int, { defaultValue: new Date().getTime() })
-  id?: number;
+  @Field(() => Number)
+  id: number;
 
   @Field(() => String)
   snapshot!: string; // contains a snapshot of the answer text at this keystroke

@@ -11,6 +11,7 @@ import {
   InterviewTemplateFragment,
   useDeleteInterviewTemplateMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { Trash } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -21,10 +22,19 @@ export const DeleteTemplateConfirmationDialog: React.FC<
   DeleteTemplateConfirmationDialogProps
 > = ({ template }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [, deleteInterviewTemplate] = useDeleteInterviewTemplateMutation();
+  const [, deleteInterviewTemplate] = useMutationWithToast(
+    useDeleteInterviewTemplateMutation,
+    {
+      successMessage: 'Interview template deleted successfully',
+      errorMessage: 'Failed to delete interview template',
+    },
+  );
 
   const handleDelete = async () => {
-    await deleteInterviewTemplate({ id: template.id });
+    const { error } = await deleteInterviewTemplate({ id: template.id });
+    if (error) {
+      return;
+    }
     setIsOpen(false);
   };
 

@@ -124,12 +124,13 @@ export type InterviewTemplateInput = {
 
 export type Keystroke = {
   __typename?: 'Keystroke';
-  id: Scalars['Int']['output'];
+  id: Scalars['Float']['output'];
   relativeTimestamp: Scalars['Int']['output'];
   snapshot: Scalars['String']['output'];
 };
 
 export type KeystrokeInput = {
+  id: Scalars['Float']['input'];
   relativeTimestamp: Scalars['Int']['input'];
   snapshot: Scalars['String']['input'];
 };

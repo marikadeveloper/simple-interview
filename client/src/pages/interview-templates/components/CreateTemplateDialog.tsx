@@ -21,6 +21,7 @@ import {
   useCreateInterviewTemplateMutation,
   useCreateTagMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -36,8 +37,17 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [tags, setTags] = useState(initialTags);
-  const [, createInterviewTemplate] = useCreateInterviewTemplateMutation();
-  const [, createTag] = useCreateTagMutation();
+  const [, createInterviewTemplate] = useMutationWithToast(
+    useCreateInterviewTemplateMutation,
+    {
+      successMessage: 'Interview template created successfully',
+      errorMessage: 'Failed to create interview template',
+    },
+  );
+  const [, createTag] = useMutationWithToast(useCreateTagMutation, {
+    successMessage: 'Tag created successfully',
+    errorMessage: 'Failed to create tag',
+  });
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,17 +69,18 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
   }, [isOpen, initialTags]);
 
   const handleCreateSubmit = async (values: z.infer<typeof formSchema>) => {
-    const data = await createInterviewTemplate({
+    const { data, error } = await createInterviewTemplate({
       input: {
         name: values.name,
         description: values.description,
         tagsIds: values.tags?.map((tag) => parseInt(tag)) || [],
       },
     });
+    if (error) {
+      return;
+    }
     setIsOpen(false);
-    navigate(
-      `/interview-templates/${data.data?.createInterviewTemplate?.slug}`,
-    );
+    navigate(`/interview-templates/${data?.createInterviewTemplate?.slug}`);
     form.reset();
   };
 

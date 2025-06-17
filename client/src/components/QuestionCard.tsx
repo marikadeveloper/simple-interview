@@ -23,6 +23,7 @@ import {
   useDeleteQuestionMutation,
   useUpdateQuestionMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pencil, Trash } from 'lucide-react';
@@ -38,11 +39,13 @@ export const formSchema = z.object({
     message: 'Description must be at least 5 characters.',
   }),
 });
+
 interface QuestionCardProps {
   templateId?: string;
   questionBankId?: string;
   question?: QuestionFragment;
 }
+
 export const QuestionCard: React.FC<QuestionCardProps> = ({
   templateId,
   questionBankId,
@@ -53,14 +56,23 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     : templateId || questionBankId
     ? 'create'
     : 'unsupported';
-  //
+
   const [formVisible, setFormVisible] = useState(
     !!templateId || !!questionBankId,
   );
-  //
-  const [, createQuestion] = useCreateQuestionMutation();
-  const [, updateQuestion] = useUpdateQuestionMutation();
-  const [, deleteQuestion] = useDeleteQuestionMutation();
+
+  const [, createQuestion] = useMutationWithToast(useCreateQuestionMutation, {
+    successMessage: 'Question created successfully',
+    errorMessage: 'Failed to create question',
+  });
+  const [, updateQuestion] = useMutationWithToast(useUpdateQuestionMutation, {
+    successMessage: 'Question updated successfully',
+    errorMessage: 'Failed to update question',
+  });
+  const [, deleteQuestion] = useMutationWithToast(useDeleteQuestionMutation, {
+    successMessage: 'Question deleted successfully',
+    errorMessage: 'Failed to delete question',
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,26 +95,33 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     }
     if (mode === 'edit') {
       if (!question) return; // Ensures question is defined
-      await updateQuestion({
+      const response = await updateQuestion({
         id: question.id,
         input,
       });
-      setFormVisible(false);
+      if (response.data?.updateQuestion) {
+        setFormVisible(false);
+      }
     } else if (mode === 'create') {
       if (!templateId && !questionBankId) return; // Ensures templateId is defined
-      await createQuestion({
+      const response = await createQuestion({
         input,
       });
-      form.reset();
+      if (response.data?.createQuestion) {
+        form.reset();
+      }
     }
   };
 
   const handleQuestionDelete = async () => {
     if (mode === 'edit') {
       if (!question) return; // Ensures question is defined
-      await deleteQuestion({
+      const response = await deleteQuestion({
         id: question.id,
       });
+      if (response.data?.deleteQuestion) {
+        setFormVisible(false);
+      }
     }
   };
 

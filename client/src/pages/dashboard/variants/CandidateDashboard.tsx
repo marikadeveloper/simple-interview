@@ -11,7 +11,7 @@ import { PageTitle } from '@/components/ui/page-title';
 import { useAuth } from '@/contexts/AuthContext';
 import { InterviewStatus, useGetInterviewsQuery } from '@/generated/graphql';
 import { AlertCircle, CalendarDays, CheckCircle, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 export default function CandidateDashboard() {
   const { user } = useAuth();

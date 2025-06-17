@@ -5,6 +5,7 @@ import { UserRole } from '@/generated/graphql';
 import { Navigate } from 'react-router';
 import AdminDashboard from './variants/AdminDashboard';
 import CandidateDashboard from './variants/CandidateDashboard';
+import InterviewerDashboard from './variants/InterviewerDashboard';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -29,6 +30,10 @@ export default function Dashboard() {
 
   if (user?.role === UserRole.Admin) {
     return <AdminDashboard />;
+  }
+
+  if (user?.role === UserRole.Interviewer) {
+    return <InterviewerDashboard />;
   }
 
   return (

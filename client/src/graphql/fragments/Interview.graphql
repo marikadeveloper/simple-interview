@@ -13,6 +13,7 @@ fragment InterviewListItem on Interview {
   status
   evaluationValue
   slug
+  completedAt
 }
 
 fragment CandidateInterview on Interview {
@@ -29,6 +30,7 @@ fragment CandidateInterview on Interview {
     ...Answer
   }
   slug
+  completedAt
 }
 
 fragment ReplayInterview on Interview {
@@ -45,6 +47,7 @@ fragment ReplayInterview on Interview {
     ...AnswerWithKeystrokes
   }
   slug
+  completedAt
 }
 
 fragment FeedbackInterview on Interview {
@@ -63,4 +66,5 @@ fragment FeedbackInterview on Interview {
   evaluationValue
   evaluationNotes
   slug
+  completedAt
 }

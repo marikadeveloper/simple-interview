@@ -83,7 +83,7 @@ export default function CandidateDashboard() {
                         </span>
                       </div>
                       <Button asChild>
-                        <Link to={`/interview/${interview.slug}`}>
+                        <Link to={`/interviews/${interview.slug}`}>
                           Start Interview
                         </Link>
                       </Button>

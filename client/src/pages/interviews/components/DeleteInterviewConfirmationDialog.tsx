@@ -13,6 +13,7 @@ import {
   InterviewStatus,
   useDeleteInterviewMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { AlertCircle, Trash } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -23,12 +24,18 @@ export const DeleteInterviewConfirmationDialog: React.FC<
   DeleteInterviewConfirmationDialogProps
 > = ({ interview }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [, deleteInterview] = useDeleteInterviewMutation();
+  const [, deleteInterview] = useMutationWithToast(useDeleteInterviewMutation, {
+    successMessage: 'Interview deleted successfully',
+    errorMessage: 'Failed to delete interview',
+  });
   const canDelete: boolean = interview.status === InterviewStatus.Pending;
 
   const handleDelete = async () => {
     if (!canDelete) return;
-    await deleteInterview({ id: interview.id });
+    const { error } = await deleteInterview({ id: interview.id });
+    if (error) {
+      return;
+    }
     setIsOpen(false);
   };
 

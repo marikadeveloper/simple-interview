@@ -29,6 +29,7 @@ import {
   useGetQuestionBankQuery,
   useGetQuestionBanksQuery,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { Database, Search } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -55,8 +56,13 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
   const [{ data: currentTemplateData }] = useGetInterviewTemplateQuery({
     variables: { id: parseInt(templateId) },
   });
-  const [, addQuestionsFromQuestionBank] =
-    useAddQuestionsFromQuestionBankMutation();
+  const [, addQuestionsFromQuestionBank] = useMutationWithToast(
+    useAddQuestionsFromQuestionBankMutation,
+    {
+      successMessage: 'Questions added successfully',
+      errorMessage: 'Failed to add questions',
+    },
+  );
 
   const questionBanks = questionBanksData?.questionBanks || [];
   const selectedQuestionBank = selectedQuestionBankData?.getQuestionBank;
@@ -130,30 +136,22 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({
       return;
     }
 
-    try {
-      const { data, error } = await addQuestionsFromQuestionBank({
-        input: {
-          interviewTemplateId: parseInt(templateId),
-          questionIds: selectedQuestions,
-        },
-      });
+    const { data, error } = await addQuestionsFromQuestionBank({
+      input: {
+        interviewTemplateId: parseInt(templateId),
+        questionIds: selectedQuestions,
+      },
+    });
 
-      if (error) {
-        toast.error('Failed to add questions');
-        return;
-      }
+    if (error) {
+      return;
+    }
 
-      if (data?.addQuestionsFromQuestionBank) {
-        toast.success(
-          `Successfully added ${selectedQuestions.length} questions to the template`,
-        );
-        setIsOpen(false);
-        setSelectedQuestionBankId(null);
-        setSelectedQuestions([]);
-        setSearchQuery('');
-      }
-    } catch (error) {
-      toast.error('An error occurred while adding questions');
+    if (data?.addQuestionsFromQuestionBank) {
+      setIsOpen(false);
+      setSelectedQuestionBankId(null);
+      setSelectedQuestions([]);
+      setSearchQuery('');
     }
   };
 

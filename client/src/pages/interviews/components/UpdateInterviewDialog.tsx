@@ -40,6 +40,7 @@ import {
   UserRole,
   useUpdateInterviewMutation,
 } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
@@ -78,7 +79,10 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
     return usersData?.getUsers?.filter((user) => user.role === 'INTERVIEWER');
   }, [usersData]);
 
-  const [, updateInterview] = useUpdateInterviewMutation();
+  const [, updateInterview] = useMutationWithToast(useUpdateInterviewMutation, {
+    successMessage: 'Interview updated successfully',
+    errorMessage: 'Failed to update interview',
+  });
   const canUpdate: boolean = interview.status === InterviewStatus.Pending;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -100,7 +104,7 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
 
   const handleUpdateSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!canUpdate) return;
-    await updateInterview({
+    const { error } = await updateInterview({
       id: interview.id,
       input: {
         interviewTemplateId: parseInt(values.interviewTemplateId),
@@ -109,6 +113,9 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
         interviewerId: parseInt(values.interviewerId),
       },
     });
+    if (error) {
+      return;
+    }
     setIsOpen(false);
     form.reset();
   };

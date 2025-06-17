@@ -51,7 +51,6 @@ export default function AdminDashboard() {
     (interview) => interview.status === InterviewStatus.Expired,
   );
 
-  const totalUsers = usersData?.getUsers?.length || 0;
   const candidates =
     usersData?.getUsers?.filter((user) => user.role === UserRole.Candidate)
       .length || 0;

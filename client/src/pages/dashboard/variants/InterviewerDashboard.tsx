@@ -53,14 +53,6 @@ export default function InterviewerDashboard() {
     (interview) => interview.status === InterviewStatus.Expired,
   );
 
-  const getDaysUntilDeadline = (deadline: string) => {
-    const today = new Date();
-    const deadlineDate = new Date(deadline);
-    const diffTime = deadlineDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
   return (
     <>
       <div className='mb-8 flex items-center justify-between'>

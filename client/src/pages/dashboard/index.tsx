@@ -3,6 +3,7 @@ import { PageTitle } from '@/components/ui/page-title';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/generated/graphql';
 import { Navigate } from 'react-router';
+import AdminDashboard from './variants/AdminDashboard';
 import CandidateDashboard from './variants/CandidateDashboard';
 
 export default function Dashboard() {
@@ -24,6 +25,10 @@ export default function Dashboard() {
 
   if (user?.role === UserRole.Candidate) {
     return <CandidateDashboard />;
+  }
+
+  if (user?.role === UserRole.Admin) {
+    return <AdminDashboard />;
   }
 
   return (

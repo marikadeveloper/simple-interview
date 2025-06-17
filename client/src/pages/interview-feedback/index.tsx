@@ -17,7 +17,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 
 const InterviewFeedback: React.FC = () => {
   const { slug } = useParams();
-  const [{ data, fetching, error }] = useGetInterviewForFeedbackBySlugQuery({
+  const [{ data, error }] = useGetInterviewForFeedbackBySlugQuery({
     variables: { slug: slug as string },
   });
   const [, evaluateInterview] = useMutationWithToast(
@@ -44,7 +44,6 @@ const InterviewFeedback: React.FC = () => {
     }
   }, [data]);
 
-  if (fetching) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
   if (!data?.getInterviewBySlug) return <div>No data</div>;
 

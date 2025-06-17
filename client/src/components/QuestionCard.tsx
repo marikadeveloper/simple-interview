@@ -65,12 +65,10 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     successMessage: 'Question created successfully',
     errorMessage: 'Failed to create question',
   });
-
   const [, updateQuestion] = useMutationWithToast(useUpdateQuestionMutation, {
     successMessage: 'Question updated successfully',
     errorMessage: 'Failed to update question',
   });
-
   const [, deleteQuestion] = useMutationWithToast(useDeleteQuestionMutation, {
     successMessage: 'Question deleted successfully',
     errorMessage: 'Failed to delete question',

@@ -10,22 +10,10 @@ import { PageTitle } from '@/components/ui/page-title';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   UserRole,
-  useAdminRegisterMutation,
   useGetInterviewsQuery,
   useGetUsersQuery,
 } from '@/generated/graphql';
-import { useMutationWithToast } from '@/hooks/useMutationWithToast';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { FileText, Users } from 'lucide-react';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
-const userFormSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -33,36 +21,7 @@ export default function AdminDashboard() {
   const [{ data: usersData }] = useGetUsersQuery({
     variables: { filters: {} },
   });
-  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
-  const [isCreateTemplateOpen, setIsCreateTemplateOpen] = useState(false);
 
-  const [, adminRegister] = useMutationWithToast(useAdminRegisterMutation, {
-    successMessage: 'User created successfully',
-    errorMessage: 'Failed to create user',
-  });
-
-  const form = useForm<z.infer<typeof userFormSchema>>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      email: '',
-      fullName: '',
-      password: '',
-    },
-  });
-
-  const handleCreateUser = async (values: z.infer<typeof userFormSchema>) => {
-    const result = await adminRegister({
-      input: values,
-    });
-
-    if (result.data?.adminRegister) {
-      setIsCreateUserOpen(false);
-      form.reset();
-    }
-  };
-
-  const totalUsers = usersData?.getUsers?.length || 0;
-  const totalInterviews = interviewsData?.getInterviews?.length || 0;
   const pendingInterviews =
     interviewsData?.getInterviews?.filter(
       (interview) => interview.status === 'PENDING',

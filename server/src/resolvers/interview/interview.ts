@@ -177,10 +177,10 @@ export class InterviewResolver {
       }
 
       if (filter && filter.trim() !== '') {
-        const filterLower = `%${filter.toLowerCase()}%`;
+        const filterPattern = `%${filter}%`;
         queryBuilder.andWhere(
-          '(LOWER(user.fullName) LIKE :filter OR LOWER(interviewTemplate.name) LIKE :filter)',
-          { filter: filterLower },
+          '(user.fullName ILIKE :filter OR interviewTemplate.name ILIKE :filter)',
+          { filter: filterPattern },
         );
       }
 

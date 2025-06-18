@@ -380,7 +380,11 @@ export type QueryGetInterviewTemplateBySlugArgs = {
 
 export type QueryGetInterviewTemplatesArgs = {
   filter?: InputMaybe<Scalars['String']['input']>;
-  tagsIds?: InputMaybe<Array<Scalars['Int']['input']>>;
+};
+
+
+export type QueryGetInterviewsArgs = {
+  filter?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -774,7 +778,9 @@ export type GetInterviewTemplatesQueryVariables = Exact<{
 
 export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTemplates?: Array<{ __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, slug: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }> | null };
 
-export type GetInterviewsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetInterviewsQueryVariables = Exact<{
+  filter?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
 export type GetInterviewsQuery = { __typename?: 'Query', getInterviews?: Array<{ __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, slug: string, completedAt?: string | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, slug: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, interviewer: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } }> | null };
@@ -1384,8 +1390,8 @@ export function useGetInterviewTemplatesQuery(options?: Omit<Urql.UseQueryArgs<G
   return Urql.useQuery<GetInterviewTemplatesQuery, GetInterviewTemplatesQueryVariables>({ query: GetInterviewTemplatesDocument, ...options });
 };
 export const GetInterviewsDocument = gql`
-    query GetInterviews {
-  getInterviews {
+    query GetInterviews($filter: String) {
+  getInterviews(filter: $filter) {
     ...InterviewListItem
   }
 }

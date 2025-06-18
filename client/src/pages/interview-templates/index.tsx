@@ -48,7 +48,7 @@ const InterviewTemplates = () => {
         </div>
       </div>
 
-      <div className='py-4'>
+      <div className='py-8'>
         <div className='flex gap-2 items-center'>
           <Input
             type='text'
@@ -63,9 +63,6 @@ const InterviewTemplates = () => {
             Search
           </Button>
         </div>
-      </div>
-
-      <div className='py-8'>
         {fetching ? (
           <TableSkeleton />
         ) : (

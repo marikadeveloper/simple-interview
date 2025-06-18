@@ -46,24 +46,32 @@ const changePasswordMutation = `
   }
 `;
 
-const forgotPasswordMutation = `
-  mutation ForgotPassword($email: String!) {
-    forgotPassword(email: $email)
+const forgotPasswordRequestMutation = `
+  mutation ForgotPasswordRequest($email: String!) {
+    forgotPasswordRequest(email: $email)
   }
 `;
 
+// const forgotPasswordChangeMutation = `
+//   mutation ForgotPasswordChange($input: ForgotPasswordChangeInput!) {
+//     forgotPasswordChange(input: $input)
+//   }
+// `;
+
 describe('changePassword', () => {
   it('given correct input should change the password', async () => {
-    const user = await createFakeUser(UserRole.INTERVIEWER);
+    const oldPassword = faker.internet.password();
+    const user = await createFakeUser(UserRole.INTERVIEWER, {
+      password: oldPassword,
+    });
     testUsers.push(user); // Track for cleanup
 
     const newPassword = faker.internet.password();
-
     const response = await graphqlCall({
       source: changePasswordMutation,
       variableValues: {
         input: {
-          token: 'valid-token',
+          oldPassword,
           newPassword,
         },
       },
@@ -80,14 +88,17 @@ describe('changePassword', () => {
   });
 
   it('given short password should return error', async () => {
-    const user = await createFakeUser(UserRole.INTERVIEWER);
+    const oldPassword = faker.internet.password();
+    const user = await createFakeUser(UserRole.INTERVIEWER, {
+      password: oldPassword,
+    });
     testUsers.push(user); // Track for cleanup
 
     const response = await graphqlCall({
       source: changePasswordMutation,
       variableValues: {
         input: {
-          token: 'valid-token',
+          oldPassword,
           newPassword: 'a'.repeat(PASSWORD_MIN_LENGTH - 1),
         },
       },
@@ -102,32 +113,13 @@ describe('changePassword', () => {
     });
   });
 
-  it('given invalid token should return error', async () => {
-    const response = await graphqlCall({
-      source: changePasswordMutation,
-      variableValues: {
-        input: {
-          token: 'invalid-token',
-          newPassword: faker.internet.password(),
-        },
-      },
-    });
-
-    expect(response).toMatchObject({
-      data: {
-        changePassword: null,
-      },
-      errors: [{ message: errorStrings.user.tokenExpired }],
-    });
-  });
-
   it('given non-existent user should return error', async () => {
     const response = await graphqlCall({
       source: changePasswordMutation,
       variableValues: {
         input: {
-          token: 'valid-token',
           newPassword: faker.internet.password(),
+          oldPassword: faker.internet.password(),
         },
       },
       userId: -1, // Simulate a non-existent user
@@ -147,7 +139,7 @@ describe('forgotPassword', () => {
     testUsers.push(user); // Track for cleanup
 
     const response = await graphqlCall({
-      source: forgotPasswordMutation,
+      source: forgotPasswordRequestMutation,
       variableValues: {
         email: user.email,
       },
@@ -156,14 +148,14 @@ describe('forgotPassword', () => {
     expect(sendEmail).toHaveBeenCalled();
     expect(response).toMatchObject({
       data: {
-        forgotPassword: true,
+        forgotPasswordRequest: true,
       },
     });
   });
 
   it('should ignore if user does not exist', async () => {
     const response = await graphqlCall({
-      source: forgotPasswordMutation,
+      source: forgotPasswordRequestMutation,
       variableValues: {
         email: 'nonexisting@email.it',
       },
@@ -172,7 +164,7 @@ describe('forgotPassword', () => {
     expect(sendEmail).not.toHaveBeenCalled();
     expect(response).toMatchObject({
       data: {
-        forgotPassword: true,
+        forgotPasswordRequest: true,
       },
     });
   });

@@ -1,6 +1,7 @@
 import { UserRole } from '@/generated/graphql';
 import { Navigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
+import { DetailPageSkeleton } from './ui/skeleton';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <DetailPageSkeleton contentBlocks={2} />;
   }
 
   if (!user || (allowedUserRoles && !allowedUserRoles.includes(user.role))) {

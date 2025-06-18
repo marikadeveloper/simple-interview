@@ -2,13 +2,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/generated/graphql';
 import { PropsWithChildren } from 'react';
 import { Navigate } from 'react-router';
+import { DetailPageSkeleton } from './ui/skeleton';
 
 // Component to redirect authenticated users away from auth pages
 export const PublicRoute: React.FC<PropsWithChildren> = ({ children }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <DetailPageSkeleton contentBlocks={2} />;
   }
 
   if (isAuthenticated && (user?.role === UserRole.Admin || user?.isActive)) {

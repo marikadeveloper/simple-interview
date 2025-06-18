@@ -379,6 +379,7 @@ export type QueryGetInterviewTemplateBySlugArgs = {
 
 
 export type QueryGetInterviewTemplatesArgs = {
+  filter?: InputMaybe<Scalars['String']['input']>;
   tagsIds?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
@@ -708,7 +709,7 @@ export type UpdateUserNameMutationVariables = Exact<{
 }>;
 
 
-export type UpdateUserNameMutation = { __typename?: 'Mutation', updateUserName: { __typename?: 'User', id: number, fullName: string, email: string, role: UserRole, updatedAt: string } };
+export type UpdateUserNameMutation = { __typename?: 'Mutation', updateUserName: { __typename?: 'User', id: number } };
 
 export type GetCandidateInterviewQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -767,7 +768,7 @@ export type GetInterviewTemplateBySlugQueryVariables = Exact<{
 export type GetInterviewTemplateBySlugQuery = { __typename?: 'Query', getInterviewTemplateBySlug?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, slug: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } | null };
 
 export type GetInterviewTemplatesQueryVariables = Exact<{
-  tagsIds?: InputMaybe<Array<Scalars['Int']['input']> | Scalars['Int']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1276,10 +1277,6 @@ export const UpdateUserNameDocument = gql`
     mutation UpdateUserName($fullName: String!) {
   updateUserName(fullName: $fullName) {
     id
-    fullName
-    email
-    role
-    updatedAt
   }
 }
     `;
@@ -1376,8 +1373,8 @@ export function useGetInterviewTemplateBySlugQuery(options: Omit<Urql.UseQueryAr
   return Urql.useQuery<GetInterviewTemplateBySlugQuery, GetInterviewTemplateBySlugQueryVariables>({ query: GetInterviewTemplateBySlugDocument, ...options });
 };
 export const GetInterviewTemplatesDocument = gql`
-    query GetInterviewTemplates($tagsIds: [Int!]) {
-  getInterviewTemplates(tagsIds: $tagsIds) {
+    query GetInterviewTemplates($filter: String) {
+  getInterviewTemplates(filter: $filter) {
     ...InterviewTemplate
   }
 }

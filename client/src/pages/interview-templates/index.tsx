@@ -1,4 +1,6 @@
+import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
+import { Input } from '@/components/ui/input';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import { TableSkeleton } from '@/components/ui/skeleton';
@@ -7,14 +9,16 @@ import {
   useGetInterviewTemplatesQuery,
   useGetTagsQuery,
 } from '@/generated/graphql';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { columns } from './columns';
 import { CreateTemplateDialog } from './components/CreateTemplateDialog';
 
 const InterviewTemplates = () => {
+  const [inputValue, setInputValue] = useState('');
+  const [filter, setFilter] = useState('');
   const [{ data: interviewTemplatesData, fetching }] =
     useGetInterviewTemplatesQuery({
-      variables: {},
+      variables: { filter },
       requestPolicy: 'network-only',
     });
   const [{ data: tagsData }] = useGetTagsQuery();
@@ -41,6 +45,23 @@ const InterviewTemplates = () => {
         </div>
         <div className='flex items-center gap-2'>
           <CreateTemplateDialog tags={tags} />
+        </div>
+      </div>
+
+      <div className='py-4'>
+        <div className='flex gap-2 items-center'>
+          <Input
+            type='text'
+            placeholder='Filter by name or tag...'
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className='mb-4 w-full max-w-xs'
+          />
+          <Button
+            className='mb-4'
+            onClick={() => setFilter(inputValue)}>
+            Search
+          </Button>
         </div>
       </div>
 

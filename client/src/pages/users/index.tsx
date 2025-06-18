@@ -29,11 +29,11 @@ const Users = () => {
 
   const handleSearch = () => {
     setFilter(inputValue);
-    setTimeout(() => {
-      reexecuteQuery({ requestPolicy: 'network-only' });
-    }, 0);
   };
 
+  useEffect(() => {
+    reexecuteQuery({ requestPolicy: 'network-only' });
+  }, [filter, reexecuteQuery]);
   return (
     <div className='container mx-auto'>
       <div className='flex items-center justify-between'>

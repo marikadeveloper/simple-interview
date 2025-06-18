@@ -95,6 +95,16 @@ export class InterviewResolver {
   async createInterview(
     @Arg('input', () => InterviewInput) input: InterviewInput,
   ): Promise<Interview | null> {
+    if (input.deadline) {
+      const date = new Date(input.deadline);
+      if (isNaN(date.getTime())) {
+        throw new Error(errorStrings.date.invalidFormat);
+      }
+      if (date < new Date()) {
+        throw new Error(errorStrings.date.mustBeInTheFuture);
+      }
+    }
+
     const interviewTemplate = await InterviewTemplate.findOne({
       where: { id: input.interviewTemplateId },
       relations: ['questions'],

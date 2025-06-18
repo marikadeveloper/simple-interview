@@ -156,6 +156,7 @@ describe('interviewTemplate', () => {
     const interviewTemplate = await InterviewTemplate.create({
       name: 'Test Interview Template',
       description: 'This is a test interview template',
+      slug: 'test-interview-template-' + Date.now(),
     }).save();
 
     const response = await graphqlCall({
@@ -182,6 +183,7 @@ describe('interviewTemplate', () => {
     const interviewTemplate = await InterviewTemplate.create({
       name: 'Test Interview Template',
       description: 'This is a test interview template',
+      slug: 'test-interview-template-' + Date.now(),
     }).save();
 
     const input = {
@@ -213,6 +215,7 @@ describe('interviewTemplate', () => {
     const interviewTemplate = await InterviewTemplate.create({
       name: 'Test Interview Template',
       description: 'This is a test interview template',
+      slug: 'test-interview-template-' + Date.now(),
     }).save();
 
     const response = await graphqlCall({

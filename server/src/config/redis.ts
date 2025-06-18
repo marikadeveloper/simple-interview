@@ -31,13 +31,13 @@ export const setAsync = promisify(redisClient.set).bind(redisClient);
 export const delAsync = promisify(redisClient.del).bind(redisClient);
 
 // Handle Redis connection events
-redisClient.on('error', (err) => console.error('Redis Client Error:', err));
-redisClient.on('connect', () => console.log('Redis Client Connected'));
-redisClient.on('end', () => console.log('Redis Client Disconnected'));
+// redisClient.on('error', (err) => console.error('Redis Client Error:', err));
+// redisClient.on('connect', () => console.log('Redis Client Connected'));
+// redisClient.on('end', () => console.log('Redis Client Disconnected'));
 
-redis.on('error', (err) => console.error('Redis Error:', err));
-redis.on('connect', () => console.log('Redis Connected'));
-redis.on('end', () => console.log('Redis Disconnected'));
+// redis.on('error', (err) => console.error('Redis Error:', err));
+// redis.on('connect', () => console.log('Redis Connected'));
+// redis.on('end', () => console.log('Redis Disconnected'));
 
 let isInitialized = false;
 

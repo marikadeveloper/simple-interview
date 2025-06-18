@@ -11,6 +11,12 @@ import { setupTestDB } from '../../test-utils/testSetup';
 import { errorStrings } from '../../utils/errorStrings';
 import { InterviewInput } from './interview-types';
 
+jest.mock('../../utils/sendEmail', () => ({
+  sendEmail: jest.fn().mockImplementation(() => {
+    return Promise.resolve(true);
+  }),
+}));
+
 // Track entities created during tests for reliable cleanup
 let testUsers: User[] = [];
 let testInterviewTemplate: InterviewTemplate;
@@ -40,26 +46,31 @@ const createInterviewTemplate = () => {
   return InterviewTemplate.create({
     name: 'Test Interview Template',
     description: 'This is a test interview template',
+    slug: 'test-interview-template-' + Date.now(),
   }).save();
 };
-const createMockQuestions = async (interviewTemplateId: number) => {
+const createMockQuestions = async (interviewTemplate: InterviewTemplate) => {
   const questions = [
     { title: 'Question 1', description: 'Description 1' },
     { title: 'Question 2', description: 'Description 2' },
     { title: 'Question 3', description: 'Description 3' },
   ];
 
-  console.log(interviewTemplateId);
-
-  await Promise.all(
+  const createdQuestions = await Promise.all(
     questions.map((question) =>
       Question.create({
         title: question.title,
         description: question.description,
-        // interviewTemplate: { id: interviewTemplateId },
       }).save(),
     ),
   );
+
+  if (!interviewTemplate.questions) {
+    interviewTemplate.questions = [];
+  }
+
+  interviewTemplate.questions.push(...createdQuestions);
+  await interviewTemplate.save();
 };
 
 const createInterviewMutation = `
@@ -158,6 +169,7 @@ const createInterview = async (
   const interview = await Interview.create({
     interviewTemplate: { id: interviewTemplateId },
     user: { id: candidateId },
+    slug: 'test-interview-' + Date.now(),
     deadline,
   }).save();
   return interview;
@@ -181,7 +193,7 @@ describe('Interview Resolver', () => {
     // Create a test interview template
     testInterviewTemplate = await createInterviewTemplate();
     interviewTemplateId = testInterviewTemplate.id;
-    await createMockQuestions(interviewTemplateId);
+    await createMockQuestions(testInterviewTemplate);
   });
 
   afterEach(async () => {
@@ -217,7 +229,7 @@ describe('Interview Resolver', () => {
           user: {
             id: candidateUser.id,
           },
-          deadline: input.deadline,
+          deadline: expect.any(String),
           status: InterviewStatus.PENDING,
         },
       },

@@ -1,5 +1,6 @@
 import { graphql, GraphQLSchema } from 'graphql';
 import { Maybe } from 'type-graphql';
+import { createUserLoader } from '../loaders/createUserLoader';
 import { createSchema } from '../utils/createSchema';
 
 interface Options {
@@ -41,6 +42,7 @@ export const graphqlCall = async ({
         set: jest.fn(),
         del: jest.fn().mockResolvedValue(true),
       },
+      userLoader: createUserLoader(),
     },
   });
 };

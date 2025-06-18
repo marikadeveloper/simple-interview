@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/ui/data-table';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import { TableSkeleton } from '@/components/ui/skeleton';
 import { useGetUsersQuery, User, UserRole } from '@/generated/graphql';
 import { columns } from './columns';
 import { CreateUserDialog } from './components/CreateUserDialog';
@@ -14,7 +15,7 @@ export const userRoles: {
 ];
 
 const Users = () => {
-  const [{ data }] = useGetUsersQuery({
+  const [{ data, fetching }] = useGetUsersQuery({
     variables: {
       filters: {},
     },
@@ -35,11 +36,15 @@ const Users = () => {
       </div>
 
       <div className='py-4'>
-        <DataTable
-          columns={columns}
-          data={(data?.getUsers as User[]) || []}
-          filterableField='fullName'
-        />
+        {fetching ? (
+          <TableSkeleton />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={(data?.getUsers as User[]) || []}
+            filterableField='fullName'
+          />
+        )}
       </div>
     </div>
   );

@@ -407,6 +407,11 @@ export type QueryGetUsersArgs = {
   filters: UsersFilters;
 };
 
+
+export type QueryQuestionBanksArgs = {
+  filter?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Question = {
   __typename?: 'Question';
   createdAt: Scalars['String']['output'];
@@ -799,7 +804,9 @@ export type GetQuestionBankBySlugQueryVariables = Exact<{
 
 export type GetQuestionBankBySlugQuery = { __typename?: 'Query', getQuestionBankBySlug?: { __typename?: 'QuestionBank', id: number, name: string, slug: string, questions?: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }> | null } | null };
 
-export type GetQuestionBanksQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetQuestionBanksQueryVariables = Exact<{
+  filter?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
 export type GetQuestionBanksQuery = { __typename?: 'Query', questionBanks: Array<{ __typename?: 'QuestionBank', id: number, name: string, slug: string }> };
@@ -1423,8 +1430,8 @@ export function useGetQuestionBankBySlugQuery(options: Omit<Urql.UseQueryArgs<Ge
   return Urql.useQuery<GetQuestionBankBySlugQuery, GetQuestionBankBySlugQueryVariables>({ query: GetQuestionBankBySlugDocument, ...options });
 };
 export const GetQuestionBanksDocument = gql`
-    query GetQuestionBanks {
-  questionBanks {
+    query GetQuestionBanks($filter: String) {
+  questionBanks(filter: $filter) {
     ...QuestionBank
   }
 }

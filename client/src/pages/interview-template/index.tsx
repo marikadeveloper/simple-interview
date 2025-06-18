@@ -1,3 +1,4 @@
+import { NotFoundPage } from '@/components/NotFoundPage';
 import { QuestionList } from '@/components/QuestionList';
 import {
   useGetInterviewTemplateBySlugQuery,
@@ -13,7 +14,7 @@ import { ReadonlyHeading } from './components/ReadonlyHeading';
 const InterviewTemplate = () => {
   const { slug } = useParams();
   const [formVisible, setFormVisible] = useState(false);
-  const [{ fetching, data }] = useGetInterviewTemplateBySlugQuery({
+  const [{ data }] = useGetInterviewTemplateBySlugQuery({
     variables: { slug: slug as string },
   });
   const [{ data: tagsData }] = useGetTagsQuery();
@@ -28,13 +29,8 @@ const InterviewTemplate = () => {
     [tagsData],
   );
 
-  if (fetching) {
-    return <div>Loading...</div>;
-  }
-
-  if (!data?.getInterviewTemplateBySlug || !slug) {
-    return <div>No template found</div>;
-  }
+  if (!data || !data.getInterviewTemplateBySlug)
+    return <NotFoundPage message='Interview template not found' />;
 
   const interviewTemplate = data.getInterviewTemplateBySlug;
   return (

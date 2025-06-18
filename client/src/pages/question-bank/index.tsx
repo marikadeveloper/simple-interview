@@ -1,3 +1,4 @@
+import { NotFoundPage } from '@/components/NotFoundPage';
 import { QuestionList } from '@/components/QuestionList';
 import { useGetQuestionBankBySlugQuery } from '@/generated/graphql';
 import { useState } from 'react';
@@ -9,17 +10,12 @@ import { ReadonlyHeading } from './components/ReadonlyHeading';
 const QuestionBank = () => {
   const { slug } = useParams();
   const [formVisible, setFormVisible] = useState(false);
-  const [{ fetching, data }] = useGetQuestionBankBySlugQuery({
+  const [{ data }] = useGetQuestionBankBySlugQuery({
     variables: { slug: slug as string },
   });
 
-  if (fetching) {
-    return <div>Loading...</div>;
-  }
-
-  if (!data?.getQuestionBankBySlug || !slug) {
-    return <div>No question bank found</div>;
-  }
+  if (!data || !data.getQuestionBankBySlug)
+    return <NotFoundPage message='Question bank not found' />;
 
   const questionBank = data.getQuestionBankBySlug;
   return (

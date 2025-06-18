@@ -1,3 +1,4 @@
+import { NotFoundPage } from '@/components/NotFoundPage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,8 +45,8 @@ const InterviewFeedback: React.FC = () => {
     }
   }, [data]);
 
-  if (error) return <div>Error: {error.message}</div>;
-  if (!data?.getInterviewBySlug) return <div>No data</div>;
+  if (error || !data || !data.getInterviewBySlug)
+    return <NotFoundPage message='Interview not found' />;
 
   const interview: FeedbackInterviewFragment = data.getInterviewBySlug;
 

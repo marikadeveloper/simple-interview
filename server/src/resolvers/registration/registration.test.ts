@@ -1,10 +1,11 @@
-import { PASSWORD_MIN_LENGTH } from '../../constants';
+import { faker } from '@faker-js/faker';
 import { User, UserRole } from '../../entities/User';
 import { dataSource } from '../../index';
 import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser, fakeUserData } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 import { errorStrings } from '../../utils/errorStrings';
+import { PreRegisterInput } from './registration-types';
 
 jest.mock('../../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {
@@ -21,8 +22,6 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  // Clean up in reverse order (users first, then invitations)
-  // to avoid foreign key constraint issues
   if (testUsers.length > 0) {
     await Promise.all(testUsers.map((user) => User.delete(user.id)));
     testUsers = [];
@@ -37,24 +36,16 @@ afterAll(async () => {
 });
 
 const adminRegisterMutation = `
-  mutation Register($input: RegisterInput!) {
+  mutation Register($input: AdminRegisterInput!) {
     adminRegister(input: $input) {
       id
     }
   }
 `;
 
-const candidateRegisterMutation = `
-  mutation CandidateRegister($input: RegisterInput!) {
-    candidateRegister(input: $input) {
-      id
-    }
-  }
-`;
-
-const interviewerRegisterMutation = `
-  mutation InterviewerRegister($input: RegisterInput!) {
-    interviewerRegister(input: $input) {
+const userRegisterMutation = `
+  mutation UserRegister($input: PreRegisterInput!) {
+    userRegister(input: $input) {
       id
     }
   }
@@ -142,25 +133,35 @@ describe('UserResolver', () => {
     });
   });
 
-  describe('candidateRegister', () => {
-    it.todo('given a correct input should register a new candidate');
+  describe('userRegister', () => {
+    let adminUser: User;
+
+    beforeAll(async () => {
+      adminUser = await createFakeUser(UserRole.ADMIN);
+    });
+
+    afterAll(async () => {
+      await User.delete(adminUser.id);
+    });
 
     it('given an invalid email should return an error', async () => {
-      const candidateInput = {
-        ...fakeUserData(),
+      const input: PreRegisterInput = {
         email: 'invalid-email',
+        role: UserRole.CANDIDATE,
+        fullName: faker.person.fullName(),
       };
 
       const response = await graphqlCall({
-        source: candidateRegisterMutation,
+        source: userRegisterMutation,
         variableValues: {
-          input: candidateInput,
+          input,
         },
+        userId: adminUser.id,
       });
 
       expect(response).toMatchObject({
         data: {
-          candidateRegister: null,
+          userRegister: null,
         },
         errors: [
           {
@@ -170,137 +171,28 @@ describe('UserResolver', () => {
       });
     });
 
-    it('given a short password should return an error', async () => {
-      const candidateInput = {
-        ...fakeUserData(),
-        password: 'a'.repeat(PASSWORD_MIN_LENGTH - 1),
-      };
-
-      const response = await graphqlCall({
-        source: candidateRegisterMutation,
-        variableValues: {
-          input: candidateInput,
-        },
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          candidateRegister: null,
-        },
-        errors: [
-          {
-            message: errorStrings.user.passwordTooShort,
-          },
-        ],
-      });
-    });
-
     it('given a short full name should return an error', async () => {
       const candidateInput = {
-        ...fakeUserData(),
         fullName: 'a',
+        role: UserRole.CANDIDATE,
+        email: faker.internet.email(),
       };
 
       const response = await graphqlCall({
-        source: candidateRegisterMutation,
+        source: userRegisterMutation,
         variableValues: {
           input: candidateInput,
         },
+        userId: adminUser.id,
       });
 
       expect(response).toMatchObject({
         data: {
-          candidateRegister: null,
+          userRegister: null,
         },
         errors: [
           {
             message: errorStrings.user.fullNameTooShort,
-          },
-        ],
-      });
-    });
-
-    it('given no valid invite should return an error', async () => {
-      const candidateInput = {
-        ...fakeUserData(),
-      };
-
-      const response = await graphqlCall({
-        source: candidateRegisterMutation,
-        variableValues: {
-          input: candidateInput,
-        },
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          candidateRegister: null,
-        },
-        errors: [
-          {
-            message: errorStrings.user.invalidInvitation,
-          },
-        ],
-      });
-    });
-  });
-
-  describe('interviewerRegister', () => {
-    it('given a correct input should register a new interviewer', async () => {
-      // Get admin ID to log in
-      const admin = await createFakeUser(UserRole.ADMIN);
-      testUsers.push(admin);
-
-      const interviewerInput = {
-        ...fakeUserData(),
-      };
-
-      const response = await graphqlCall({
-        source: interviewerRegisterMutation,
-        variableValues: {
-          input: interviewerInput,
-        },
-        userId: admin.id,
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          interviewerRegister: {
-            id: expect.any(Number),
-          },
-        },
-      });
-
-      // Add to cleanup list
-      // @ts-ignore
-      if (response?.data?.interviewerRegister?.id) {
-        const user = await User.findOne({
-          // @ts-ignore
-          where: { id: response.data.interviewerRegister.id },
-        });
-        if (user) testUsers.push(user);
-      }
-    });
-
-    it('should return error trying to register an interviewer without sign in', async () => {
-      const interviewerInput = {
-        ...fakeUserData(),
-      };
-
-      const response = await graphqlCall({
-        source: interviewerRegisterMutation,
-        variableValues: {
-          input: interviewerInput,
-        },
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          interviewerRegister: null,
-        },
-        errors: [
-          {
-            message: errorStrings.user.notAuthenticated,
           },
         ],
       });

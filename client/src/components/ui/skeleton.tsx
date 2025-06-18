@@ -33,9 +33,9 @@ export function TableSkeleton() {
           </tr>
         </thead>
         <tbody>
-          {[...Array(4)].map((_, i) => (
+          {[...Array(NUM_SKELETON_ROWS)].map((_, i) => (
             <tr key={i}>
-              {Array.from({ length: 4 }).map((_, j) => (
+              {Array.from({ length: NUM_SKELETON_ROWS }).map((_, j) => (
                 <td
                   className='px-4 py-3'
                   key={j}>

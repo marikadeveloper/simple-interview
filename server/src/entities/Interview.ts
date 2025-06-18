@@ -75,6 +75,10 @@ export class Interview extends BaseEntity {
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'date', nullable: true })
+  completedAt?: Date;
+
   @Field(() => InterviewTemplate)
   @ManyToOne(
     () => InterviewTemplate,

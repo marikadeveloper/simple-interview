@@ -293,6 +293,7 @@ export class InterviewResolver {
     }
 
     interview.status = InterviewStatus.COMPLETED;
+    interview.completedAt = new Date();
     await interview.save();
 
     // Notify the interviewer about the completion via email

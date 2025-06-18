@@ -43,6 +43,18 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
     );
   }, [keystrokes]);
 
+  const answerDurationMs = useMemo(() => {
+    if (sortedKeystrokes.length === 0) return 0;
+    return sortedKeystrokes[sortedKeystrokes.length - 1].relativeTimestamp;
+  }, [sortedKeystrokes]);
+
+  const formatDuration = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   // Sort keystrokes by timestamp when they change
   useEffect(() => {
     // Reset state when keystrokes change
@@ -200,6 +212,13 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
 
   return (
     <div className='keystroke-replay w-full max-w-4xl mx-auto p-4 space-y-4'>
+      {answerDurationMs > 0 && (
+        <div
+          className='duration-indicator text-xs font-mono py-1 px-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-t-md w-fit mb-1'
+          aria-label={`Answer duration: ${formatDuration(answerDurationMs)}`}>
+          Duration: {formatDuration(answerDurationMs)}
+        </div>
+      )}
       {language && (
         <div
           className='language-indicator text-xs font-mono py-1 px-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-t-md w-fit'

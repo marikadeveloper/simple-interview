@@ -1,8 +1,7 @@
-import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { Input } from '@/components/ui/input';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import SearchBar from '@/components/ui/search-bar';
 import { TableSkeleton } from '@/components/ui/skeleton';
 import {
   InterviewTemplateFragment,
@@ -49,20 +48,13 @@ const InterviewTemplates = () => {
       </div>
 
       <div className='py-8'>
-        <div className='flex gap-2 items-center'>
-          <Input
-            type='text'
-            placeholder='Filter by name or tag...'
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className='mb-4 w-full max-w-xs'
-          />
-          <Button
-            className='mb-4'
-            onClick={() => setFilter(inputValue)}>
-            Search
-          </Button>
-        </div>
+        <SearchBar
+          placeholder='Filter by name or tag...'
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onSearch={() => setFilter(inputValue)}
+          className='mb-4'
+        />
         {fetching ? (
           <TableSkeleton />
         ) : (

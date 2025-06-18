@@ -1,8 +1,7 @@
-import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { Input } from '@/components/ui/input';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import SearchBar from '@/components/ui/search-bar';
 import { TableSkeleton } from '@/components/ui/skeleton';
 import {
   QuestionBankFragment,
@@ -42,16 +41,13 @@ const QuestionBanks = () => {
       </div>
 
       <div className='py-8'>
-        <div className='flex gap-2 items-center mb-4'>
-          <Input
-            type='text'
-            placeholder='Filter by name...'
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className='w-full max-w-xs'
-          />
-          <Button onClick={handleSearch}>Search</Button>
-        </div>
+        <SearchBar
+          placeholder='Filter by name...'
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onSearch={handleSearch}
+          className='mb-4'
+        />
         {fetching ? (
           <TableSkeleton />
         ) : (

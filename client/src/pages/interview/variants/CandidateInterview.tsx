@@ -1,3 +1,4 @@
+import { NotFoundPage } from '@/components/NotFoundPage';
 import {
   CandidateInterviewFragment,
   useGetCandidateInterviewBySlugQuery,
@@ -7,13 +8,12 @@ import { InterviewSession } from '../components/InterviewSession';
 
 export const CandidateInterview = () => {
   const { slug } = useParams();
-  const [{ data, fetching, error }] = useGetCandidateInterviewBySlugQuery({
+  const [{ data, error }] = useGetCandidateInterviewBySlugQuery({
     variables: { slug: slug as string },
   });
 
-  if (fetching) return <div>Loading...</div>;
-  if (error || !data) return <div>Error: {error?.message}</div>;
-  if (!data.getCandidateInterviewBySlug) return <div>Interview not found</div>;
+  if (error || !data || !data.getCandidateInterviewBySlug)
+    return <NotFoundPage message='Interview not found' />;
 
   const interview: CandidateInterviewFragment =
     data.getCandidateInterviewBySlug;

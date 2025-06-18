@@ -1,3 +1,4 @@
+import { NotFoundPage } from '@/components/NotFoundPage';
 import { Button } from '@/components/ui/button';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
@@ -13,7 +14,7 @@ import { KeystrokeReplay } from '../components/KeystrokeReplay';
 
 export const ReadonlyInterview = () => {
   const { slug } = useParams();
-  const [{ data, fetching, error }] = useGetInterviewForReplayBySlugQuery({
+  const [{ data, error }] = useGetInterviewForReplayBySlugQuery({
     variables: { slug: slug as string },
   });
 
@@ -27,24 +28,8 @@ export const ReadonlyInterview = () => {
     setCurrentQuestionIndex(currentQuestionIndex - 1);
   };
 
-  if (fetching)
-    return (
-      <div className='flex items-center justify-center min-h-screen'>
-        Loading...
-      </div>
-    );
-  if (error || !data)
-    return (
-      <div className='flex items-center justify-center min-h-screen text-red-500'>
-        Error: {error?.message}
-      </div>
-    );
-  if (!data.getInterviewBySlug)
-    return (
-      <div className='flex items-center justify-center min-h-screen text-red-500'>
-        Interview not found
-      </div>
-    );
+  if (error || !data || !data.getInterviewBySlug)
+    return <NotFoundPage message='Interview not found' />;
 
   const interview: ReplayInterviewFragment = data.getInterviewBySlug;
   const question: QuestionFragment =

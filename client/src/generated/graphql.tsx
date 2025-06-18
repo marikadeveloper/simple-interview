@@ -404,7 +404,7 @@ export type QueryGetUserArgs = {
 
 
 export type QueryGetUsersArgs = {
-  filters: UsersFilters;
+  filter?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -477,13 +477,6 @@ export enum UserRole {
   Candidate = 'CANDIDATE',
   Interviewer = 'INTERVIEWER'
 }
-
-export type UsersFilters = {
-  email?: InputMaybe<Scalars['String']['input']>;
-  fullName?: InputMaybe<Scalars['String']['input']>;
-  /** If logged in as Interviewer, this field will always have value 'candidate' */
-  role?: InputMaybe<UserRole>;
-};
 
 export type AnswerFragment = { __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } };
 
@@ -817,7 +810,7 @@ export type GetTagsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetTagsQuery = { __typename?: 'Query', getTags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null };
 
 export type GetUsersQueryVariables = Exact<{
-  filters: UsersFilters;
+  filter?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1452,14 +1445,14 @@ export function useGetTagsQuery(options?: Omit<Urql.UseQueryArgs<GetTagsQueryVar
   return Urql.useQuery<GetTagsQuery, GetTagsQueryVariables>({ query: GetTagsDocument, ...options });
 };
 export const GetUsersDocument = gql`
-    query GetUsers($filters: UsersFilters!) {
-  getUsers(filters: $filters) {
+    query GetUsers($filter: String) {
+  getUsers(filter: $filter) {
     ...User
   }
 }
     ${UserFragmentDoc}`;
 
-export function useGetUsersQuery(options: Omit<Urql.UseQueryArgs<GetUsersQueryVariables>, 'query'>) {
+export function useGetUsersQuery(options?: Omit<Urql.UseQueryArgs<GetUsersQueryVariables>, 'query'>) {
   return Urql.useQuery<GetUsersQuery, GetUsersQueryVariables>({ query: GetUsersDocument, ...options });
 };
 export const MeDocument = gql`

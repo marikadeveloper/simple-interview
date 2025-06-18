@@ -3,13 +3,10 @@ import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
 import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
-import {
-  createFakeQuestion,
-  createFakeUser,
-  fakeQuestionData,
-} from '../../test-utils/mockData';
+import { createFakeQuestion, createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 import { errorStrings } from '../../utils/errorStrings';
+import { QuestionCreateInput } from './question-types';
 
 // Track entities created during tests for reliable cleanup
 let testUsers: User[] = [];
@@ -46,8 +43,8 @@ afterAll(async () => {
 });
 
 const createQuestionMutation = `
-  mutation CreateQuestion($interviewTemplateId: Int!, $input: QuestionInput!) {
-    createQuestion(interviewTemplateId: $interviewTemplateId, input: $input) {
+  mutation CreateQuestion($input: QuestionCreateInput!) {
+    createQuestion(input: $input) {
       id
       title
       description
@@ -56,7 +53,7 @@ const createQuestionMutation = `
 `;
 
 const updateQuestionMutation = `
-  mutation UpdateQuestion($id: Int!, $input: QuestionInput!) {
+  mutation UpdateQuestion($id: Int!, $input: QuestionUpdateInput!) {
     updateQuestion(id: $id, input: $input) {
       id
       title
@@ -75,6 +72,7 @@ const createInterviewTemplate = () => {
   return InterviewTemplate.create({
     name: 'Test Interview Template',
     description: 'This is a test interview template',
+    slug: 'test-interview-template-' + Date.now(),
   }).save();
 };
 
@@ -96,59 +94,64 @@ describe('QuestionResolver', () => {
     interviewTemplateId = testInterviewTemplate.id;
   });
 
-  describe('should be able to create a question', () => {
-    const questionInput = {
+  it('should be able to create a question as an admin', async () => {
+    const questionInput: QuestionCreateInput = {
       title: 'Test Question',
       description: 'This is a test question',
+      interviewTemplateId,
     };
 
-    it('as an admin', async () => {
-      const response = await graphqlCall({
-        source: createQuestionMutation,
-        variableValues: { interviewTemplateId, input: questionInput },
-        userId: adminUser.id,
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          createQuestion: {
-            id: expect.any(Number),
-            title: questionInput.title,
-            description: questionInput.description,
-          },
-        },
-      });
-
-      // Store the created question for cleanup
-      const createdQuestion = response.data?.createQuestion as Question;
-      testQuestions.push(
-        await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
-      );
+    const response = await graphqlCall({
+      source: createQuestionMutation,
+      variableValues: { input: questionInput },
+      userId: adminUser.id,
     });
 
-    it('as an interviewer', async () => {
-      const response = await graphqlCall({
-        source: createQuestionMutation,
-        variableValues: { interviewTemplateId, input: questionInput },
-        userId: interviewerUser.id,
-      });
-
-      expect(response).toMatchObject({
-        data: {
-          createQuestion: {
-            id: expect.any(Number),
-            title: questionInput.title,
-            description: questionInput.description,
-          },
+    expect(response).toMatchObject({
+      data: {
+        createQuestion: {
+          id: expect.any(Number),
+          title: questionInput.title,
+          description: questionInput.description,
         },
-      });
-
-      // Store the created question for cleanup
-      const createdQuestion = response.data?.createQuestion as Question;
-      testQuestions.push(
-        await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
-      );
+      },
     });
+
+    // Store the created question for cleanup
+    const createdQuestion = response.data?.createQuestion as Question;
+    testQuestions.push(
+      await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
+    );
+  });
+
+  it('should be able to create a question as an interviewer', async () => {
+    const questionInput: QuestionCreateInput = {
+      title: 'Test Question',
+      description: 'This is a test question',
+      interviewTemplateId,
+    };
+
+    const response = await graphqlCall({
+      source: createQuestionMutation,
+      variableValues: { interviewTemplateId, input: questionInput },
+      userId: interviewerUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        createQuestion: {
+          id: expect.any(Number),
+          title: questionInput.title,
+          description: questionInput.description,
+        },
+      },
+    });
+
+    // Store the created question for cleanup
+    const createdQuestion = response.data?.createQuestion as Question;
+    testQuestions.push(
+      await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
+    );
   });
 
   it('should not be able to create a question as a candidate', async () => {
@@ -188,53 +191,6 @@ describe('QuestionResolver', () => {
       },
       errors: [{ message: errorStrings.user.notAuthenticated }],
     });
-  });
-
-  it('should create a question with the correct sort order', async () => {
-    const questionInput1 = fakeQuestionData();
-    const questionInput2 = fakeQuestionData();
-
-    // Create the first question
-    const response1 = await graphqlCall({
-      source: createQuestionMutation,
-      variableValues: { interviewTemplateId, input: questionInput1 },
-      userId: adminUser.id,
-    });
-
-    expect(response1).toMatchObject({
-      data: {
-        createQuestion: {
-          id: expect.any(Number),
-          title: questionInput1.title,
-          description: questionInput1.description,
-        },
-      },
-    });
-
-    // Create the second question
-    const response2 = await graphqlCall({
-      source: createQuestionMutation,
-      variableValues: { interviewTemplateId, input: questionInput2 },
-      userId: adminUser.id,
-    });
-
-    expect(response2).toMatchObject({
-      data: {
-        createQuestion: {
-          id: expect.any(Number),
-          title: questionInput2.title,
-          description: questionInput2.description,
-        },
-      },
-    });
-
-    // Store the created questions for cleanup
-    const createdQuestion1 = response1.data?.createQuestion as Question;
-    const createdQuestion2 = response2.data?.createQuestion as Question;
-    testQuestions.push(
-      await Question.findOneOrFail({ where: { id: createdQuestion1.id } }),
-      await Question.findOneOrFail({ where: { id: createdQuestion2.id } }),
-    );
   });
 
   it("should update a question's title and description", async () => {

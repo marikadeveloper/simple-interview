@@ -27,8 +27,8 @@ afterEach(async () => {
 });
 
 const getUsersQuery = `
-  query GetUsers($filters: UsersFilters!) {
-    getUsers(filters: $filters) {
+  query GetUsers($filter: String) {
+    getUsers(filter: $filter) {
       id
       email
     }
@@ -61,7 +61,7 @@ describe('users', () => {
     const response = await graphqlCall({
       source: getUsersQuery,
       variableValues: {
-        filters: {},
+        filter: '',
       },
       userId: admin.id,
     });

@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import argon2 from 'argon2';
+import { InterviewTemplate } from '../entities/InterviewTemplate';
 import { Question } from '../entities/Question';
 import { User, UserRole } from '../entities/User';
 
@@ -43,6 +44,21 @@ export const createFakeQuestion = async (
   const question = (await Question.create({
     ...data,
   }).save()) as Question;
-  console.log(interviewTemplateId);
+
+  const interviewTemplate = await InterviewTemplate.findOneBy({
+    id: interviewTemplateId,
+  });
+
+  if (!interviewTemplate) {
+    throw new Error('Interview template not found');
+  }
+
+  if (!interviewTemplate.questions) {
+    interviewTemplate.questions = [];
+  }
+
+  interviewTemplate.questions.push(question);
+  await interviewTemplate.save();
+
   return question;
 };

@@ -1,0 +1,5 @@
+mutation UpdateUserName($fullName: String!) {
+  updateUserName(fullName: $fullName) {
+    id
+  }
+}

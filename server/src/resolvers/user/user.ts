@@ -90,4 +90,20 @@ export class UserResolver {
     await User.delete({ id });
     return true;
   }
+
+  @Mutation(() => User)
+  @UseMiddleware(isAuth)
+  async updateUserName(
+    @Arg('fullName', () => String) fullName: string,
+    @Ctx() { req }: MyContext,
+  ): Promise<User> {
+    const userId = req.session.userId;
+    const user = await User.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error(errorStrings.user.notFound);
+    }
+    user.fullName = fullName;
+    await user.save();
+    return user;
+  }
 }

@@ -25,6 +25,7 @@ const Interviews = lazy(() => import('./pages/interviews'));
 const Users = lazy(() => import('./pages/users'));
 const QuestionBanks = lazy(() => import('./pages/question-banks'));
 const QuestionBank = lazy(() => import('./pages/question-bank'));
+const ProfilePage = lazy(() => import('./pages/users/ProfilePage'));
 
 export const AppRoutes = () => {
   return (
@@ -147,6 +148,14 @@ export const AppRoutes = () => {
             <ProtectedRoute
               allowedUserRoles={[UserRole.Admin, UserRole.Interviewer]}>
               <Users />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

@@ -71,12 +71,9 @@ export function AppSidebar() {
               <DropdownMenuContent
                 side='top'
                 className='w-[--radix-popper-anchor-width]'>
-                {/* <DropdownMenuItem>
-                  <span>Account</span>
-                </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <span>Billing</span>
-                </DropdownMenuItem> */}
+                  <Link to='/profile'>Profile</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <button onClick={logout}>Sign out</button>
                 </DropdownMenuItem>

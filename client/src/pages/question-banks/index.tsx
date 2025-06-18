@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/ui/data-table';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import { TableSkeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   QuestionBankFragment,
@@ -11,7 +12,7 @@ import { CreateQuestionBankDialog } from './components/CreateQuestionBankDialog'
 
 const QuestionBanks = () => {
   const { user } = useAuth();
-  const [{ data }] = useGetQuestionBanksQuery();
+  const [{ data, fetching }] = useGetQuestionBanksQuery();
 
   if (!user) return null;
 
@@ -30,10 +31,14 @@ const QuestionBanks = () => {
       </div>
 
       <div className='py-8'>
-        <DataTable
-          columns={columns}
-          data={(data?.questionBanks as QuestionBankFragment[]) || []}
-        />
+        {fetching ? (
+          <TableSkeleton />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={(data?.questionBanks as QuestionBankFragment[]) || []}
+          />
+        )}
       </div>
     </div>
   );

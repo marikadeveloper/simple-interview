@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/ui/data-table';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import { TableSkeleton } from '@/components/ui/skeleton';
 import {
   InterviewListItemFragment,
   useGetInterviewsQuery,
@@ -9,7 +10,7 @@ import { columns } from '../columns';
 import { CreateInterviewDialog } from '../components/CreateInterviewDialog';
 
 export const AdminInterviews = () => {
-  const [{ data }] = useGetInterviewsQuery();
+  const [{ data, fetching }] = useGetInterviewsQuery();
 
   return (
     <div className='container mx-auto'>
@@ -24,10 +25,14 @@ export const AdminInterviews = () => {
       </div>
 
       <div className='py-8'>
-        <DataTable
-          columns={columns}
-          data={(data?.getInterviews as InterviewListItemFragment[]) || []}
-        />
+        {fetching ? (
+          <TableSkeleton />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={(data?.getInterviews as InterviewListItemFragment[]) || []}
+          />
+        )}
       </div>
     </div>
   );

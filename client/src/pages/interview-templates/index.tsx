@@ -2,6 +2,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { MultiSelect } from '@/components/ui/multi-select'; // Assuming you have a MultiSelect component
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import { TableSkeleton } from '@/components/ui/skeleton';
 import {
   InterviewTemplateFragment,
   useGetInterviewTemplatesQuery,
@@ -19,13 +20,15 @@ const InterviewTemplates = () => {
     queryParamsTag ? [queryParamsTag as string] : [],
   );
 
-  const [{ data: interviewTemplatesData }, refetchInterviewTemplates] =
-    useGetInterviewTemplatesQuery({
-      variables: {
-        tagsIds: selectedTags ? selectedTags.map((id) => parseInt(id), []) : [],
-      },
-      requestPolicy: 'network-only',
-    });
+  const [
+    { data: interviewTemplatesData, fetching },
+    refetchInterviewTemplates,
+  ] = useGetInterviewTemplatesQuery({
+    variables: {
+      tagsIds: selectedTags ? selectedTags.map((id) => parseInt(id), []) : [],
+    },
+    requestPolicy: 'network-only',
+  });
   const [{ data: tagsData }] = useGetTagsQuery();
 
   const tags = useMemo(
@@ -69,13 +72,17 @@ const InterviewTemplates = () => {
           onValueChange={(values) => handleTagsChange(values)}
           placeholder='Filter by tags'
         />
-        <DataTable
-          columns={columns}
-          data={
-            (interviewTemplatesData?.getInterviewTemplates as InterviewTemplateFragment[]) ||
-            []
-          }
-        />
+        {fetching ? (
+          <TableSkeleton />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={
+              (interviewTemplatesData?.getInterviewTemplates as InterviewTemplateFragment[]) ||
+              []
+            }
+          />
+        )}
       </div>
     </div>
   );

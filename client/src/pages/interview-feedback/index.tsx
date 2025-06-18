@@ -1,4 +1,3 @@
-import { NotFoundPage } from '@/components/NotFoundPage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +14,7 @@ import { Crown, ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import SyntaxHighlighter from 'react-syntax-highlighter';
+import { NotFoundPage } from '../auth/NotFoundPage';
 
 const InterviewFeedback: React.FC = () => {
   const { slug } = useParams();

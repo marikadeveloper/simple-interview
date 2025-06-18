@@ -1,4 +1,3 @@
-import { NotFoundPage } from '@/components/NotFoundPage';
 import { Button } from '@/components/ui/button';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
@@ -8,6 +7,7 @@ import {
   ReplayInterviewFragment,
   useGetInterviewForReplayBySlugQuery,
 } from '@/generated/graphql';
+import { NotFoundPage } from '@/pages/auth/NotFoundPage';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { KeystrokeReplay } from '../components/KeystrokeReplay';

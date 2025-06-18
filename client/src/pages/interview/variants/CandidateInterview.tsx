@@ -1,8 +1,8 @@
-import { NotFoundPage } from '@/components/NotFoundPage';
 import {
   CandidateInterviewFragment,
   useGetCandidateInterviewBySlugQuery,
 } from '@/generated/graphql';
+import { NotFoundPage } from '@/pages/auth/NotFoundPage';
 import { useParams } from 'react-router';
 import { InterviewSession } from '../components/InterviewSession';
 

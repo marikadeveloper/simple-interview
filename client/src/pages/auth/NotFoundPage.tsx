@@ -1,7 +1,7 @@
+import { Button } from '@/components/ui/button';
+import { PageSubtitle } from '@/components/ui/page-subtitle';
+import { PageTitle } from '@/components/ui/page-title';
 import { Link } from 'react-router';
-import { Button } from './ui/button';
-import { PageSubtitle } from './ui/page-subtitle';
-import { PageTitle } from './ui/page-title';
 
 interface NotFoundPageProps {
   message?: string;

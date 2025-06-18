@@ -2,7 +2,6 @@ import { DataTable } from '@/components/ui/data-table';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import { TableSkeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   QuestionBankFragment,
   useGetQuestionBanksQuery,
@@ -11,10 +10,7 @@ import { columns } from './columns';
 import { CreateQuestionBankDialog } from './components/CreateQuestionBankDialog';
 
 const QuestionBanks = () => {
-  const { user } = useAuth();
   const [{ data, fetching }] = useGetQuestionBanksQuery();
-
-  if (!user) return null;
 
   return (
     <div className='container mx-auto'>

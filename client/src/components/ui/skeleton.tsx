@@ -1,5 +1,7 @@
 import { cn } from '@/lib/utils';
 
+const NUM_SKELETON_ROWS = 4;
+
 function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div

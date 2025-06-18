@@ -1,9 +1,9 @@
-import { NotFoundPage } from '@/components/NotFoundPage';
 import { QuestionList } from '@/components/QuestionList';
 import { useGetQuestionBankBySlugQuery } from '@/generated/graphql';
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import { QuestionCard } from '../../components/QuestionCard';
+import { NotFoundPage } from '../auth/NotFoundPage';
 import { FormHeading } from './components/FormHeading';
 import { ReadonlyHeading } from './components/ReadonlyHeading';
 

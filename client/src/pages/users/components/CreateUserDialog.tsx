@@ -25,7 +25,6 @@ import {
   useUserRegisterMutation,
 } from '@/generated/graphql';
 import { useMutationWithToast } from '@/hooks/useMutationWithToast';
-import NotAuthorizedPage from '@/pages/auth/NotAuthorizedPage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -77,26 +76,22 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
     }
   }
 
-  if (!user) {
-    return <NotAuthorizedPage />;
-  }
-
   const renderTrigger = () => {
-    if (user.role === UserRole.Interviewer) {
+    if (user?.role === UserRole.Interviewer) {
       return 'Add Candidate';
     }
     return 'Add User';
   };
 
   const renderTitle = () => {
-    if (user.role === UserRole.Interviewer) {
+    if (user?.role === UserRole.Interviewer) {
       return 'Add Candidate';
     }
     return 'Create User';
   };
 
   const renderDescription = () => {
-    if (user.role === UserRole.Interviewer) {
+    if (user?.role === UserRole.Interviewer) {
       return 'Create a candidate account for the application.';
     }
     return 'Create a user account for the application.';
@@ -119,7 +114,7 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
             id='user-create-form'
             onSubmit={form.handleSubmit(onSubmit)}
             className='space-y-6'>
-            {user.role === UserRole.Admin && (
+            {user?.role === UserRole.Admin && (
               <FormField
                 control={form.control}
                 name='role'

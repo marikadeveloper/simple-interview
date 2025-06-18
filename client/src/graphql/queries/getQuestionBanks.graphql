@@ -1,5 +1,5 @@
-query GetQuestionBanks {
-  questionBanks {
+query GetQuestionBanks($filter: String) {
+  questionBanks(filter: $filter) {
     ...QuestionBank
   }
 }

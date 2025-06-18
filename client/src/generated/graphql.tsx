@@ -379,7 +379,12 @@ export type QueryGetInterviewTemplateBySlugArgs = {
 
 
 export type QueryGetInterviewTemplatesArgs = {
-  tagsIds?: InputMaybe<Array<Scalars['Int']['input']>>;
+  filter?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryGetInterviewsArgs = {
+  filter?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -399,7 +404,12 @@ export type QueryGetUserArgs = {
 
 
 export type QueryGetUsersArgs = {
-  filters: UsersFilters;
+  filter?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryQuestionBanksArgs = {
+  filter?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Question = {
@@ -467,13 +477,6 @@ export enum UserRole {
   Candidate = 'CANDIDATE',
   Interviewer = 'INTERVIEWER'
 }
-
-export type UsersFilters = {
-  email?: InputMaybe<Scalars['String']['input']>;
-  fullName?: InputMaybe<Scalars['String']['input']>;
-  /** If logged in as Interviewer, this field will always have value 'candidate' */
-  role?: InputMaybe<UserRole>;
-};
 
 export type AnswerFragment = { __typename?: 'Answer', id: number, text: string, language: string, question: { __typename?: 'Question', id: number, title: string, description: string } };
 
@@ -708,7 +711,7 @@ export type UpdateUserNameMutationVariables = Exact<{
 }>;
 
 
-export type UpdateUserNameMutation = { __typename?: 'Mutation', updateUserName: { __typename?: 'User', id: number, fullName: string, email: string, role: UserRole, updatedAt: string } };
+export type UpdateUserNameMutation = { __typename?: 'Mutation', updateUserName: { __typename?: 'User', id: number } };
 
 export type GetCandidateInterviewQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -767,13 +770,15 @@ export type GetInterviewTemplateBySlugQueryVariables = Exact<{
 export type GetInterviewTemplateBySlugQuery = { __typename?: 'Query', getInterviewTemplateBySlug?: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, slug: string, questions: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }>, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null } | null };
 
 export type GetInterviewTemplatesQueryVariables = Exact<{
-  tagsIds?: InputMaybe<Array<Scalars['Int']['input']> | Scalars['Int']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
 export type GetInterviewTemplatesQuery = { __typename?: 'Query', getInterviewTemplates?: Array<{ __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, slug: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }> | null };
 
-export type GetInterviewsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetInterviewsQueryVariables = Exact<{
+  filter?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
 export type GetInterviewsQuery = { __typename?: 'Query', getInterviews?: Array<{ __typename?: 'Interview', id: number, deadline: string, status: InterviewStatus, evaluationValue?: InterviewEvaluation | null, slug: string, completedAt?: string | null, interviewTemplate: { __typename?: 'InterviewTemplate', id: number, name: string, description: string, updatedAt: string, createdAt: string, slug: string, tags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null }, user: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean }, interviewer: { __typename?: 'User', id: number, email: string, fullName: string, role: UserRole, isActive: boolean } }> | null };
@@ -792,7 +797,9 @@ export type GetQuestionBankBySlugQueryVariables = Exact<{
 
 export type GetQuestionBankBySlugQuery = { __typename?: 'Query', getQuestionBankBySlug?: { __typename?: 'QuestionBank', id: number, name: string, slug: string, questions?: Array<{ __typename?: 'Question', id: number, title: string, description: string, updatedAt: string, createdAt: string, questionBank?: { __typename?: 'QuestionBank', id: number, name: string, slug: string } | null }> | null } | null };
 
-export type GetQuestionBanksQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetQuestionBanksQueryVariables = Exact<{
+  filter?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
 export type GetQuestionBanksQuery = { __typename?: 'Query', questionBanks: Array<{ __typename?: 'QuestionBank', id: number, name: string, slug: string }> };
@@ -803,7 +810,7 @@ export type GetTagsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetTagsQuery = { __typename?: 'Query', getTags?: Array<{ __typename?: 'Tag', id: number, text: string }> | null };
 
 export type GetUsersQueryVariables = Exact<{
-  filters: UsersFilters;
+  filter?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1276,10 +1283,6 @@ export const UpdateUserNameDocument = gql`
     mutation UpdateUserName($fullName: String!) {
   updateUserName(fullName: $fullName) {
     id
-    fullName
-    email
-    role
-    updatedAt
   }
 }
     `;
@@ -1376,8 +1379,8 @@ export function useGetInterviewTemplateBySlugQuery(options: Omit<Urql.UseQueryAr
   return Urql.useQuery<GetInterviewTemplateBySlugQuery, GetInterviewTemplateBySlugQueryVariables>({ query: GetInterviewTemplateBySlugDocument, ...options });
 };
 export const GetInterviewTemplatesDocument = gql`
-    query GetInterviewTemplates($tagsIds: [Int!]) {
-  getInterviewTemplates(tagsIds: $tagsIds) {
+    query GetInterviewTemplates($filter: String) {
+  getInterviewTemplates(filter: $filter) {
     ...InterviewTemplate
   }
 }
@@ -1387,8 +1390,8 @@ export function useGetInterviewTemplatesQuery(options?: Omit<Urql.UseQueryArgs<G
   return Urql.useQuery<GetInterviewTemplatesQuery, GetInterviewTemplatesQueryVariables>({ query: GetInterviewTemplatesDocument, ...options });
 };
 export const GetInterviewsDocument = gql`
-    query GetInterviews {
-  getInterviews {
+    query GetInterviews($filter: String) {
+  getInterviews(filter: $filter) {
     ...InterviewListItem
   }
 }
@@ -1420,8 +1423,8 @@ export function useGetQuestionBankBySlugQuery(options: Omit<Urql.UseQueryArgs<Ge
   return Urql.useQuery<GetQuestionBankBySlugQuery, GetQuestionBankBySlugQueryVariables>({ query: GetQuestionBankBySlugDocument, ...options });
 };
 export const GetQuestionBanksDocument = gql`
-    query GetQuestionBanks {
-  questionBanks {
+    query GetQuestionBanks($filter: String) {
+  questionBanks(filter: $filter) {
     ...QuestionBank
   }
 }
@@ -1442,14 +1445,14 @@ export function useGetTagsQuery(options?: Omit<Urql.UseQueryArgs<GetTagsQueryVar
   return Urql.useQuery<GetTagsQuery, GetTagsQueryVariables>({ query: GetTagsDocument, ...options });
 };
 export const GetUsersDocument = gql`
-    query GetUsers($filters: UsersFilters!) {
-  getUsers(filters: $filters) {
+    query GetUsers($filter: String) {
+  getUsers(filter: $filter) {
     ...User
   }
 }
     ${UserFragmentDoc}`;
 
-export function useGetUsersQuery(options: Omit<Urql.UseQueryArgs<GetUsersQueryVariables>, 'query'>) {
+export function useGetUsersQuery(options?: Omit<Urql.UseQueryArgs<GetUsersQueryVariables>, 'query'>) {
   return Urql.useQuery<GetUsersQuery, GetUsersQueryVariables>({ query: GetUsersDocument, ...options });
 };
 export const MeDocument = gql`

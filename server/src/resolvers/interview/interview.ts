@@ -147,7 +147,10 @@ export class InterviewResolver {
 
   @Query(() => [Interview], { nullable: true })
   @UseMiddleware(isAuth)
-  async getInterviews(@Ctx() { req }: MyContext): Promise<Interview[] | null> {
+  async getInterviews(
+    @Ctx() { req }: MyContext,
+    @Arg('filter', () => String, { nullable: true }) filter?: string,
+  ): Promise<Interview[] | null> {
     // admin and interviewer can see all interviews
     // candidate can only see their own interviews
     const userId = req.session.userId;
@@ -160,20 +163,28 @@ export class InterviewResolver {
         relations: ['interviewTemplate', 'user', 'interviewer'],
         order: { deadline: 'DESC' },
       });
-
-      return interviews;
-    } else if (user.role === UserRole.INTERVIEWER) {
-      const interviews = await Interview.find({
-        where: { interviewer: { id: userId } },
-        relations: ['interviewTemplate', 'user', 'interviewer'],
-        order: { deadline: 'DESC' },
-      });
       return interviews;
     } else {
-      const interviews = await Interview.find({
-        relations: ['interviewTemplate', 'user', 'interviewer'],
-        order: { deadline: 'DESC' },
-      });
+      // Admins and interviewers can filter
+      const queryBuilder = Interview.createQueryBuilder('interview')
+        .leftJoinAndSelect('interview.interviewTemplate', 'interviewTemplate')
+        .leftJoinAndSelect('interview.user', 'user')
+        .leftJoinAndSelect('interview.interviewer', 'interviewer')
+        .orderBy('interview.deadline', 'DESC');
+
+      if (user.role === UserRole.INTERVIEWER) {
+        queryBuilder.where('interview.interviewer = :userId', { userId });
+      }
+
+      if (filter && filter.trim() !== '') {
+        const filterPattern = `%${filter}%`;
+        queryBuilder.andWhere(
+          '(user.fullName ILIKE :filter OR interviewTemplate.name ILIKE :filter)',
+          { filter: filterPattern },
+        );
+      }
+
+      const interviews = await queryBuilder.getMany();
       return interviews;
     }
   }

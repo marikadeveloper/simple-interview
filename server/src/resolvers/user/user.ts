@@ -12,7 +12,6 @@ import { isAdminOrInterviewer } from '../../middleware/isAdminOrInterviewer';
 import { isAuth } from '../../middleware/isAuth';
 import { MyContext } from '../../types';
 import { errorStrings } from '../../utils/errorStrings';
-import { UsersFilters } from './user-types';
 
 @Resolver(User)
 export class UserResolver {
@@ -24,15 +23,13 @@ export class UserResolver {
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async getUsers(
-    @Arg('filters', () => UsersFilters) filters: UsersFilters,
     @Ctx() { req }: MyContext,
+    @Arg('filter', () => String, { nullable: true }) filter?: string,
   ): Promise<User[] | null> {
     const userId = req.session.userId;
     const user = (await User.findOne({
       where: { id: userId },
     })) as User;
-
-    const { fullName, email, role } = filters;
 
     const query = User.createQueryBuilder('user')
       .where('user.id != :id', { id: req.session.userId })
@@ -42,21 +39,15 @@ export class UserResolver {
     if (user.role === UserRole.INTERVIEWER) {
       query.andWhere('user.role = :role', { role: UserRole.CANDIDATE });
     }
-    // admins can see all users
-    if (user.role === UserRole.ADMIN && role) {
-      query.andWhere('user.role = :role', { role });
+
+    if (filter && filter.trim() !== '') {
+      const filterLower = `%${filter.toLowerCase()}%`;
+      query.andWhere(
+        '(LOWER(user.fullName) LIKE :filter OR LOWER(user.email) LIKE :filter)',
+        { filter: filterLower },
+      );
     }
 
-    if (fullName) {
-      query.andWhere('user.fullName ILIKE :fullName', {
-        fullName: `%${fullName}%`,
-      });
-    }
-    if (email) {
-      query.andWhere('user.email ILIKE :email', {
-        email: `%${email}%`,
-      });
-    }
     const users = await query.getMany();
     return users;
   }

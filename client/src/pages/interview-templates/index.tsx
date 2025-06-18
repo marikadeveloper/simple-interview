@@ -1,5 +1,6 @@
+import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { MultiSelect } from '@/components/ui/multi-select'; // Assuming you have a MultiSelect component
+import { Input } from '@/components/ui/input';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
 import { TableSkeleton } from '@/components/ui/skeleton';
@@ -8,27 +9,18 @@ import {
   useGetInterviewTemplatesQuery,
   useGetTagsQuery,
 } from '@/generated/graphql';
-import { useQueryParam } from '@/hooks/useQueryParam';
 import { useMemo, useState } from 'react';
 import { columns } from './columns';
 import { CreateTemplateDialog } from './components/CreateTemplateDialog';
 
 const InterviewTemplates = () => {
-  // if you click on a tag inside the interview template detail, it will take you here with the tag id preselected
-  const queryParamsTag = useQueryParam('tags');
-  const [selectedTags, setSelectedTags] = useState<string[]>(
-    queryParamsTag ? [queryParamsTag as string] : [],
-  );
-
-  const [
-    { data: interviewTemplatesData, fetching },
-    refetchInterviewTemplates,
-  ] = useGetInterviewTemplatesQuery({
-    variables: {
-      tagsIds: selectedTags ? selectedTags.map((id) => parseInt(id), []) : [],
-    },
-    requestPolicy: 'network-only',
-  });
+  const [inputValue, setInputValue] = useState('');
+  const [filter, setFilter] = useState('');
+  const [{ data: interviewTemplatesData, fetching }] =
+    useGetInterviewTemplatesQuery({
+      variables: { filter },
+      requestPolicy: 'network-only',
+    });
   const [{ data: tagsData }] = useGetTagsQuery();
 
   const tags = useMemo(
@@ -41,14 +33,6 @@ const InterviewTemplates = () => {
         : [],
     [tagsData],
   );
-
-  const handleTagsChange = (tagIds: string[]) => {
-    setSelectedTags(tagIds);
-
-    refetchInterviewTemplates({
-      requestPolicy: 'network-only',
-    });
-  };
 
   return (
     <div className='container mx-auto'>
@@ -65,13 +49,20 @@ const InterviewTemplates = () => {
       </div>
 
       <div className='py-8'>
-        <MultiSelect
-          className='mb-4'
-          options={tags}
-          value={selectedTags}
-          onValueChange={(values) => handleTagsChange(values)}
-          placeholder='Filter by tags'
-        />
+        <div className='flex gap-2 items-center'>
+          <Input
+            type='text'
+            placeholder='Filter by name or tag...'
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className='mb-4 w-full max-w-xs'
+          />
+          <Button
+            className='mb-4'
+            onClick={() => setFilter(inputValue)}>
+            Search
+          </Button>
+        </div>
         {fetching ? (
           <TableSkeleton />
         ) : (

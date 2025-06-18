@@ -25,7 +25,7 @@ export class InterviewTemplateResolver {
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
   async getInterviewTemplates(
-    @Arg('tagsIds', () => [Int], { nullable: true }) tagsIds: number[],
+    @Arg('filter', () => String, { nullable: true }) filter?: string,
   ): Promise<InterviewTemplate[] | null> {
     const queryBuilder = InterviewTemplate.createQueryBuilder(
       'interviewTemplate',
@@ -33,16 +33,11 @@ export class InterviewTemplateResolver {
       .leftJoinAndSelect('interviewTemplate.tags', 'tag')
       .orderBy('interviewTemplate.createdAt', 'DESC');
 
-    if (tagsIds && tagsIds.length) {
+    if (filter && filter.trim() !== '') {
+      const filterLower = `%${filter.toLowerCase()}%`;
       queryBuilder.where(
-        `interviewTemplate.id IN (
-          SELECT it.id FROM interview_template it
-          LEFT JOIN interview_template_tags_tag itt ON it.id = itt."interviewTemplateId"
-          WHERE itt."tagId" IN (:...tagsIds)
-          GROUP BY it.id
-          HAVING COUNT(DISTINCT itt."tagId") = :tagsCount
-        )`,
-        { tagsIds, tagsCount: tagsIds.length },
+        '(LOWER(interviewTemplate.name) LIKE :filter OR LOWER(tag.text) LIKE :filter)',
+        { filter: filterLower },
       );
     }
 

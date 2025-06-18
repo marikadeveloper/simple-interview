@@ -1,5 +1,5 @@
-query GetInterviews {
-  getInterviews {
+query GetInterviews($filter: String) {
+  getInterviews(filter: $filter) {
     ...InterviewListItem
   }
 }

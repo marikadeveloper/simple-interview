@@ -1,5 +1,5 @@
-query GetUsers($filters: UsersFilters!) {
-  getUsers(filters: $filters) {
+query GetUsers($filter: String) {
+  getUsers(filter: $filter) {
     ...User
   }
 }

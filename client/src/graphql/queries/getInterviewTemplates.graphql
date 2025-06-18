@@ -1,5 +1,5 @@
-query GetInterviewTemplates($tagsIds: [Int!]) {
-  getInterviewTemplates(tagsIds: $tagsIds) {
+query GetInterviewTemplates($filter: String) {
+  getInterviewTemplates(filter: $filter) {
     ...InterviewTemplate
   }
 }

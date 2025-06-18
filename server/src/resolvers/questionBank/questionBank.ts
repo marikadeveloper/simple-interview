@@ -17,7 +17,15 @@ import { QuestionBankInput } from './questionBank-types';
 @Resolver(QuestionBank)
 export class QuestionBankResolver {
   @Query(() => [QuestionBank])
-  async questionBanks(): Promise<QuestionBank[]> {
+  async questionBanks(
+    @Arg('filter', () => String, { nullable: true }) filter?: string,
+  ): Promise<QuestionBank[]> {
+    if (filter && filter.trim() !== '') {
+      const filterLower = `%${filter.toLowerCase()}%`;
+      return QuestionBank.createQueryBuilder('questionBank')
+        .where('LOWER(questionBank.name) LIKE :filter', { filter: filterLower })
+        .getMany();
+    }
     return QuestionBank.find();
   }
 

@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from '@/components/ui/skeleton';
 import {
   CandidateInterviewFragment,
   useGetCandidateInterviewBySlugQuery,
@@ -8,9 +9,13 @@ import { InterviewSession } from '../components/InterviewSession';
 
 export const CandidateInterview = () => {
   const { slug } = useParams();
-  const [{ data, error }] = useGetCandidateInterviewBySlugQuery({
+  const [{ data, error, fetching }] = useGetCandidateInterviewBySlugQuery({
     variables: { slug: slug as string },
   });
+
+  if (fetching) {
+    return <DetailPageSkeleton />;
+  }
 
   if (error || !data || !data.getCandidateInterviewBySlug)
     return <NotFoundPage message='Interview not found' />;

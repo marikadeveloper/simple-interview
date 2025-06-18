@@ -1,4 +1,5 @@
 import { QuestionList } from '@/components/QuestionList';
+import { DetailPageSkeleton } from '@/components/ui/skeleton';
 import {
   useGetInterviewTemplateBySlugQuery,
   useGetTagsQuery,
@@ -14,7 +15,7 @@ import { ReadonlyHeading } from './components/ReadonlyHeading';
 const InterviewTemplate = () => {
   const { slug } = useParams();
   const [formVisible, setFormVisible] = useState(false);
-  const [{ data }] = useGetInterviewTemplateBySlugQuery({
+  const [{ data, fetching }] = useGetInterviewTemplateBySlugQuery({
     variables: { slug: slug as string },
   });
   const [{ data: tagsData }] = useGetTagsQuery();
@@ -28,6 +29,10 @@ const InterviewTemplate = () => {
         : [],
     [tagsData],
   );
+
+  if (fetching) {
+    return <DetailPageSkeleton />;
+  }
 
   if (!data || !data.getInterviewTemplateBySlug)
     return <NotFoundPage message='Interview template not found' />;

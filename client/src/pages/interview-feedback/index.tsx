@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import { DetailPageSkeleton } from '@/components/ui/skeleton';
 import {
   FeedbackInterviewFragment,
   InterviewEvaluation,
@@ -18,7 +19,7 @@ import { NotFoundPage } from '../auth/NotFoundPage';
 
 const InterviewFeedback: React.FC = () => {
   const { slug } = useParams();
-  const [{ data, error }] = useGetInterviewForFeedbackBySlugQuery({
+  const [{ data, error, fetching }] = useGetInterviewForFeedbackBySlugQuery({
     variables: { slug: slug as string },
   });
   const [, evaluateInterview] = useMutationWithToast(
@@ -44,6 +45,10 @@ const InterviewFeedback: React.FC = () => {
       });
     }
   }, [data]);
+
+  if (fetching) {
+    return <DetailPageSkeleton />;
+  }
 
   if (error || !data || !data.getInterviewBySlug)
     return <NotFoundPage message='Interview not found' />;

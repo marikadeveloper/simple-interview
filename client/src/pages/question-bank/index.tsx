@@ -1,4 +1,5 @@
 import { QuestionList } from '@/components/QuestionList';
+import { DetailPageSkeleton } from '@/components/ui/skeleton';
 import { useGetQuestionBankBySlugQuery } from '@/generated/graphql';
 import { useState } from 'react';
 import { useParams } from 'react-router';
@@ -10,9 +11,13 @@ import { ReadonlyHeading } from './components/ReadonlyHeading';
 const QuestionBank = () => {
   const { slug } = useParams();
   const [formVisible, setFormVisible] = useState(false);
-  const [{ data }] = useGetQuestionBankBySlugQuery({
+  const [{ data, fetching }] = useGetQuestionBankBySlugQuery({
     variables: { slug: slug as string },
   });
+
+  if (fetching) {
+    return <DetailPageSkeleton />;
+  }
 
   if (!data || !data.getQuestionBankBySlug)
     return <NotFoundPage message='Question bank not found' />;

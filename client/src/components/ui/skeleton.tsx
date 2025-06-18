@@ -51,3 +51,26 @@ export function TableSkeleton() {
     </div>
   );
 }
+
+export function DetailPageSkeleton({
+  contentBlocks = 3,
+}: {
+  contentBlocks?: number;
+}) {
+  return (
+    <div className='container mx-auto py-8'>
+      <div className='mb-8'>
+        <Skeleton className='h-10 w-1/2 mb-4' />
+        <Skeleton className='h-6 w-1/3 mb-8' />
+      </div>
+      <div className='space-y-4'>
+        {[...Array(contentBlocks)].map((_, i) => (
+          <Skeleton
+            key={i}
+            className='h-32 w-full mb-4'
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

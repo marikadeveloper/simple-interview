@@ -2,6 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import { DetailPageSkeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   ChangePasswordDocument,
   MeDocument,
@@ -11,9 +13,11 @@ import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
 
 export default function ProfilePage() {
+  const { isLoading } = useAuth();
+
   // Fetch current user info
   const [{ data: meData }] = useQuery({ query: MeDocument });
-  const user = meData?.me;
+  const userData = meData?.me;
 
   // Update name mutation
   const [, updateUserName] = useMutation(UpdateUserNameDocument);
@@ -60,6 +64,10 @@ export default function ProfilePage() {
     }
   };
 
+  if (isLoading) {
+    return <DetailPageSkeleton contentBlocks={2} />;
+  }
+
   return (
     <>
       <div className='mb-8 flex items-center justify-between'>
@@ -80,7 +88,7 @@ export default function ProfilePage() {
         </label>
         <Input
           id='fullName'
-          defaultValue={user?.fullName || ''}
+          defaultValue={userData?.fullName || ''}
           {...registerName('fullName', {
             required: 'Name is required',
             minLength: 2,

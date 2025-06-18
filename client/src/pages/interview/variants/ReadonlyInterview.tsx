@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { PageSubtitle } from '@/components/ui/page-subtitle';
 import { PageTitle } from '@/components/ui/page-title';
+import { DetailPageSkeleton } from '@/components/ui/skeleton';
 import {
   AnswerWithKeystrokesFragment,
   QuestionFragment,
@@ -14,7 +15,7 @@ import { KeystrokeReplay } from '../components/KeystrokeReplay';
 
 export const ReadonlyInterview = () => {
   const { slug } = useParams();
-  const [{ data, error }] = useGetInterviewForReplayBySlugQuery({
+  const [{ data, error, fetching }] = useGetInterviewForReplayBySlugQuery({
     variables: { slug: slug as string },
   });
 
@@ -27,6 +28,10 @@ export const ReadonlyInterview = () => {
   const previousQuestion = () => {
     setCurrentQuestionIndex(currentQuestionIndex - 1);
   };
+
+  if (fetching) {
+    return <DetailPageSkeleton />;
+  }
 
   if (error || !data || !data.getInterviewBySlug)
     return <NotFoundPage message='Interview not found' />;

@@ -1,7 +1,11 @@
 import { In } from 'typeorm';
 import { dataSource } from '../../';
 import { Answer } from '../../entities/Answer';
-import { Interview, InterviewStatus } from '../../entities/Interview';
+import {
+  Interview,
+  InterviewEvaluation,
+  InterviewStatus,
+} from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
 import { User, UserRole } from '../../entities/User';
@@ -71,6 +75,8 @@ const createMockQuestions = async (interviewTemplate: InterviewTemplate) => {
 
   interviewTemplate.questions.push(...createdQuestions);
   await interviewTemplate.save();
+
+  return createdQuestions;
 };
 
 const createInterviewMutation = `
@@ -93,21 +99,13 @@ const getInterviewsQuery = `
   query GetInterviews {
     getInterviews {
       id
-      interviewTemplate {
-        id
-      }
-      user {
-        id
-      }
-      deadline
-      status
     }
   }
 `;
 
 const getInterviewQuery = `
-  query GetInterview($id: Int!) {
-    getInterview(id: $id) {
+  query GetInterviewBySlug($slug: String!) {
+    getInterviewBySlug(slug: $slug) {
       id
       interviewTemplate {
         id
@@ -117,13 +115,18 @@ const getInterviewQuery = `
       }
       deadline
       status
+      interviewer {
+        id
+      }
+      evaluationValue
+      evaluationNotes
     }
   }
 `;
 
 const getCandidateInterviewQuery = `
-  query GetCandidateInterview($id: Int!) {
-    getCandidateInterview(id: $id) {
+  query GetCandidateInterviewBySlug($slug: String!) {
+    getCandidateInterviewBySlug(slug: $slug) {
       id
       interviewTemplate {
         id
@@ -156,11 +159,31 @@ const deleteInterviewMutation = `
   }
 `;
 
-const createInterview = async (
-  interviewTemplateId: number,
-  candidateId: number,
-  deadline?: string,
-) => {
+// const updateInterviewMutation = `
+//   mutation UpdateInterview($id: Int!, $input: InterviewInput!) {
+//     updateInterview(id: $id, input: $input) {
+//       id
+//     }
+//   }
+// `;
+
+// const evaluateInterviewMutation = `
+//   mutation EvaluateInterview($id: Int!, $input: InterviewEvaluationInput!) {
+//     evaluateInterview(id: $id, input: $input)
+//   }
+// `;
+
+const createInterview = async ({
+  interviewTemplateId,
+  candidateId,
+  interviewerId,
+  deadline,
+}: {
+  interviewTemplateId: number;
+  candidateId: number;
+  interviewerId?: number;
+  deadline?: string;
+}) => {
   if (!deadline) {
     // Default to 1 day from now
     deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -171,6 +194,7 @@ const createInterview = async (
     user: { id: candidateId },
     slug: 'test-interview-' + Date.now(),
     deadline,
+    interviewer: interviewerId ? { id: interviewerId } : undefined,
   }).save();
   return interview;
 };
@@ -181,6 +205,7 @@ describe('Interview Resolver', () => {
   let candidateUser: User;
   let candidateUser2: User;
   let interviewTemplateId: number;
+  let questions: Question[];
 
   beforeAll(async () => {
     // Create test users
@@ -193,7 +218,7 @@ describe('Interview Resolver', () => {
     // Create a test interview template
     testInterviewTemplate = await createInterviewTemplate();
     interviewTemplateId = testInterviewTemplate.id;
-    await createMockQuestions(testInterviewTemplate);
+    questions = await createMockQuestions(testInterviewTemplate);
   });
 
   afterEach(async () => {
@@ -204,6 +229,220 @@ describe('Interview Resolver', () => {
     }
   });
 
+  // ! 62,67-77,82-89,114,118,123,128,186,190-191,220,232-247,281-296,313,324-335,348,368-445,456-474
+
+  // Field resolvers
+  it('should get the user of an interview', async () => {
+    const interview = await createInterview({
+      interviewTemplateId,
+      candidateId: candidateUser.id,
+    });
+    testInterviews.push(interview);
+
+    const response = await graphqlCall({
+      source: `
+        query GetInterviewBySlug($slug: String!) {
+          getInterviewBySlug(slug: $slug) {
+            user {
+              id
+            }
+          }
+        }
+      `,
+      variableValues: {
+        slug: interview.slug,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getInterviewBySlug: {
+          user: {
+            id: candidateUser.id,
+          },
+        },
+      },
+    });
+  });
+
+  it('should get the correct status of an interview', async () => {
+    const statusQuery = `
+      query GetInterviewBySlug($slug: String!) {
+        getInterviewBySlug(slug: $slug) {
+          status
+        }
+      }
+    `;
+
+    const interview = await createInterview({
+      interviewTemplateId,
+      candidateId: candidateUser.id,
+    });
+    testInterviews.push(interview);
+
+    // Pending
+    const pending_response = await graphqlCall({
+      source: statusQuery,
+      variableValues: {
+        slug: interview.slug,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(pending_response).toMatchObject({
+      data: {
+        getInterviewBySlug: {
+          status: InterviewStatus.PENDING,
+        },
+      },
+    });
+
+    // In progress
+    // create answer
+    await Answer.create({
+      text: 'Test answer',
+      question: { id: questions[0].id },
+      interview: { id: interview.id },
+    }).save();
+
+    const in_progress_response = await graphqlCall({
+      source: statusQuery,
+      variableValues: {
+        slug: interview.slug,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(in_progress_response).toMatchObject({
+      data: {
+        getInterviewBySlug: {
+          status: InterviewStatus.IN_PROGRESS,
+        },
+      },
+    });
+
+    // Expired
+    // set deadline to 1 day in the past
+    await Interview.update(interview.id, {
+      deadline: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    });
+
+    const expired_response = await graphqlCall({
+      source: statusQuery,
+      variableValues: {
+        slug: interview.slug,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(expired_response).toMatchObject({
+      data: {
+        getInterviewBySlug: {
+          status: InterviewStatus.EXPIRED,
+        },
+      },
+    });
+
+    // Completed
+    // mark the interview as completed
+    await Interview.update(interview.id, {
+      status: InterviewStatus.COMPLETED,
+    });
+
+    const completed_response = await graphqlCall({
+      source: statusQuery,
+      variableValues: {
+        slug: interview.slug,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(completed_response).toMatchObject({
+      data: {
+        getInterviewBySlug: {
+          status: InterviewStatus.COMPLETED,
+        },
+      },
+    });
+
+    // Clean up answer
+    await Answer.delete({ interview: { id: interview.id } });
+  });
+
+  it('should get the evaluation value of an interview if the user is an admin or interviewer', async () => {
+    const interview = await createInterview({
+      interviewTemplateId,
+      candidateId: candidateUser.id,
+    });
+    testInterviews.push(interview);
+
+    await Interview.update(interview.id, {
+      evaluationValue: InterviewEvaluation.GOOD,
+      evaluationNotes: 'Test notes',
+    });
+
+    const response = await graphqlCall({
+      source: `
+        query GetInterviewBySlug($slug: String!) {
+          getInterviewBySlug(slug: $slug) {
+            evaluationValue
+          }
+        }
+      `,
+      variableValues: {
+        slug: interview.slug,
+      },
+      userId: adminUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getInterviewBySlug: {
+          evaluationValue: InterviewEvaluation.GOOD,
+        },
+      },
+    });
+  });
+
+  it.only('should hide the evaluation value from the candidate', async () => {
+    const interview = await createInterview({
+      interviewTemplateId,
+      candidateId: candidateUser.id,
+    });
+    testInterviews.push(interview);
+
+    await Interview.update(interview.id, {
+      evaluationValue: InterviewEvaluation.GOOD,
+      evaluationNotes: 'Test notes',
+    });
+
+    const response = await graphqlCall({
+      source: `
+        query GetCandidateInterviewBySlug($slug: String!) {
+          getCandidateInterviewBySlug(slug: $slug) {
+            evaluationValue
+            evaluationNotes
+          }
+        }
+      `,
+      variableValues: {
+        slug: interview.slug,
+      },
+      userId: candidateUser.id,
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        getCandidateInterviewBySlug: {
+          evaluationValue: null,
+          evaluationNotes: null,
+        },
+      },
+    });
+  });
+
+  // Mutations / queries
   it('should create an interview successfully', async () => {
     const input: InterviewInput = {
       interviewTemplateId,
@@ -299,14 +538,14 @@ describe('Interview Resolver', () => {
   });
 
   it('admins and interviewers should be able to see all interviews', async () => {
-    const interviewCandidate1 = await createInterview(
+    const interviewCandidate1 = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-    );
-    const interviewCandidate2 = await createInterview(
+      candidateId: candidateUser.id,
+    });
+    const interviewCandidate2 = await createInterview({
       interviewTemplateId,
-      candidateUser2.id,
-    );
+      candidateId: candidateUser2.id,
+    });
     testInterviews.push(interviewCandidate1, interviewCandidate2);
 
     const response = await graphqlCall({
@@ -345,14 +584,14 @@ describe('Interview Resolver', () => {
   });
 
   it('candidates should only see their own interviews', async () => {
-    const interviewCandidate1 = await createInterview(
+    const interviewCandidate1 = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-    );
-    const interviewCandidate2 = await createInterview(
+      candidateId: candidateUser.id,
+    });
+    const interviewCandidate2 = await createInterview({
       interviewTemplateId,
-      candidateUser2.id,
-    );
+      candidateId: candidateUser2.id,
+    });
     testInterviews.push(interviewCandidate1, interviewCandidate2);
 
     const response = await graphqlCall({
@@ -378,10 +617,10 @@ describe('Interview Resolver', () => {
   });
 
   it('admins and interviewers should be able to get a single interview', async () => {
-    const interviewCandidate = await createInterview(
+    const interviewCandidate = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-    );
+      candidateId: candidateUser.id,
+    });
     testInterviews.push(interviewCandidate);
 
     const response = await graphqlCall({
@@ -413,11 +652,11 @@ describe('Interview Resolver', () => {
     const pastDeadline = new Date(
       Date.now() - 24 * 60 * 60 * 1000,
     ).toISOString(); // 1 day in the past
-    const interviewCandidate = await createInterview(
+    const interviewCandidate = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-      pastDeadline,
-    );
+      candidateId: candidateUser.id,
+      deadline: pastDeadline,
+    });
     testInterviews.push(interviewCandidate);
 
     const response = await graphqlCall({
@@ -446,10 +685,10 @@ describe('Interview Resolver', () => {
 
   it('should automatically set the status to "in progress" if at least one question is answered', async () => {
     // create interview
-    const interviewCandidate = await createInterview(
+    const interviewCandidate = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-    );
+      candidateId: candidateUser.id,
+    });
     testInterviews.push(interviewCandidate);
     const questions = await Question.findBy({
       interviewTemplates: { id: In([interviewTemplateId]) },
@@ -490,10 +729,10 @@ describe('Interview Resolver', () => {
   });
 
   it('should return "COMPLETED" status if the candidate has marked the interview as COMPLETED', async () => {
-    const interviewCandidate = await createInterview(
+    const interviewCandidate = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-    );
+      candidateId: candidateUser.id,
+    });
     testInterviews.push(interviewCandidate);
 
     // Mark the interview as COMPLETED
@@ -531,10 +770,10 @@ describe('Interview Resolver', () => {
   });
 
   it('candidates should be able to get their own interview', async () => {
-    let interviewCandidate = await createInterview(
+    let interviewCandidate = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-    );
+      candidateId: candidateUser.id,
+    });
     testInterviews.push(interviewCandidate);
 
     const response = await graphqlCall({
@@ -565,10 +804,10 @@ describe('Interview Resolver', () => {
   });
 
   it("candidates should not be able to get other candidates' interviews", async () => {
-    const interviewCandidate2 = await createInterview(
+    const interviewCandidate2 = await createInterview({
       interviewTemplateId,
-      candidateUser2.id,
-    );
+      candidateId: candidateUser2.id,
+    });
     testInterviews.push(interviewCandidate2);
 
     const response = await graphqlCall({
@@ -588,10 +827,10 @@ describe('Interview Resolver', () => {
   });
 
   it('admins and interviewers should be able to delete an interview', async () => {
-    const interviewCandidate = await createInterview(
+    const interviewCandidate = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-    );
+      candidateId: candidateUser.id,
+    });
 
     const response = await graphqlCall({
       source: deleteInterviewMutation,
@@ -609,10 +848,10 @@ describe('Interview Resolver', () => {
   });
 
   it('admins and interviewers should not be able to delete an interview that is not in PENDING status', async () => {
-    const interviewCandidate = await createInterview(
+    const interviewCandidate = await createInterview({
       interviewTemplateId,
-      candidateUser.id,
-    );
+      candidateId: candidateUser.id,
+    });
     testInterviews.push(interviewCandidate);
 
     // Mark the interview as COMPLETED

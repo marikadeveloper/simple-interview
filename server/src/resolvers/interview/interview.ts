@@ -32,10 +32,10 @@ export class InterviewResolver {
     return userLoader.load(interview.user.id);
   }
 
-  @FieldResolver(() => User)
-  interviewer(@Root() interview: Interview, @Ctx() { userLoader }: MyContext) {
-    return userLoader.load(interview.interviewer.id);
-  }
+  // @FieldResolver(() => User)
+  // interviewer(@Root() interview: Interview, @Ctx() { userLoader }: MyContext) {
+  //   return userLoader.load(interview.interviewer?.id);
+  // }
 
   @FieldResolver(() => InterviewStatus)
   async status(@Root() interview: Interview): Promise<InterviewStatus> {

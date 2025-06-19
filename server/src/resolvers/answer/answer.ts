@@ -12,6 +12,7 @@ import { Interview, InterviewStatus } from '../../entities/Interview';
 import { Question } from '../../entities/Question';
 import { isAuth } from '../../middleware/isAuth';
 import { MyContext } from '../../types';
+import { errorStrings } from '../../utils/errorStrings';
 import { CreateAnswerInput, SaveKeystrokesInput } from './answer-types';
 
 @Resolver(Answer)
@@ -37,11 +38,11 @@ export class AnswerResolver {
       relations: ['interviewTemplate'],
     });
     if (!interview) {
-      throw new Error('Interview not found');
+      throw new Error(errorStrings.interview.notFound);
     }
 
     if (interview.status === InterviewStatus.COMPLETED) {
-      throw new Error('Interview is completed');
+      throw new Error(errorStrings.interview.canNotUpdate);
     }
 
     const question = await Question.findOneBy({
@@ -50,7 +51,7 @@ export class AnswerResolver {
     });
 
     if (!question) {
-      throw new Error('Question not found in this interview template');
+      throw new Error(errorStrings.question.notFound);
     }
 
     const answer = await Answer.create({
@@ -69,36 +70,31 @@ export class AnswerResolver {
     @Arg('input') input: SaveKeystrokesInput,
     @Ctx() { req }: MyContext,
   ): Promise<boolean> {
-    try {
-      const answer = await Answer.findOne({
-        where: { id: input.answerId },
-        relations: ['interview', 'interview.user'],
-      });
+    const answer = await Answer.findOne({
+      where: { id: input.answerId },
+      relations: ['interview', 'interview.user'],
+    });
 
-      if (!answer) {
-        throw new Error('Answer not found');
-      }
-
-      // Ensure the logged-in user is the one who owns the interview
-      if (answer.interview.user.id !== req.session.userId) {
-        throw new Error('Not authorized to modify this answer');
-      }
-
-      // Insert all keystrokes
-      answer.keystrokes = input.keystrokes.map((keystroke) => ({
-        id: keystroke.id,
-        snapshot: keystroke.snapshot,
-        relativeTimestamp: keystroke.relativeTimestamp,
-      }));
-
-      // Mark that the answer has replay data
-      answer.hasReplay = true;
-      await answer.save();
-
-      return true;
-    } catch (error) {
-      console.error('Error saving keystrokes:', error);
-      return false;
+    if (!answer) {
+      throw new Error(errorStrings.answer.notFound);
     }
+
+    // Ensure the logged-in user is the one who owns the interview
+    if (answer.interview.user.id !== req.session.userId) {
+      throw new Error(errorStrings.answer.notAuthorized);
+    }
+
+    // Insert all keystrokes
+    answer.keystrokes = input.keystrokes.map((keystroke) => ({
+      id: keystroke.id,
+      snapshot: keystroke.snapshot,
+      relativeTimestamp: keystroke.relativeTimestamp,
+    }));
+
+    // Mark that the answer has replay data
+    answer.hasReplay = true;
+    await answer.save();
+
+    return true;
   }
 }

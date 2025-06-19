@@ -48,4 +48,8 @@ export const errorStrings = {
     notFound: 'question bank not found',
     inUse: 'question bank is used in an interview template',
   },
+  answer: {
+    notFound: 'answer not found',
+    notAuthorized: 'not authorized to modify this answer',
+  },
 };

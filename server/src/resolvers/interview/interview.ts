@@ -228,9 +228,10 @@ export class InterviewResolver {
   @UseMiddleware(isAuth)
   async getCandidateInterviewBySlug(
     @Arg('slug', () => String) slug: string,
+    @Ctx() { req }: MyContext,
   ): Promise<Interview | null> {
     const interview = await Interview.findOne({
-      where: { slug },
+      where: { slug, user: { id: req.session.userId } },
       relations: [
         'interviewTemplate',
         'interviewTemplate.questions',

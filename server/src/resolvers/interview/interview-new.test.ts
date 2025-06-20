@@ -600,11 +600,88 @@ describe('InterviewResolver', () => {
   });
 
   describe('getCandidateInterviewBySlug', () => {
-    it.todo(
-      'should return the interview by slug if the user is the assigned candidate',
-    );
-    it.todo('should not return an interview of another candidate');
-    it.todo('should throw an error if the interview does not exist');
+    it('should return the interview by slug if the user is the assigned candidate', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          query GetCandidateInterviewBySlug($slug: String!) {
+            getCandidateInterviewBySlug(slug: $slug) {
+              id
+            }
+          }
+        `,
+        variableValues: {
+          slug: testInterview.slug,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getCandidateInterviewBySlug: {
+            id: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it('should not return an interview of another candidate', async () => {
+      const testCandidate2 = await createFakeUser(UserRole.CANDIDATE);
+      testUsers.push(testCandidate2);
+
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          query GetCandidateInterviewBySlug($slug: String!) {
+            getCandidateInterviewBySlug(slug: $slug) {
+              id
+            }
+          }
+        `,
+        variableValues: {
+          slug: testInterview.slug,
+        },
+        userId: testCandidate2.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interview.notFound }],
+      });
+    });
+
+    it('should throw an error if the interview does not exist', async () => {
+      const response = await graphqlCall({
+        source: `
+          query GetCandidateInterviewBySlug($slug: String!) {
+            getCandidateInterviewBySlug(slug: $slug) {
+              id
+            }
+          }
+        `,
+        variableValues: {
+          slug: 'non-existent-interview-slug',
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interview.notFound }],
+      });
+    });
   });
 
   describe('confirmInterviewCompletion', () => {

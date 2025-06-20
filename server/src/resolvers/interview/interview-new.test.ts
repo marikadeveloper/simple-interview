@@ -1,3 +1,4 @@
+import { ILike } from 'typeorm';
 import { dataSource } from '../..';
 import { Interview } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
@@ -92,6 +93,16 @@ const buildCreateInterviewMutation = (fields: (keyof Interview)[]) => {
   return `
     mutation CreateInterview($input: InterviewInput!) {
       createInterview(input: $input) {
+        ${fields.join('\n')}
+      }
+    }
+  `;
+};
+
+const buildGetInterviewsQuery = (fields: (keyof Interview)[]) => {
+  return `
+    query GetInterviews {
+      getInterviews {
         ${fields.join('\n')}
       }
     }
@@ -364,13 +375,136 @@ describe('InterviewResolver', () => {
   });
 
   describe('getInterviews', () => {
-    it.todo('should return all interviews for an admin');
-    it.todo('should return only assigned interviews for an interviewer');
-    it.todo('should return only their own interviews for a candidate');
-    it.todo('should filter interviews by name for an admin');
-    it.todo('should filter interviews by name for an interviewer');
-    it.todo('should not allow filtering for candidates');
-    it.todo('should return interviews ordered by deadline in descending order');
+    it('should return all interviews for an admin', async () => {
+      const response = await graphqlCall({
+        source: buildGetInterviewsQuery(['id']),
+        userId: testAdmin.id,
+      });
+
+      const allInterviewsLength = await Interview.count();
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviews: expect.any(Array),
+        },
+      });
+      expect(response.data?.getInterviews).toHaveLength(allInterviewsLength);
+    });
+
+    it('should return only assigned interviews for an interviewer', async () => {
+      const response = await graphqlCall({
+        source: buildGetInterviewsQuery(['id']),
+        userId: testInterviewer.id,
+      });
+
+      const assignedInterviewsLength = await Interview.count({
+        where: {
+          interviewer: {
+            id: testInterviewer.id,
+          },
+        },
+      });
+
+      expect(response.data?.getInterviews).toHaveLength(
+        assignedInterviewsLength,
+      );
+    });
+
+    it('should return only their own interviews for a candidate', async () => {
+      const response = await graphqlCall({
+        source: buildGetInterviewsQuery(['id']),
+        userId: testCandidate.id,
+      });
+
+      const assignedInterviewsLength = await Interview.count({
+        where: {
+          user: {
+            id: testCandidate.id,
+          },
+        },
+      });
+
+      expect(response.data?.getInterviews).toHaveLength(
+        assignedInterviewsLength,
+      );
+    });
+
+    it('should filter interviews by name for an admin', async () => {
+      const response = await graphqlCall({
+        source: `
+          query GetInterviews($filter: String!) {
+            getInterviews(filter: $filter) {
+              id
+            }
+          }
+        `,
+        variableValues: {
+          filter: 'Test Interview',
+        },
+        userId: testAdmin.id,
+      });
+
+      const interviews: Interview[] = response.data
+        ?.getInterviews as Interview[];
+
+      const matchingInterviews = await Interview.find({
+        where: {
+          interviewTemplate: {
+            name: ILike('%Test Interview%'),
+          },
+        },
+      });
+
+      expect(matchingInterviews.length).toBe(interviews.length);
+    });
+
+    it('should filter interviews by name for an interviewer', async () => {
+      const response = await graphqlCall({
+        source: `
+          query GetInterviews($filter: String!) {
+            getInterviews(filter: $filter) {
+              id
+            }
+          }
+        `,
+        variableValues: {
+          filter: 'Test Interview',
+        },
+        userId: testInterviewer.id,
+      });
+
+      const interviews: Interview[] = response.data
+        ?.getInterviews as Interview[];
+
+      const matchingInterviews = await Interview.find({
+        where: {
+          interviewer: {
+            id: testInterviewer.id,
+          },
+          interviewTemplate: {
+            name: ILike('%Test Interview%'),
+          },
+        },
+      });
+
+      expect(matchingInterviews.length).toBe(interviews.length);
+    });
+
+    it('should return interviews ordered by deadline in descending order', async () => {
+      const response = await graphqlCall({
+        source: buildGetInterviewsQuery(['id']),
+        userId: testAdmin.id,
+      });
+
+      const interviews: Interview[] = response.data
+        ?.getInterviews as Interview[];
+
+      const sortedInterviews = interviews.sort((a, b) => {
+        return new Date(b.deadline).getTime() - new Date(a.deadline).getTime();
+      });
+
+      expect(interviews).toEqual(sortedInterviews);
+    });
   });
 
   describe('getInterviewBySlug', () => {

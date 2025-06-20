@@ -202,30 +202,6 @@ export class InterviewResolver {
   @Query(() => Interview, { nullable: true })
   @UseMiddleware(isAuth)
   @UseMiddleware(isAdminOrInterviewer)
-  async getInterview(
-    @Arg('id', () => Int) id: number,
-  ): Promise<Interview | null> {
-    const interview = await Interview.findOne({
-      where: { id },
-      relations: [
-        'interviewTemplate',
-        'interviewTemplate.questions',
-        'user',
-        'answers',
-        'answers.question',
-      ],
-    });
-
-    if (!interview) {
-      throw new Error(errorStrings.interview.notFound);
-    }
-
-    return interview;
-  }
-
-  @Query(() => Interview, { nullable: true })
-  @UseMiddleware(isAuth)
-  @UseMiddleware(isAdminOrInterviewer)
   async getInterviewBySlug(
     @Arg('slug', () => String) slug: string,
   ): Promise<Interview | null> {
@@ -237,32 +213,7 @@ export class InterviewResolver {
         'user',
         'answers',
         'answers.question',
-      ],
-    });
-
-    if (!interview) {
-      throw new Error(errorStrings.interview.notFound);
-    }
-
-    return interview;
-  }
-
-  @Query(() => Interview, { nullable: true })
-  @UseMiddleware(isAuth)
-  async getCandidateInterview(
-    @Ctx() { req }: MyContext,
-    @Arg('id', () => Int) id: number,
-  ): Promise<Interview | null> {
-    const userId = req.session.userId;
-
-    const interview = await Interview.findOne({
-      where: { id, user: { id: userId } },
-      relations: [
-        'interviewTemplate',
-        'interviewTemplate.questions',
-        'user',
-        'answers',
-        'answers.question',
+        'interviewer',
       ],
     });
 

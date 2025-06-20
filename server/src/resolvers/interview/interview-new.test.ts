@@ -17,7 +17,6 @@ let testInterviewer: User;
 let testCandidate: User;
 let testInterviewTemplate: InterviewTemplate;
 let testInterviewTemplateQuestions: Question[] = [];
-let testInterviews: Interview[] = [];
 
 const createTestInterviewTemplate = async () => {
   testInterviewTemplate = await InterviewTemplate.create({
@@ -78,7 +77,6 @@ beforeAll(async () => {
 afterAll(async () => {
   // remove all test data
   await Promise.all(testUsers.map((user) => user.remove()));
-  await Promise.all(testInterviews.map((interview) => interview.remove()));
   await Promise.all(
     testInterviewTemplateQuestions.map((question) => question.remove()),
   );
@@ -508,10 +506,97 @@ describe('InterviewResolver', () => {
   });
 
   describe('getInterviewBySlug', () => {
-    it.todo('should return an interview by slug for an admin');
-    it.todo('should return an interview by slug for an interviewer');
-    it.todo('should not return an interview to a candidate by slug');
-    it.todo('should throw an error if the interview does not exist');
+    it('should return an interview by slug for an admin', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewBySlug($slug: String!) {
+            getInterviewBySlug(slug: $slug) {
+              id
+            }
+          }
+        `,
+        variableValues: {
+          slug: testInterview.slug,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviewBySlug: {
+            id: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it('should return an interview by slug for an interviewer', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewBySlug($slug: String!) {
+            getInterviewBySlug(slug: $slug) {
+              id
+            }
+          }
+        `,
+        variableValues: {
+          slug: testInterview.slug,
+        },
+        userId: testInterviewer.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviewBySlug: {
+            id: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it('should not return an interview to a candidate by slug', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewBySlug($slug: String!) {
+            getInterviewBySlug(slug: $slug) {
+              id
+            }
+          }
+        `,
+        variableValues: {
+          slug: testInterview.slug,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthorized }],
+      });
+    });
   });
 
   describe('getCandidateInterviewBySlug', () => {

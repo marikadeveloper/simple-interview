@@ -868,13 +868,156 @@ describe('InterviewResolver', () => {
   });
 
   describe('deleteInterview', () => {
-    it.todo('should allow an admin to delete a pending interview');
-    it.todo('should allow an interviewer to delete a pending interview');
-    it.todo('should not allow a candidate to delete an interview');
-    it.todo('should throw an error if the interview does not exist');
-    it.todo(
-      'should throw an error when trying to delete a non-pending interview',
-    );
+    it('should allow an admin to delete a pending interview', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterview($id: Int!) {
+            deleteInterview(id: $id)
+          }
+        `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteInterview: true,
+        },
+      });
+
+      const updatedInterview = await Interview.findOne({
+        where: { id: testInterview.id },
+      });
+
+      expect(updatedInterview).toBeNull();
+    });
+
+    it('should allow an interviewer to delete a pending interview', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterview($id: Int!) {
+            deleteInterview(id: $id)
+          }
+        `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testInterviewer.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteInterview: true,
+        },
+      });
+
+      const updatedInterview = await Interview.findOne({
+        where: { id: testInterview.id },
+      });
+
+      expect(updatedInterview).toBeNull();
+    });
+
+    it('should not allow a candidate to delete an interview', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterview($id: Int!) {
+            deleteInterview(id: $id)
+          }
+        `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthorized }],
+      });
+
+      const updatedInterview = await Interview.findOne({
+        where: { id: testInterview.id },
+      });
+
+      expect(updatedInterview).toBeDefined();
+    });
+
+    it('should throw an error if the interview does not exist', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterview($id: Int!) {
+            deleteInterview(id: $id)
+          }
+        `,
+        variableValues: {
+          id: 9999999,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interview.notFound }],
+      });
+    });
+
+    it('should throw an error when trying to delete a non-pending interview', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+        status: InterviewStatus.COMPLETED,
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterview($id: Int!) {
+            deleteInterview(id: $id)
+          }
+        `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interview.canNotDelete }],
+      });
+
+      const updatedInterview = await Interview.findOne({
+        where: { id: testInterview.id },
+      });
+
+      expect(updatedInterview).toBeDefined();
+    });
   });
 
   describe('updateInterview', () => {

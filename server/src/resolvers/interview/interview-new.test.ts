@@ -1,6 +1,6 @@
 import { ILike } from 'typeorm';
 import { dataSource } from '../..';
-import { Interview } from '../../entities/Interview';
+import { Interview, InterviewStatus } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
 import { User, UserRole } from '../../entities/User';
@@ -685,16 +685,186 @@ describe('InterviewResolver', () => {
   });
 
   describe('confirmInterviewCompletion', () => {
-    it.todo(
-      'should allow a candidate to confirm completion of their own interview',
-    );
-    it.todo(
-      "should not allow a user to confirm completion of another user's interview",
-    );
-    it.todo('should set the interview status to COMPLETED');
-    it.todo('should set the completedAt timestamp');
-    it.todo('should send an email notification to the interviewer');
-    it.todo('should return false if the interview does not exist');
+    it('should allow a candidate to confirm completion of their own interview', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+            mutation ConfirmInterviewCompletion($id: Int!) {
+              confirmInterviewCompletion(id: $id)
+            }
+          `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          confirmInterviewCompletion: true,
+        },
+      });
+    });
+
+    it("should not allow a user to confirm completion of another user's interview", async () => {
+      const testCandidate2 = await createFakeUser(UserRole.CANDIDATE);
+      testUsers.push(testCandidate2);
+
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation ConfirmInterviewCompletion($id: Int!) {
+            confirmInterviewCompletion(id: $id)
+          }
+        `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testCandidate2.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          confirmInterviewCompletion: false,
+        },
+      });
+    });
+
+    it('should set the interview status to COMPLETED', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation ConfirmInterviewCompletion($id: Int!) {
+            confirmInterviewCompletion(id: $id)
+          }
+        `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          confirmInterviewCompletion: true,
+        },
+      });
+
+      const updatedInterview = await Interview.findOne({
+        where: { id: testInterview.id },
+      });
+
+      expect(updatedInterview?.status).toBe(InterviewStatus.COMPLETED);
+    });
+
+    it('should set the completedAt timestamp', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation ConfirmInterviewCompletion($id: Int!) {
+            confirmInterviewCompletion(id: $id)
+          }
+        `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          confirmInterviewCompletion: true,
+        },
+      });
+
+      const updatedInterview = await Interview.findOne({
+        where: { id: testInterview.id },
+      });
+
+      expect(updatedInterview?.completedAt).toBeDefined();
+    });
+
+    it('should send an email notification to the interviewer', async () => {
+      const testInterview = await Interview.create({
+        interviewTemplate: testInterviewTemplate,
+        user: testCandidate,
+        interviewer: testInterviewer,
+        deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        slug: 'test-interview-slug-' + Date.now(),
+      }).save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation ConfirmInterviewCompletion($id: Int!) {
+            confirmInterviewCompletion(id: $id)
+          }
+        `,
+        variableValues: {
+          id: testInterview.id,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          confirmInterviewCompletion: true,
+        },
+      });
+
+      expect(sendEmail).toHaveBeenCalledWith(
+        testInterviewer.email,
+        'Interview Completed',
+        expect.any(String),
+      );
+    });
+
+    it('should return false if the interview does not exist', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation ConfirmInterviewCompletion($id: Int!) {
+            confirmInterviewCompletion(id: $id)
+          }
+        `,
+        variableValues: {
+          id: 9999999,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          confirmInterviewCompletion: false,
+        },
+      });
+    });
   });
 
   describe('deleteInterview', () => {

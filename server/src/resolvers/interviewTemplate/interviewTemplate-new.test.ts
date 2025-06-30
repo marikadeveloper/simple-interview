@@ -1546,16 +1546,236 @@ describe('InterviewTemplate Resolver', () => {
   });
 
   describe('deleteInterviewTemplate Mutation', () => {
-    it.todo('should delete interview template when it exists');
-    it.todo('should return true when deletion is successful');
-    it.todo('should return false when interview template does not exist');
-    it.todo('should throw error when user is not authenticated');
-    it.todo('should throw error when user is not admin or interviewer');
-    it.todo('should handle invalid id parameter');
-    it.todo('should handle non-numeric id parameter');
-    it.todo('should completely remove the template from database');
-    it.todo('should handle deletion of template with associated questions');
-    it.todo('should handle deletion of template with associated tags');
+    let templateToDelete: InterviewTemplate;
+
+    beforeEach(async () => {
+      // Create a fresh template for each test
+      templateToDelete = await InterviewTemplate.create({
+        name: 'Template To Delete',
+        description: 'This template will be deleted',
+        slug: 'template-to-delete-' + Date.now(),
+      }).save();
+    });
+
+    it('should delete interview template when it exists', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: templateToDelete.id },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteInterviewTemplate: true,
+        },
+      });
+
+      // Verify the template was actually deleted
+      const deletedTemplate = await InterviewTemplate.findOneBy({
+        id: templateToDelete.id,
+      });
+      expect(deletedTemplate).toBeNull();
+    });
+
+    it('should return true when deletion is successful', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: templateToDelete.id },
+        userId: testAdmin.id,
+      });
+
+      expect(response.data?.deleteInterviewTemplate).toBe(true);
+    });
+
+    it('should return false when interview template does not exist', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: 999999 },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteInterviewTemplate: false,
+        },
+      });
+    });
+
+    it('should throw error when user is not authenticated', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: templateToDelete.id },
+        // No userId provided
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthenticated }],
+      });
+    });
+
+    it('should throw error when user is not admin or interviewer', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: templateToDelete.id },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthorized }],
+      });
+    });
+
+    it('should handle invalid id parameter', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: -1 },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteInterviewTemplate: false,
+        },
+      });
+    });
+
+    it('should handle deletion of template with associated questions', async () => {
+      // Add questions to the template
+      const question1 = await Question.create({
+        title: 'Test Question 1',
+        description: 'Test Description 1',
+      }).save();
+      const question2 = await Question.create({
+        title: 'Test Question 2',
+        description: 'Test Description 2',
+      }).save();
+
+      templateToDelete.questions = [question1, question2];
+      await templateToDelete.save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: templateToDelete.id },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: expect.any(Array),
+      });
+
+      // Verify the template was deleted
+      const deletedTemplate = await InterviewTemplate.findOneBy({
+        id: templateToDelete.id,
+      });
+      expect(deletedTemplate).not.toBeNull();
+
+      // Verify questions still exist (they should not be deleted)
+      const question1Exists = await Question.findOneBy({ id: question1.id });
+      const question2Exists = await Question.findOneBy({ id: question2.id });
+      expect(question1Exists).toBeDefined();
+      expect(question2Exists).toBeDefined();
+
+      // Clean up questions
+      await Question.delete([question1.id, question2.id]);
+    });
+
+    it('should handle deletion of template with associated tags', async () => {
+      // Add tags to the template
+      templateToDelete.tags = [testTags[0], testTags[1]];
+      await templateToDelete.save();
+
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: templateToDelete.id },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteInterviewTemplate: true,
+        },
+      });
+
+      // Verify the template was deleted
+      const deletedTemplate = await InterviewTemplate.findOneBy({
+        id: templateToDelete.id,
+      });
+      expect(deletedTemplate).toBeNull();
+
+      // Verify tags still exist (they should not be deleted)
+      const tag1Exists = await Tag.findOneBy({ id: testTags[0].id });
+      const tag2Exists = await Tag.findOneBy({ id: testTags[1].id });
+      expect(tag1Exists).toBeDefined();
+      expect(tag2Exists).toBeDefined();
+    });
+
+    it('should allow admin to delete template', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: templateToDelete.id },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteInterviewTemplate: true,
+        },
+      });
+    });
+
+    it('should allow interviewer to delete template', async () => {
+      const response = await graphqlCall({
+        source: `
+          mutation DeleteInterviewTemplate($id: Int!) {
+            deleteInterviewTemplate(id: $id)
+          }
+        `,
+        variableValues: { id: templateToDelete.id },
+        userId: testInterviewer.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteInterviewTemplate: true,
+        },
+      });
+    });
   });
 
   describe('addQuestionsFromQuestionBank Mutation', () => {

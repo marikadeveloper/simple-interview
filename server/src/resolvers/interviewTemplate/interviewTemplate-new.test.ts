@@ -352,14 +352,205 @@ describe('InterviewTemplate Resolver', () => {
   });
 
   describe('getInterviewTemplate Query', () => {
-    it.todo('should return interview template by id when it exists');
-    it.todo('should include questions and questionBank relations in response');
-    it.todo('should include tags in the response');
-    it.todo('should throw error when interview template does not exist');
-    it.todo('should throw error when user is not authenticated');
-    it.todo('should throw error when user is not admin or interviewer');
-    it.todo('should handle invalid id parameter');
-    it.todo('should handle non-numeric id parameter');
+    it('should return interview template by id when it exists', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplate($id: Int!) {
+            getInterviewTemplate(id: $id) {
+              id
+              name
+              description
+              slug
+            }
+          }
+        `,
+        variableValues: {
+          id: testTemplate.id,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviewTemplate: {
+            id: testTemplate.id,
+            name: testTemplate.name,
+            description: testTemplate.description,
+            slug: testTemplate.slug,
+          },
+        },
+      });
+    });
+
+    it('should include questions and questionBank relations in response', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplate($id: Int!) {
+            getInterviewTemplate(id: $id) {
+              id
+              name
+              questions {
+                id
+                title
+                description
+                questionBank {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        `,
+        variableValues: {
+          id: testTemplate.id,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviewTemplate: {
+            id: testTemplate.id,
+            name: testTemplate.name,
+            questions: expect.any(Array),
+          },
+        },
+      });
+
+      const template = response.data?.getInterviewTemplate as InterviewTemplate;
+      expect(template.questions).toBeDefined();
+      expect(Array.isArray(template.questions)).toBe(true);
+    });
+
+    it('should include tags in the response', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplate($id: Int!) {
+            getInterviewTemplate(id: $id) {
+              id
+              name
+              tags {
+                id
+                text
+              }
+            }
+          }
+        `,
+        variableValues: {
+          id: testTemplate.id,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviewTemplate: {
+            id: testTemplate.id,
+            name: testTemplate.name,
+            tags: expect.any(Array),
+          },
+        },
+      });
+
+      const template = response.data?.getInterviewTemplate as InterviewTemplate;
+      expect(template.tags).toBeDefined();
+      expect(Array.isArray(template.tags)).toBe(true);
+      expect(template.tags!.length).toBeGreaterThan(0);
+    });
+
+    it('should throw error when interview template does not exist', async () => {
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplate($id: Int!) {
+            getInterviewTemplate(id: $id) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          id: 999999,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interviewTemplate.notFound }],
+      });
+    });
+
+    it('should throw error when user is not authenticated', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplate($id: Int!) {
+            getInterviewTemplate(id: $id) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          id: testTemplate.id,
+        },
+        // No userId provided
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthenticated }],
+      });
+    });
+
+    it('should throw error when user is not admin or interviewer', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplate($id: Int!) {
+            getInterviewTemplate(id: $id) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          id: testTemplate.id,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthorized }],
+      });
+    });
+
+    it('should handle invalid id parameter', async () => {
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplate($id: Int!) {
+            getInterviewTemplate(id: $id) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          id: -1,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interviewTemplate.notFound }],
+      });
+    });
   });
 
   describe('getInterviewTemplateBySlug Query', () => {

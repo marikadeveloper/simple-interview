@@ -2267,41 +2267,4 @@ describe('InterviewTemplate Resolver', () => {
       });
     });
   });
-
-  describe('Authentication and Authorization', () => {
-    it.todo('should allow admin users to perform all operations');
-    it.todo('should allow interviewer users to perform all operations');
-    it.todo('should deny candidate users from all operations');
-    it.todo('should deny unauthenticated users from all operations');
-    it.todo('should handle expired authentication tokens');
-    it.todo('should handle invalid authentication tokens');
-  });
-
-  describe('Edge Cases and Error Handling', () => {
-    it.todo('should handle database connection errors gracefully');
-    it.todo('should handle concurrent creation of templates with same name');
-    it.todo('should handle very long input strings');
-    it.todo('should handle null/undefined input values appropriately');
-    it.todo('should handle malformed GraphQL queries');
-    it.todo('should handle missing required fields in input');
-    it.todo('should handle extra fields in input (should be ignored)');
-    it.todo('should handle SQL injection attempts in filter');
-    it.todo('should handle XSS attempts in input fields');
-  });
-
-  describe('Data Integrity', () => {
-    it.todo('should maintain referential integrity when deleting templates');
-    it.todo('should maintain referential integrity when updating templates');
-    it.todo('should handle cascading deletes appropriately');
-    it.todo('should prevent orphaned records');
-    it.todo('should maintain data consistency across operations');
-  });
-
-  describe('Performance and Scalability', () => {
-    it.todo('should handle large number of templates efficiently');
-    it.todo('should handle templates with many questions efficiently');
-    it.todo('should handle templates with many tags efficiently');
-    it.todo('should optimize database queries for filtering');
-    it.todo('should handle pagination if implemented');
-  });
 });

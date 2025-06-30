@@ -7,6 +7,7 @@ import { graphqlCall } from '../../test-utils/graphqlCall';
 import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 import { errorStrings } from '../../utils/errorStrings';
+import * as sendEmailModule from '../../utils/sendEmail';
 
 jest.mock('../../utils/sendEmail', () => ({
   sendEmail: jest.fn().mockImplementation(() => {
@@ -378,15 +379,92 @@ describe('PasswordResolver', () => {
   });
 
   describe('forgotPasswordRequest', () => {
-    // Success cases
-    it.todo('should send reset email and store token when user exists');
+    it('should send reset email and store token when user exists', async () => {
+      const user = await createFakeUser(UserRole.INTERVIEWER);
+      testUsers.push(user);
+      jest.spyOn(sendEmailModule, 'sendEmail');
 
-    it.todo('should return true even when user does not exist (security)');
+      const response = await graphqlCall({
+        source: forgotPasswordRequestMutation,
+        variableValues: {
+          email: user.email,
+        },
+      });
 
-    // Error cases
-    it.todo('should handle malformed email addresses gracefully');
+      expect(response).toMatchObject({
+        data: {
+          forgotPasswordRequest: true,
+        },
+      });
+      expect(sendEmailModule.sendEmail).toHaveBeenCalledWith(
+        user.email,
+        expect.stringContaining('Reset Password'),
+        expect.stringContaining('reset'),
+      );
+    });
 
-    it.todo('should handle multiple reset requests for same email');
+    it('should return true even when user does not exist (security)', async () => {
+      jest.spyOn(sendEmailModule, 'sendEmail');
+      const response = await graphqlCall({
+        source: forgotPasswordRequestMutation,
+        variableValues: {
+          email: 'nonexistentuser@example.com',
+        },
+      });
+      expect(response).toMatchObject({
+        data: {
+          forgotPasswordRequest: true,
+        },
+      });
+      expect(sendEmailModule.sendEmail).not.toHaveBeenCalled();
+    });
+
+    it('should handle malformed email addresses gracefully', async () => {
+      const response = await graphqlCall({
+        source: forgotPasswordRequestMutation,
+        variableValues: {
+          email: 'not-an-email',
+        },
+      });
+      // Should not throw, should return true (security)
+      expect(response).toMatchObject({
+        data: {
+          forgotPasswordRequest: true,
+        },
+      });
+    });
+
+    it('should handle multiple reset requests for same email', async () => {
+      const user = await createFakeUser(UserRole.CANDIDATE);
+      testUsers.push(user);
+      jest.spyOn(sendEmailModule, 'sendEmail');
+
+      // First request
+      const response1 = await graphqlCall({
+        source: forgotPasswordRequestMutation,
+        variableValues: {
+          email: user.email,
+        },
+      });
+      // Second request
+      const response2 = await graphqlCall({
+        source: forgotPasswordRequestMutation,
+        variableValues: {
+          email: user.email,
+        },
+      });
+      expect(response1).toMatchObject({
+        data: {
+          forgotPasswordRequest: true,
+        },
+      });
+      expect(response2).toMatchObject({
+        data: {
+          forgotPasswordRequest: true,
+        },
+      });
+      expect(sendEmailModule.sendEmail).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('forgotPasswordChange', () => {

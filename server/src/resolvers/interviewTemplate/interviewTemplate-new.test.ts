@@ -1779,29 +1779,493 @@ describe('InterviewTemplate Resolver', () => {
   });
 
   describe('addQuestionsFromQuestionBank Mutation', () => {
-    it.todo(
-      'should add questions to interview template when all questions exist',
-    );
-    it.todo(
-      'should not add duplicate questions that already exist in template',
-    );
-    it.todo('should only add new questions not already in template');
-    it.todo('should throw error when interview template does not exist');
-    it.todo('should throw error when user is not authenticated');
-    it.todo('should throw error when user is not admin or interviewer');
-    it.todo('should throw error when some questions do not exist');
-    it.todo('should throw error when all questions do not exist');
-    it.todo('should handle empty questionIds array');
-    it.todo('should handle invalid interviewTemplateId');
-    it.todo('should handle non-numeric interviewTemplateId');
-    it.todo('should handle invalid questionIds');
-    it.todo('should handle non-numeric questionIds');
-    it.todo('should return true when operation is successful');
-    it.todo('should maintain existing questions in template');
-    it.todo(
-      'should handle adding questions to template with no existing questions',
-    );
-    it.todo('should preserve question order in template');
+    let templateToAddQuestions: InterviewTemplate;
+    let testQuestions: Question[];
+
+    beforeEach(async () => {
+      // Create a fresh template for each test
+      templateToAddQuestions = await InterviewTemplate.create({
+        name: 'Template For Adding Questions',
+        description: 'This template will have questions added',
+        slug: 'template-for-adding-questions-' + Date.now(),
+      }).save();
+
+      // Create test questions
+      testQuestions = await Promise.all([
+        Question.create({
+          title: 'Test Question 1',
+          description: 'Test Description 1',
+        }).save(),
+        Question.create({
+          title: 'Test Question 2',
+          description: 'Test Description 2',
+        }).save(),
+        Question.create({
+          title: 'Test Question 3',
+          description: 'Test Description 3',
+        }).save(),
+      ]);
+    });
+
+    afterEach(async () => {
+      // Clean up test questions
+      if (testQuestions.length > 0) {
+        await Question.delete(testQuestions.map((q) => q.id));
+        testQuestions = [];
+      }
+    });
+
+    it('should add questions to interview template when all questions exist', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id, testQuestions[1].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+
+      // Verify questions were added to the template
+      const updatedTemplate = await InterviewTemplate.findOne({
+        where: { id: templateToAddQuestions.id },
+        relations: ['questions'],
+      });
+
+      expect(updatedTemplate?.questions).toHaveLength(2);
+      expect(updatedTemplate?.questions?.map((q) => q.id)).toEqual(
+        expect.arrayContaining([testQuestions[0].id, testQuestions[1].id]),
+      );
+    });
+
+    it('should not add duplicate questions that already exist in template', async () => {
+      // First, add a question to the template
+      templateToAddQuestions.questions = [testQuestions[0]];
+      await templateToAddQuestions.save();
+
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id, testQuestions[1].id], // testQuestions[0] already exists
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+
+      // Verify only the new question was added (no duplicates)
+      const updatedTemplate = await InterviewTemplate.findOne({
+        where: { id: templateToAddQuestions.id },
+        relations: ['questions'],
+      });
+
+      expect(updatedTemplate?.questions).toHaveLength(2);
+      expect(updatedTemplate?.questions?.map((q) => q.id)).toEqual(
+        expect.arrayContaining([testQuestions[0].id, testQuestions[1].id]),
+      );
+    });
+
+    it('should only add new questions not already in template', async () => {
+      // Add some questions to the template first
+      templateToAddQuestions.questions = [testQuestions[0], testQuestions[1]];
+      await templateToAddQuestions.save();
+
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[1].id, testQuestions[2].id], // testQuestions[1] already exists
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+
+      // Verify only the new question was added
+      const updatedTemplate = await InterviewTemplate.findOne({
+        where: { id: templateToAddQuestions.id },
+        relations: ['questions'],
+      });
+
+      expect(updatedTemplate?.questions).toHaveLength(3);
+      expect(updatedTemplate?.questions?.map((q) => q.id)).toEqual(
+        expect.arrayContaining([
+          testQuestions[0].id,
+          testQuestions[1].id,
+          testQuestions[2].id,
+        ]),
+      );
+    });
+
+    it('should throw error when interview template does not exist', async () => {
+      const input = {
+        interviewTemplateId: 999999,
+        questionIds: [testQuestions[0].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interviewTemplate.notFound }],
+      });
+    });
+
+    it('should throw error when user is not authenticated', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        // No userId provided
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthenticated }],
+      });
+    });
+
+    it('should throw error when user is not admin or interviewer', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthorized }],
+      });
+    });
+
+    it('should throw error when some questions do not exist', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id, 999999], // One valid, one invalid
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: 'Some questions were not found' }],
+      });
+    });
+
+    it('should handle empty questionIds array', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+
+      // Verify template remains unchanged
+      const updatedTemplate = await InterviewTemplate.findOne({
+        where: { id: templateToAddQuestions.id },
+        relations: ['questions'],
+      });
+
+      expect(updatedTemplate?.questions).toHaveLength(0);
+    });
+
+    it('should handle invalid interviewTemplateId', async () => {
+      const input = {
+        interviewTemplateId: -1,
+        questionIds: [testQuestions[0].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interviewTemplate.notFound }],
+      });
+    });
+
+    it('should handle invalid questionIds', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [-1, -2],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: 'Some questions were not found' }],
+      });
+    });
+
+    it('should return true when operation is successful', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response.data?.addQuestionsFromQuestionBank).toBe(true);
+    });
+
+    it('should maintain existing questions in template', async () => {
+      // Add some questions to the template first
+      templateToAddQuestions.questions = [testQuestions[0]];
+      await templateToAddQuestions.save();
+
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[1].id, testQuestions[2].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+
+      // Verify all questions are present (existing + new)
+      const updatedTemplate = await InterviewTemplate.findOne({
+        where: { id: templateToAddQuestions.id },
+        relations: ['questions'],
+      });
+
+      expect(updatedTemplate?.questions).toHaveLength(3);
+      expect(updatedTemplate?.questions?.map((q) => q.id)).toEqual(
+        expect.arrayContaining([
+          testQuestions[0].id,
+          testQuestions[1].id,
+          testQuestions[2].id,
+        ]),
+      );
+    });
+
+    it('should handle adding questions to template with no existing questions', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id, testQuestions[1].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+
+      // Verify questions were added
+      const updatedTemplate = await InterviewTemplate.findOne({
+        where: { id: templateToAddQuestions.id },
+        relations: ['questions'],
+      });
+
+      expect(updatedTemplate?.questions).toHaveLength(2);
+      expect(updatedTemplate?.questions?.map((q) => q.id)).toEqual(
+        expect.arrayContaining([testQuestions[0].id, testQuestions[1].id]),
+      );
+    });
+
+    it('should preserve question order in template', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [
+          testQuestions[0].id,
+          testQuestions[1].id,
+          testQuestions[2].id,
+        ],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+
+      // Verify questions were added in the correct order
+      const updatedTemplate = await InterviewTemplate.findOne({
+        where: { id: templateToAddQuestions.id },
+        relations: ['questions'],
+      });
+
+      expect(updatedTemplate?.questions).toHaveLength(3);
+      expect(updatedTemplate?.questions?.map((q) => q.id)).toEqual([
+        testQuestions[0].id,
+        testQuestions[1].id,
+        testQuestions[2].id,
+      ]);
+    });
+
+    it('should allow admin to add questions', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+    });
+
+    it('should allow interviewer to add questions', async () => {
+      const input = {
+        interviewTemplateId: templateToAddQuestions.id,
+        questionIds: [testQuestions[0].id],
+      };
+
+      const response = await graphqlCall({
+        source: `
+          mutation AddQuestionsFromQuestionBank($input: AddQuestionsFromQuestionBankInput!) {
+            addQuestionsFromQuestionBank(input: $input)
+          }
+        `,
+        variableValues: { input },
+        userId: testInterviewer.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          addQuestionsFromQuestionBank: true,
+        },
+      });
+    });
   });
 
   describe('Authentication and Authorization', () => {

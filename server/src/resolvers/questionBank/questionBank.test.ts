@@ -28,6 +28,14 @@ describe('QuestionBank Resolver', () => {
     candidateUser = await createFakeUser(UserRole.CANDIDATE);
   });
 
+  afterAll(async () => {
+    // Clean up all created entities after all tests
+    await QuestionBank.delete({});
+    await InterviewTemplate.delete({});
+    await Question.delete({});
+    await User.delete({});
+  });
+
   describe('questionBanks query', () => {
     it('should return all question banks when no filter is provided', async () => {
       // Create test question banks

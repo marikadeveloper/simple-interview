@@ -554,15 +554,253 @@ describe('InterviewTemplate Resolver', () => {
   });
 
   describe('getInterviewTemplateBySlug Query', () => {
-    it.todo('should return interview template by slug when it exists');
-    it.todo('should include questions and questionBank relations in response');
-    it.todo('should include tags in the response');
-    it.todo('should throw error when interview template does not exist');
-    it.todo('should throw error when user is not authenticated');
-    it.todo('should throw error when user is not admin or interviewer');
-    it.todo('should handle empty slug parameter');
-    it.todo('should handle non-existent slug');
-    it.todo('should be case-sensitive for slug matching');
+    it('should return interview template by slug when it exists', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+              description
+              slug
+            }
+          }
+        `,
+        variableValues: {
+          slug: testTemplate.slug,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviewTemplateBySlug: {
+            id: testTemplate.id,
+            name: testTemplate.name,
+            description: testTemplate.description,
+            slug: testTemplate.slug,
+          },
+        },
+      });
+    });
+
+    it('should include questions and questionBank relations in response', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+              questions {
+                id
+                title
+                description
+                questionBank {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        `,
+        variableValues: {
+          slug: testTemplate.slug,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviewTemplateBySlug: {
+            id: testTemplate.id,
+            name: testTemplate.name,
+            questions: expect.any(Array),
+          },
+        },
+      });
+
+      const template = response.data
+        ?.getInterviewTemplateBySlug as InterviewTemplate;
+      expect(template.questions).toBeDefined();
+      expect(Array.isArray(template.questions)).toBe(true);
+    });
+
+    it('should include tags in the response', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+              tags {
+                id
+                text
+              }
+            }
+          }
+        `,
+        variableValues: {
+          slug: testTemplate.slug,
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getInterviewTemplateBySlug: {
+            id: testTemplate.id,
+            name: testTemplate.name,
+            tags: expect.any(Array),
+          },
+        },
+      });
+
+      const template = response.data
+        ?.getInterviewTemplateBySlug as InterviewTemplate;
+      expect(template.tags).toBeDefined();
+      expect(Array.isArray(template.tags)).toBe(true);
+      expect(template.tags!.length).toBeGreaterThan(0);
+    });
+
+    it('should throw error when interview template does not exist', async () => {
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          slug: 'non-existent-slug',
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interviewTemplate.notFound }],
+      });
+    });
+
+    it('should throw error when user is not authenticated', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          slug: testTemplate.slug,
+        },
+        // No userId provided
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthenticated }],
+      });
+    });
+
+    it('should throw error when user is not admin or interviewer', async () => {
+      const testTemplate = testInterviewTemplates[0];
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          slug: testTemplate.slug,
+        },
+        userId: testCandidate.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.user.notAuthorized }],
+      });
+    });
+
+    it('should handle empty slug parameter', async () => {
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          slug: '',
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interviewTemplate.notFound }],
+      });
+    });
+
+    it('should handle non-existent slug', async () => {
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          slug: 'this-slug-definitely-does-not-exist-12345',
+        },
+        userId: testAdmin.id,
+      });
+
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interviewTemplate.notFound }],
+      });
+    });
+
+    it('should be case-sensitive for slug matching', async () => {
+      const testTemplate = testInterviewTemplates[0];
+      const modifiedSlug = testTemplate.slug.toUpperCase();
+
+      const response = await graphqlCall({
+        source: `
+          query GetInterviewTemplateBySlug($slug: String!) {
+            getInterviewTemplateBySlug(slug: $slug) {
+              id
+              name
+            }
+          }
+        `,
+        variableValues: {
+          slug: modifiedSlug,
+        },
+        userId: testAdmin.id,
+      });
+
+      // Should not find the template with different case
+      expect(response).toMatchObject({
+        errors: [{ message: errorStrings.interviewTemplate.notFound }],
+      });
+    });
   });
 
   describe('createInterviewTemplate Mutation', () => {

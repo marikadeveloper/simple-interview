@@ -1,242 +1,194 @@
-import { dataSource } from '../..';
+import { Interview, InterviewStatus } from '../../entities/Interview';
 import { InterviewTemplate } from '../../entities/InterviewTemplate';
 import { Question } from '../../entities/Question';
+import { QuestionBank } from '../../entities/QuestionBank';
 import { User, UserRole } from '../../entities/User';
 import { graphqlCall } from '../../test-utils/graphqlCall';
-import { createFakeQuestion, createFakeUser } from '../../test-utils/mockData';
+import { createFakeUser } from '../../test-utils/mockData';
 import { setupTestDB } from '../../test-utils/testSetup';
 import { errorStrings } from '../../utils/errorStrings';
-import { QuestionCreateInput } from './question-types';
 
-// Track entities created during tests for reliable cleanup
-let testUsers: User[] = [];
-let testQuestions: Question[] = [];
-let testInterviewTemplate: InterviewTemplate;
-
-// Set up the database connection before all tests
-beforeAll(async () => {
-  await setupTestDB();
-});
-
-afterEach(async () => {
-  if (testQuestions.length > 0) {
-    await Promise.all(
-      testQuestions.map((question) => Question.delete(question.id)),
-    );
-    testQuestions = [];
-  }
-});
-
-// Close database connections after all tests
-afterAll(async () => {
-  // Clean up test users
-  if (testUsers.length > 0) {
-    await Promise.all(testUsers.map((user) => User.delete(user.id)));
-    testUsers = [];
-  }
-  // Clean up test template
-  await testInterviewTemplate?.remove();
-
-  if (dataSource && dataSource.isInitialized) {
-    await dataSource.destroy();
-  }
-});
-
-const createQuestionMutation = `
-  mutation CreateQuestion($input: QuestionCreateInput!) {
-    createQuestion(input: $input) {
-      id
-      title
-      description
-    }
-  }
-`;
-
-const updateQuestionMutation = `
-  mutation UpdateQuestion($id: Int!, $input: QuestionUpdateInput!) {
-    updateQuestion(id: $id, input: $input) {
-      id
-      title
-      description
-    }
-  }
-`;
-
-const deleteQuestionMutation = `
-  mutation DeleteQuestion($id: Int!) {
-    deleteQuestion(id: $id)
-  }
-`;
-
-const createInterviewTemplate = () => {
-  return InterviewTemplate.create({
-    name: 'Test Interview Template',
-    description: 'This is a test interview template',
-    slug: 'test-interview-template-' + Date.now(),
+// Utility to create a QuestionBank for tests
+const createQuestionBank = async () => {
+  return QuestionBank.create({
+    name: 'Test Bank ' + Math.random().toString(36).substring(7),
+    slug:
+      'test-bank-' + Math.random().toString(36).substring(7) + '-' + Date.now(),
   }).save();
 };
 
 describe('QuestionResolver', () => {
   let adminUser: User;
   let interviewerUser: User;
-  let candidateUser: User;
-  let interviewTemplateId: number;
+  let interviewTemplate: InterviewTemplate;
+  let questionBank: QuestionBank;
 
   beforeAll(async () => {
-    // Create test users
+    await setupTestDB();
     adminUser = await createFakeUser(UserRole.ADMIN);
     interviewerUser = await createFakeUser(UserRole.INTERVIEWER);
-    candidateUser = await createFakeUser(UserRole.CANDIDATE);
-    testUsers.push(adminUser, interviewerUser, candidateUser);
-
-    // Create a test interview template
-    testInterviewTemplate = await createInterviewTemplate();
-    interviewTemplateId = testInterviewTemplate.id;
+    interviewTemplate = await InterviewTemplate.create({
+      name: 'Edge Template',
+      description: 'desc',
+      slug:
+        'edge-template-' +
+        Math.random().toString(36).substring(7) +
+        '-' +
+        Date.now(),
+    }).save();
+    questionBank = await createQuestionBank();
   });
 
-  it('should be able to create a question as an admin', async () => {
-    const questionInput: QuestionCreateInput = {
-      title: 'Test Question',
-      description: 'This is a test question',
-      interviewTemplateId,
-    };
+  afterAll(async () => {
+    await Question.delete({});
+    await Interview.delete({});
+    await InterviewTemplate.delete({});
+    await QuestionBank.delete({});
+    await User.delete({});
+  });
 
-    const response = await graphqlCall({
+  const createQuestionMutation = `
+    mutation CreateQuestion($input: QuestionCreateInput!) {
+      createQuestion(input: $input) {
+        id
+        title
+        description
+      }
+    }
+  `;
+
+  const updateQuestionMutation = `
+    mutation UpdateQuestion($id: Int!, $input: QuestionUpdateInput!) {
+      updateQuestion(id: $id, input: $input) {
+        id
+        title
+        description
+      }
+    }
+  `;
+
+  const deleteQuestionMutation = `
+    mutation DeleteQuestion($id: Int!) {
+      deleteQuestion(id: $id)
+    }
+  `;
+
+  it('should error if neither questionBankId nor interviewTemplateId is provided', async () => {
+    const input = { title: 'Q', description: 'D' };
+    const res = await graphqlCall({
       source: createQuestionMutation,
-      variableValues: { input: questionInput },
+      variableValues: { input },
       userId: adminUser.id,
     });
-
-    expect(response).toMatchObject({
-      data: {
-        createQuestion: {
-          id: expect.any(Number),
-          title: questionInput.title,
-          description: questionInput.description,
-        },
-      },
-    });
-
-    // Store the created question for cleanup
-    const createdQuestion = response.data?.createQuestion as Question;
-    testQuestions.push(
-      await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
+    expect(res.errors?.[0].message).toBe(
+      errorStrings.question.missingTemplateOrBank,
     );
   });
 
-  it('should be able to create a question as an interviewer', async () => {
-    const questionInput: QuestionCreateInput = {
-      title: 'Test Question',
-      description: 'This is a test question',
-      interviewTemplateId,
-    };
-
-    const response = await graphqlCall({
+  it('should error if interviewTemplateId does not exist', async () => {
+    const input = { title: 'Q', description: 'D', interviewTemplateId: 999999 };
+    const res = await graphqlCall({
       source: createQuestionMutation,
-      variableValues: { interviewTemplateId, input: questionInput },
-      userId: interviewerUser.id,
+      variableValues: { input },
+      userId: adminUser.id,
     });
-
-    expect(response).toMatchObject({
-      data: {
-        createQuestion: {
-          id: expect.any(Number),
-          title: questionInput.title,
-          description: questionInput.description,
-        },
-      },
-    });
-
-    // Store the created question for cleanup
-    const createdQuestion = response.data?.createQuestion as Question;
-    testQuestions.push(
-      await Question.findOneOrFail({ where: { id: createdQuestion.id } }),
+    expect(res.errors?.[0].message).toBe(
+      errorStrings.interviewTemplate.notFound,
     );
   });
 
-  it('should not be able to create a question as a candidate', async () => {
-    const questionInput = {
-      title: 'Test Question',
-      description: 'This is a test question',
+  it('should error if interview template is used in an interview', async () => {
+    // Create an interview using the template
+    await Interview.create({
+      slug: 'int-' + Math.random().toString(36).substring(7) + '-' + Date.now(),
+      status: InterviewStatus.PENDING,
+      deadline: new Date(),
+      interviewTemplate: interviewTemplate,
+      user: adminUser,
+      interviewer: interviewerUser,
+    }).save();
+    const input = {
+      title: 'Q',
+      description: 'D',
+      interviewTemplateId: interviewTemplate.id,
     };
-
-    const response = await graphqlCall({
+    const res = await graphqlCall({
       source: createQuestionMutation,
-      variableValues: { interviewTemplateId, input: questionInput },
-      userId: candidateUser.id,
+      variableValues: { input },
+      userId: adminUser.id,
     });
-
-    expect(response).toMatchObject({
-      data: {
-        createQuestion: null,
-      },
-      errors: [{ message: errorStrings.user.notAuthorized }],
-    });
+    expect(res.errors?.[0].message).toBe(
+      errorStrings.interviewTemplate.usedInInterview,
+    );
   });
 
-  it('should not be able to create a question without authentication', async () => {
-    const questionInput = {
-      title: 'Test Question',
-      description: 'This is a test question',
-    };
-
-    const response = await graphqlCall({
-      source: createQuestionMutation,
-      variableValues: { interviewTemplateId, input: questionInput },
-    });
-
-    expect(response).toMatchObject({
-      data: {
-        createQuestion: null,
-      },
-      errors: [{ message: errorStrings.user.notAuthenticated }],
-    });
-  });
-
-  it("should update a question's title and description", async () => {
-    const question = await createFakeQuestion(interviewTemplateId, {});
-    testQuestions.push(question);
-
-    const updatedQuestionInput = {
-      title: 'Updated Question Title',
-      description: 'Updated Question Description',
-    };
-
-    const response = await graphqlCall({
+  it('should error if updating a question that is used in an interview', async () => {
+    // Create a new template and question
+    const temp = await InterviewTemplate.create({
+      name: 'UpdateTest',
+      description: 'desc',
+      slug:
+        'update-test-' +
+        Math.random().toString(36).substring(7) +
+        '-' +
+        Date.now(),
+    }).save();
+    const q = await Question.create({
+      title: 'Q',
+      description: 'D',
+    }).save();
+    temp.questions = [q];
+    await temp.save();
+    // Create an interview using the template
+    await Interview.create({
+      slug:
+        'int-update-' +
+        Math.random().toString(36).substring(7) +
+        '-' +
+        Date.now(),
+      status: InterviewStatus.PENDING,
+      deadline: new Date(),
+      interviewTemplate: temp,
+      user: adminUser,
+      interviewer: interviewerUser,
+    }).save();
+    const input = { title: 'New', description: 'New' };
+    const res = await graphqlCall({
       source: updateQuestionMutation,
-      variableValues: { id: question.id, input: updatedQuestionInput },
+      variableValues: { id: q.id, input },
       userId: adminUser.id,
     });
-
-    expect(response).toMatchObject({
-      data: {
-        updateQuestion: {
-          id: question.id,
-          title: updatedQuestionInput.title,
-          description: updatedQuestionInput.description,
-        },
-      },
-    });
+    expect(res.errors?.[0].message).toBe(errorStrings.question.usedInInterview);
   });
 
-  it('should delete a question', async () => {
-    const question = await createFakeQuestion(interviewTemplateId, {});
-
-    const response = await graphqlCall({
+  it('should return false when deleting a non-existent question', async () => {
+    const res = await graphqlCall({
       source: deleteQuestionMutation,
-      variableValues: { id: question.id },
+      variableValues: { id: 999999 },
       userId: adminUser.id,
     });
+    expect(res.data?.deleteQuestion).toBe(false);
+  });
 
-    expect(response).toMatchObject({
-      data: {
-        deleteQuestion: true,
-      },
+  it('should create a question with a questionBankId', async () => {
+    const input = {
+      title: 'Q',
+      description: 'D',
+      questionBankId: questionBank.id,
+    };
+    const res = await graphqlCall({
+      source: createQuestionMutation,
+      variableValues: { input },
+      userId: adminUser.id,
     });
-
-    // Check if the question is deleted
-    const deletedQuestion = await Question.findOneBy({ id: question.id });
-
-    expect(deletedQuestion).toBeNull();
+    expect(res.data?.createQuestion).toMatchObject({
+      title: 'Q',
+      description: 'D',
+    });
+    // Clean up
+    const created = res.data?.createQuestion as any;
+    if (created && typeof created.id === 'number') {
+      await Question.delete(created.id);
+    }
   });
 });

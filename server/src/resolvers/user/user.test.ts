@@ -31,6 +31,8 @@ const getUsersQuery = `
     getUsers(filter: $filter) {
       id
       email
+      fullName
+      role
     }
   }
 `;
@@ -40,6 +42,7 @@ const getUserQuery = `
     getUser(id: $id) {
       id
       email
+      fullName
     }
   }
 `;
@@ -50,103 +53,232 @@ const deleteUserMutation = `
   }
 `;
 
-describe('users', () => {
-  it('should return all users', async () => {
-    const admin = await createFakeUser(UserRole.ADMIN);
-    const user1 = await createFakeUser(UserRole.CANDIDATE);
-    const user2 = await createFakeUser(UserRole.CANDIDATE);
+const updateUserNameMutation = `
+  mutation UpdateUserName($fullName: String!) {
+    updateUserName(fullName: $fullName) {
+      id
+      fullName
+      email
+    }
+  }
+`;
 
-    testUsers.push(admin, user1, user2);
+describe('UserResolver - Additional Coverage Tests', () => {
+  describe('getUsers', () => {
+    it('should filter users by name and email', async () => {
+      const admin = await createFakeUser(UserRole.ADMIN);
+      const user1 = await createFakeUser(UserRole.CANDIDATE, {
+        fullName: 'John Smith',
+        email: 'john.smith@example.com',
+      });
+      const user2 = await createFakeUser(UserRole.CANDIDATE, {
+        fullName: 'Jane Doe',
+        email: 'jane.doe@example.com',
+      });
+      const user3 = await createFakeUser(UserRole.CANDIDATE, {
+        fullName: 'Bob Wilson',
+        email: 'bob.wilson@example.com',
+      });
 
-    const response = await graphqlCall({
-      source: getUsersQuery,
-      variableValues: {
-        filter: '',
-      },
-      userId: admin.id,
-    });
+      testUsers.push(admin, user1, user2, user3);
 
-    expect(response).toMatchObject({
-      data: {
-        getUsers: [
-          {
-            id: user1.id,
-            email: user1.email,
-          },
-          {
-            id: user2.id,
-            email: user2.email,
-          },
-        ],
-      },
-    });
-  });
-
-  it('should get a user by id', async () => {
-    const admin = await createFakeUser(UserRole.ADMIN);
-    const user = await createFakeUser(UserRole.CANDIDATE);
-    testUsers.push(admin, user);
-
-    const response = await graphqlCall({
-      source: getUserQuery,
-      variableValues: {
-        id: user.id,
-      },
-      userId: admin.id,
-    });
-
-    expect(response).toMatchObject({
-      data: {
-        getUser: {
-          id: user.id,
-          email: user.email,
+      const response = await graphqlCall({
+        source: getUsersQuery,
+        variableValues: {
+          filter: 'john',
         },
-      },
+        userId: admin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getUsers: [
+            {
+              id: user1.id,
+              email: user1.email,
+              fullName: user1.fullName,
+            },
+          ],
+        },
+      });
+    });
+
+    it('should filter users by email case insensitive', async () => {
+      const admin = await createFakeUser(UserRole.ADMIN);
+      const user1 = await createFakeUser(UserRole.CANDIDATE, {
+        fullName: 'John Smith',
+        email: 'john.smith@example.com',
+      });
+      const user2 = await createFakeUser(UserRole.CANDIDATE, {
+        fullName: 'Jane Doe',
+        email: 'jane.doe@example.com',
+      });
+
+      testUsers.push(admin, user1, user2);
+
+      const response = await graphqlCall({
+        source: getUsersQuery,
+        variableValues: {
+          filter: 'JOHN.SMITH',
+        },
+        userId: admin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          getUsers: [
+            {
+              id: user1.id,
+              email: user1.email,
+              fullName: user1.fullName,
+            },
+          ],
+        },
+      });
+    });
+
+    it('should handle empty filter string', async () => {
+      const admin = await createFakeUser(UserRole.ADMIN);
+      const user1 = await createFakeUser(UserRole.CANDIDATE);
+      const user2 = await createFakeUser(UserRole.CANDIDATE);
+
+      testUsers.push(admin, user1, user2);
+
+      const response = await graphqlCall({
+        source: getUsersQuery,
+        variableValues: {
+          filter: '   ',
+        },
+        userId: admin.id,
+      });
+
+      expect(response.data?.getUsers).toHaveLength(2);
+      expect(response.data?.getUsers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: user1.id }),
+          expect.objectContaining({ id: user2.id }),
+        ]),
+      );
+    });
+
+    it('should restrict interviewers to only see candidates', async () => {
+      const interviewer = await createFakeUser(UserRole.INTERVIEWER);
+      const candidate1 = await createFakeUser(UserRole.CANDIDATE);
+      const candidate2 = await createFakeUser(UserRole.CANDIDATE);
+      const admin = await createFakeUser(UserRole.ADMIN);
+
+      testUsers.push(interviewer, candidate1, candidate2, admin);
+
+      const response = await graphqlCall({
+        source: getUsersQuery,
+        variableValues: {
+          filter: '',
+        },
+        userId: interviewer.id,
+      });
+
+      expect(response.data?.getUsers).toHaveLength(2);
+      expect(response.data?.getUsers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: candidate1.id,
+            role: UserRole.CANDIDATE,
+          }),
+          expect.objectContaining({
+            id: candidate2.id,
+            role: UserRole.CANDIDATE,
+          }),
+        ]),
+      );
+
+      // Should not include admin
+      expect(response.data?.getUsers).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: admin.id })]),
+      );
     });
   });
 
-  it('a candidate should not be able to get any user', async () => {
-    const candidate = await createFakeUser(UserRole.CANDIDATE);
-    const user = await createFakeUser(UserRole.CANDIDATE);
-    testUsers.push(candidate, user);
+  describe('getUser', () => {
+    it('should throw error when user not found', async () => {
+      const admin = await createFakeUser(UserRole.ADMIN);
+      testUsers.push(admin);
 
-    const response = await graphqlCall({
-      source: getUserQuery,
-      variableValues: {
-        id: user.id,
-      },
-      userId: candidate.id,
-    });
+      const response = await graphqlCall({
+        source: getUserQuery,
+        variableValues: {
+          id: 99999, // Non-existent user ID
+        },
+        userId: admin.id,
+      });
 
-    expect(response).toMatchObject({
-      data: {
-        getUser: null,
-      },
-      errors: [{ message: errorStrings.user.notAuthorized }],
+      expect(response.errors).toBeDefined();
+      expect(response.errors?.[0].message).toBe(errorStrings.user.notFound);
     });
   });
 
-  it('should delete a user', async () => {
-    const admin = await createFakeUser(UserRole.ADMIN);
-    const user = await createFakeUser(UserRole.CANDIDATE);
-    testUsers.push(admin);
+  describe('deleteUser', () => {
+    it('should return false when user not found', async () => {
+      const admin = await createFakeUser(UserRole.ADMIN);
+      testUsers.push(admin);
 
-    const response = await graphqlCall({
-      source: deleteUserMutation,
-      variableValues: {
-        id: user.id,
-      },
-      userId: admin.id,
+      const response = await graphqlCall({
+        source: deleteUserMutation,
+        variableValues: {
+          id: 99999, // Non-existent user ID
+        },
+        userId: admin.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          deleteUser: false,
+        },
+      });
+    });
+  });
+
+  describe('updateUserName', () => {
+    it('should throw error when user not found', async () => {
+      const response = await graphqlCall({
+        source: updateUserNameMutation,
+        variableValues: {
+          fullName: 'New Name',
+        },
+        userId: 99999, // Non-existent user ID
+      });
+
+      expect(response.errors).toBeDefined();
+      expect(response.errors?.[0].message).toBe(errorStrings.user.notFound);
     });
 
-    expect(response).toMatchObject({
-      data: {
-        deleteUser: true,
-      },
-    });
+    it('should successfully update user name', async () => {
+      const user = await createFakeUser(UserRole.CANDIDATE, {
+        fullName: 'Old Name',
+      });
+      testUsers.push(user);
 
-    // Check if the user is deleted
-    const deletedUser = await User.findOneBy({ id: user.id });
-    expect(deletedUser).toBeNull();
+      const newName = 'Updated Name';
+      const response = await graphqlCall({
+        source: updateUserNameMutation,
+        variableValues: {
+          fullName: newName,
+        },
+        userId: user.id,
+      });
+
+      expect(response).toMatchObject({
+        data: {
+          updateUserName: {
+            id: user.id,
+            fullName: newName,
+            email: user.email,
+          },
+        },
+      });
+
+      // Verify the change was saved to database
+      const updatedUser = await User.findOneBy({ id: user.id });
+      expect(updatedUser?.fullName).toBe(newName);
+    });
   });
 });

@@ -137,6 +137,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       <div className='relative'>
         <Card
           data-question-id={question ? question.id : undefined}
+          data-testid='question-card'
           className={cn(
             'w-full bg-white',
             formVisible ? 'gap-6' : 'gap-2',
@@ -158,21 +159,25 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               {question && formVisible && (
                 <Button
                   variant='outline'
-                  onClick={handleQuestionDelete}>
+                  onClick={handleQuestionDelete}
+                  data-testid='delete-question-btn'>
                   <Trash />
                 </Button>
               )}
               {question && !formVisible && (
                 <Button
                   variant='outline'
-                  onClick={() => setFormVisible(true)}>
+                  onClick={() => setFormVisible(true)}
+                  data-testid='edit-question-btn'>
                   <Pencil />
                 </Button>
               )}
             </div>
           </CardHeader>
           <CardContent>
-            <p className={formVisible ? 'hidden' : 'block'}>
+            <p
+              className={formVisible ? 'hidden' : 'block'}
+              data-testid='question-description-readonly'>
               {form.watch('description')}
             </p>
             <div className={!formVisible ? `hidden` : ''}>
@@ -207,6 +212,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                           <Textarea
                             placeholder='Enter question description'
                             {...field}
+                            data-testid='question-description-textarea'
                           />
                         </FormControl>
                         <FormMessage />
@@ -222,16 +228,20 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               'flex justify-between',
               !formVisible ? `hidden` : '',
             )}>
-            <Button
-              variant='outline'
-              onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button
-              type='submit'
-              form={`question-form-${question?.id || 'new'}`}>
-              Save
-            </Button>
+            {formVisible && (
+              <>
+                <Button
+                  variant='outline'
+                  onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button
+                  type='submit'
+                  form={`question-form-${question?.id || 'new'}`}>
+                  Save
+                </Button>
+              </>
+            )}
           </CardFooter>
         </Card>
       </div>

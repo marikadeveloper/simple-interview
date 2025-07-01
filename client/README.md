@@ -28,15 +28,15 @@ export default tseslint.config({
       tsconfigRootDir: import.meta.dirname,
     },
   },
-})
+});
 ```
 
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js
 // eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+import reactX from 'eslint-plugin-react-x';
+import reactDom from 'eslint-plugin-react-dom';
 
 export default tseslint.config({
   plugins: {
@@ -50,5 +50,68 @@ export default tseslint.config({
     ...reactX.configs['recommended-typescript'].rules,
     ...reactDom.configs.recommended.rules,
   },
-})
+});
+```
+
+# Client
+
+This is a React application built with Vite, TypeScript, and GraphQL.
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Testing
+
+The project uses Vitest for testing with React Testing Library and MSW for API mocking.
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once
+npm run test:run
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Test Structure
+
+- `src/test/` - Test configuration and utilities
+- `src/test/mocks/` - MSW handlers for API mocking
+- `src/test/__tests__/` - Test files
+- `src/test/utils.tsx` - Custom render function with providers
+
+### Writing Tests
+
+Use the custom `render` function from `src/test/utils.tsx` to render components with all necessary providers:
+
+```tsx
+import { render, screen } from '../test/utils';
+
+test('my component', () => {
+  render(<MyComponent />);
+  expect(screen.getByText('Hello')).toBeInTheDocument();
+});
+```
+
+## GraphQL Code Generation
+
+```bash
+npm run gen
+```
+
+## Building
+
+```bash
+npm run build
 ```

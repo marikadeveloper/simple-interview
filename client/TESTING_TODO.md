@@ -10,7 +10,7 @@
 
 ### 1.1 Utility Functions (0% coverage)
 
-- [ ] **`src/utils/formatters.ts`** - `pathnameToBreadcrumbLabel` function
+- [x] **`src/utils/formatters.ts`** - `pathnameToBreadcrumbLabel` function
   - Test path conversion logic (dash to space, capitalization)
   - Test edge cases (empty string, single word, multiple dashes)
 - [x] **`src/utils/dates.ts`** - Date formatting functions

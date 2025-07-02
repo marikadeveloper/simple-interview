@@ -26,10 +26,10 @@
   - Test breadcrumb generation from pathname **(done)**
   - Test navigation links and current page display **(done)**
   - Test with various URL patterns **(done)**
-- [ ] **`src/components/QuestionList.tsx`** (0% coverage)
-  - Test rendering of question cards
-  - Test empty questions array
-  - Test with single/multiple questions
+- [x] **`src/components/QuestionList.tsx`** (0% coverage)
+  - Test rendering of question cards **(done)**
+  - Test empty questions array **(done)**
+  - Test with single/multiple questions **(done)**
 
 ## Priority 2: Authentication & User Management (High Business Value)
 

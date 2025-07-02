@@ -11,14 +11,14 @@
 ### 1.1 Utility Functions (0% coverage)
 
 - [x] **`src/utils/formatters.ts`** - `pathnameToBreadcrumbLabel` function
-  - Test path conversion logic (dash to space, capitalization)
-  - Test edge cases (empty string, single word, multiple dashes)
+  - Test path conversion logic (dash to space, capitalization) **(done)**
+  - Test edge cases (empty string, single word, multiple dashes) **(done)**
 - [x] **`src/utils/dates.ts`** - Date formatting functions
   - Test `formatDate`, `formatDateTime`, `formatDateRelative` **(done)**
   - Test with various date formats and edge cases **(done)**
-- [ ] **`src/utils/betterUpdateQuery.ts`** - GraphQL cache utility
-  - Test cache update logic
-  - Test with null/undefined data scenarios
+- [x] **`src/utils/betterUpdateQuery.ts`** - GraphQL cache utility
+  - Test cache update logic **(done)**
+  - Test with null/undefined data scenarios **(done)**
 
 ### 1.2 Core Components (Low coverage)
 

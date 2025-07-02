@@ -13,9 +13,9 @@
 - [ ] **`src/utils/formatters.ts`** - `pathnameToBreadcrumbLabel` function
   - Test path conversion logic (dash to space, capitalization)
   - Test edge cases (empty string, single word, multiple dashes)
-- [ ] **`src/utils/dates.ts`** - Date formatting functions
-  - Test `formatDate`, `formatDateTime`, `formatDateRelative`
-  - Test with various date formats and edge cases
+- [x] **`src/utils/dates.ts`** - Date formatting functions
+  - Test `formatDate`, `formatDateTime`, `formatDateRelative` **(done)**
+  - Test with various date formats and edge cases **(done)**
 - [ ] **`src/utils/betterUpdateQuery.ts`** - GraphQL cache utility
   - Test cache update logic
   - Test with null/undefined data scenarios

@@ -15,7 +15,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const formSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email({ message: 'Please enter a valid email address' }),
 });
 
 export default function ForgotPasswordPage() {
@@ -28,6 +28,7 @@ export default function ForgotPasswordPage() {
     defaultValues: {
       email: '',
     },
+    mode: 'all',
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {

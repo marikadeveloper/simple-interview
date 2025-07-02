@@ -2,13 +2,13 @@
 
 ## Current Status
 
-- **Overall Coverage**: 10.74% statements, 65.93% branches, 38.74% functions
-- **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%)
-- **Needs Testing**: Most page components (0%), many utility functions (0%), business logic components
+- **Overall Coverage**: 12.4% statements, 69.38% branches, 42.71% functions
+- **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%), Breadcrumb (100%), QuestionList (100%)
+- **Needs Testing**: Most page components (0%), many business logic components, context providers, and integration flows
 
 ## Priority 1: Critical Business Logic & Utilities (High Impact, Low Effort)
 
-### 1.1 Utility Functions (0% coverage)
+### 1.1 Utility Functions (100% coverage)
 
 - [x] **`src/utils/formatters.ts`** - `pathnameToBreadcrumbLabel` function
   - Test path conversion logic (dash to space, capitalization) **(done)**
@@ -20,13 +20,13 @@
   - Test cache update logic **(done)**
   - Test with null/undefined data scenarios **(done)**
 
-### 1.2 Core Components (Low coverage)
+### 1.2 Core Components (Improved coverage)
 
-- [x] **`src/components/Breadcrumb.tsx`** (0% coverage)
+- [x] **`src/components/Breadcrumb.tsx`** (100% coverage)
   - Test breadcrumb generation from pathname **(done)**
   - Test navigation links and current page display **(done)**
   - Test with various URL patterns **(done)**
-- [x] **`src/components/QuestionList.tsx`** (0% coverage)
+- [x] **`src/components/QuestionList.tsx`** (100% coverage)
   - Test rendering of question cards **(done)**
   - Test empty questions array **(done)**
   - Test with single/multiple questions **(done)**

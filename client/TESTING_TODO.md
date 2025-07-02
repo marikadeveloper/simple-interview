@@ -35,11 +35,11 @@
 
 ### 2.1 Auth Pages (0% coverage)
 
-- [ ] **`src/pages/auth/LoginPage.tsx`** (0% coverage)
-  - Test form validation and submission
-  - Test error handling and display
-  - Test navigation after successful login
-  - Test loading states
+- [x] **`src/pages/auth/LoginPage.tsx`** (0% coverage)
+  - Test form validation and submission **(done)**
+  - Test error handling and display **(done)**
+  - Test navigation after successful login **(done)**
+  - Test loading states **(done)**
 - [ ] **`src/pages/auth/ChangePasswordPage.tsx`** (0% coverage)
   - Test password change flow
   - Test validation and error handling

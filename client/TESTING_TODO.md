@@ -22,10 +22,10 @@
 
 ### 1.2 Core Components (Low coverage)
 
-- [ ] **`src/components/Breadcrumb.tsx`** (0% coverage)
-  - Test breadcrumb generation from pathname
-  - Test navigation links and current page display
-  - Test with various URL patterns
+- [x] **`src/components/Breadcrumb.tsx`** (0% coverage)
+  - Test breadcrumb generation from pathname **(done)**
+  - Test navigation links and current page display **(done)**
+  - Test with various URL patterns **(done)**
 - [ ] **`src/components/QuestionList.tsx`** (0% coverage)
   - Test rendering of question cards
   - Test empty questions array

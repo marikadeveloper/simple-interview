@@ -24,6 +24,7 @@ const formSchema = z
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'New password and confirm password must match',
+    path: ['confirmPassword'],
   });
 
 export default function ChangePasswordPage() {

@@ -40,9 +40,9 @@
   - Test error handling and display **(done)**
   - Test navigation after successful login **(done)**
   - Test loading states **(done)**
-- [ ] **`src/pages/auth/ChangePasswordPage.tsx`** (0% coverage)
-  - Test password change flow
-  - Test validation and error handling
+- [x] **`src/pages/auth/ChangePasswordPage.tsx`** (100% coverage)
+  - Test password change flow **(done)**
+  - Test validation and error handling **(done)**
 - [ ] **`src/pages/auth/ForgotPasswordPage.tsx`** (0% coverage)
   - Test password reset request flow
 

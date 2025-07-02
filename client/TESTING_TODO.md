@@ -1,0 +1,179 @@
+# Testing TODO - Prioritized List
+
+## Current Status
+
+- **Overall Coverage**: 10.74% statements, 65.93% branches, 38.74% functions
+- **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%)
+- **Needs Testing**: Most page components (0%), many utility functions (0%), business logic components
+
+## Priority 1: Critical Business Logic & Utilities (High Impact, Low Effort)
+
+### 1.1 Utility Functions (0% coverage)
+
+- [ ] **`src/utils/formatters.ts`** - `pathnameToBreadcrumbLabel` function
+  - Test path conversion logic (dash to space, capitalization)
+  - Test edge cases (empty string, single word, multiple dashes)
+- [ ] **`src/utils/dates.ts`** - Date formatting functions
+  - Test `formatDate`, `formatDateTime`, `formatDateRelative`
+  - Test with various date formats and edge cases
+- [ ] **`src/utils/betterUpdateQuery.ts`** - GraphQL cache utility
+  - Test cache update logic
+  - Test with null/undefined data scenarios
+
+### 1.2 Core Components (Low coverage)
+
+- [ ] **`src/components/Breadcrumb.tsx`** (0% coverage)
+  - Test breadcrumb generation from pathname
+  - Test navigation links and current page display
+  - Test with various URL patterns
+- [ ] **`src/components/QuestionList.tsx`** (0% coverage)
+  - Test rendering of question cards
+  - Test empty questions array
+  - Test with single/multiple questions
+
+## Priority 2: Authentication & User Management (High Business Value)
+
+### 2.1 Auth Pages (0% coverage)
+
+- [ ] **`src/pages/auth/LoginPage.tsx`** (0% coverage)
+  - Test form validation and submission
+  - Test error handling and display
+  - Test navigation after successful login
+  - Test loading states
+- [ ] **`src/pages/auth/ChangePasswordPage.tsx`** (0% coverage)
+  - Test password change flow
+  - Test validation and error handling
+- [ ] **`src/pages/auth/ForgotPasswordPage.tsx`** (0% coverage)
+  - Test password reset request flow
+
+### 2.2 User Management
+
+- [ ] **`src/pages/users/ProfilePage.tsx`** (0% coverage)
+  - Test profile display and editing
+  - Test user data updates
+
+## Priority 3: Interview Management (Core Business Logic)
+
+### 3.1 Interview Components
+
+- [ ] **`src/pages/interview/components/InterviewSession.tsx`** (0% coverage)
+  - Test interview flow and state management
+  - Test question navigation
+- [ ] **`src/pages/interview/components/KeystrokeRecordingTextarea.tsx`** (0% coverage)
+  - Test keystroke recording functionality
+  - Test text input and recording state
+- [ ] **`src/pages/interview/components/KeystrokeReplay.tsx`** (0% coverage)
+  - Test keystroke replay functionality
+  - Test timing and playback controls
+
+### 3.2 Interview Management Pages
+
+- [ ] **`src/pages/interviews/index.tsx`** (0% coverage)
+  - Test interview listing and filtering
+  - Test interview creation/deletion flows
+- [ ] **`src/pages/interviews/components/CreateInterviewDialog.tsx`** (0% coverage)
+  - Test interview creation form
+  - Test validation and submission
+
+## Priority 4: Question & Template Management
+
+### 4.1 Question Management
+
+- [ ] **`src/pages/question-bank/index.tsx`** (0% coverage)
+  - Test question bank display and management
+- [ ] **`src/pages/question-banks/components/CreateQuestionBankDialog.tsx`** (0% coverage)
+  - Test question bank creation flow
+
+### 4.2 Template Management
+
+- [ ] **`src/pages/interview-template/index.tsx`** (0% coverage)
+  - Test template creation and editing
+- [ ] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (0% coverage)
+  - Test template creation form
+
+## Priority 5: Dashboard & Navigation
+
+### 5.1 Dashboard Pages
+
+- [ ] **`src/pages/dashboard/variants/AdminDashboard.tsx`** (0% coverage)
+  - Test admin-specific dashboard features
+- [ ] **`src/pages/dashboard/variants/CandidateDashboard.tsx`** (0% coverage)
+  - Test candidate dashboard functionality
+- [ ] **`src/pages/dashboard/variants/InterviewerDashboard.tsx`** (0% coverage)
+  - Test interviewer dashboard features
+
+### 5.2 Navigation Components
+
+- [ ] **`src/components/AppSidebar.tsx`** (0% coverage)
+  - Test sidebar navigation and role-based menu items
+- [ ] **`src/components/Layout.tsx`** (0% coverage)
+  - Test layout structure and responsive behavior
+
+## Priority 6: Advanced Features & Edge Cases
+
+### 6.1 Interview Feedback
+
+- [ ] **`src/pages/interview-feedback/index.tsx`** (0% coverage)
+  - Test feedback display and evaluation features
+
+### 6.2 Advanced Components
+
+- [ ] **`src/components/DropIndicator.tsx`** (0% coverage)
+  - Test drag and drop functionality
+- [ ] **`src/components/InterviewEvaluationIcon.tsx`** (0% coverage)
+  - Test evaluation status display
+
+## Priority 7: Integration & End-to-End Testing
+
+### 7.1 GraphQL Integration
+
+- [ ] **`src/utils/createUrqlClient.ts`** (0% coverage)
+  - Test client configuration and error handling
+- [ ] **`src/contexts/UrqlClientContext.tsx`** (0% coverage)
+  - Test GraphQL client context provider
+
+### 7.2 Route Testing
+
+- [ ] **`src/AppRoutes.tsx`** (0% coverage)
+  - Test route configuration and protected routes
+- [ ] **`src/components/PublicRoute.tsx`** (0% coverage)
+  - Test public route handling
+
+## Testing Guidelines
+
+### What to Test
+
+- ✅ **Business logic functions** (formatters, dates, utilities)
+- ✅ **Custom hooks** (already well covered)
+- ✅ **Complex components** with state management
+- ✅ **Form handling** and validation
+- ✅ **Error handling** and edge cases
+- ✅ **Navigation** and routing logic
+
+### What NOT to Test
+
+- ❌ **shadcn/ui components** (already tested by library)
+- ❌ **Simple prop-passing components** without logic
+- ❌ **Third-party library configurations** (unless custom logic added)
+- ❌ **Generated GraphQL code** (test the usage, not the generation)
+
+### Testing Strategy
+
+1. **Start with utilities** - High impact, low effort, no dependencies
+2. **Move to components** - Test business logic and user interactions
+3. **Test pages** - Focus on form handling and navigation
+4. **Integration tests** - Test component interactions and data flow
+
+### Coverage Goals
+
+- **Utilities**: 100% (critical business logic)
+- **Components**: 80%+ (focus on business logic, not UI rendering)
+- **Pages**: 70%+ (focus on form handling and navigation)
+- **Overall**: 60%+ (realistic target for React app)
+
+## Next Steps
+
+1. Start with Priority 1 utilities (formatters, dates, betterUpdateQuery)
+2. Move to Priority 1 components (Breadcrumb, QuestionList)
+3. Focus on authentication flows (Priority 2)
+4. Build up to complex interview management (Priority 3)

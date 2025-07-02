@@ -43,8 +43,9 @@
 - [x] **`src/pages/auth/ChangePasswordPage.tsx`** (100% coverage)
   - Test password change flow **(done)**
   - Test validation and error handling **(done)**
-- [ ] **`src/pages/auth/ForgotPasswordPage.tsx`** (0% coverage)
-  - Test password reset request flow
+- [x] **`src/pages/auth/ForgotPasswordPage.tsx`** (100% coverage)
+  - Test password reset request flow **(done)**
+  - Test validation and error handling **(done)**
 
 ### 2.2 User Management
 

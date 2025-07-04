@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { KeystrokeFragment } from '@/generated/graphql';
-import { reconstructText } from '@/utils/keystrokeReconstruct';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import React, {
   useCallback,
@@ -182,7 +181,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
       // but this happens much less frequently than during replay
       if (index >= 0) {
         const keystrokes = sortedKeystrokes.slice(0, index + 1);
-        setCurrentText(reconstructText(keystrokes));
+        setCurrentText(keystrokes.map((k) => k.snapshot).join(''));
       } else {
         setCurrentText(initialText);
       }

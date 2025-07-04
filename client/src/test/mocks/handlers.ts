@@ -90,6 +90,38 @@ export const handlers = [
     });
   }),
 
+  // Mock ChangePassword mutation
+  graphql.mutation('ChangePassword', () => {
+    return HttpResponse.json({
+      data: {
+        changePassword: {
+          id: '1',
+          email: 'test@example.com',
+          fullName: 'Updated User',
+          role: 'ADMIN',
+          isActive: true,
+          __typename: 'User',
+        },
+      },
+    });
+  }),
+
+  // Mock UpdateUserName mutation
+  graphql.mutation('UpdateUserName', () => {
+    return HttpResponse.json({
+      data: {
+        updateUserName: {
+          id: '1',
+          email: 'test@example.com',
+          fullName: 'Updated User',
+          role: 'ADMIN',
+          isActive: true,
+          __typename: 'User',
+        },
+      },
+    });
+  }),
+
   // Catch-all for debugging
   graphql.operation(async ({ operationName }) => {
     // eslint-disable-next-line no-console

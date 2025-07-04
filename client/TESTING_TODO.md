@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Coverage**: 12.4% statements, 69.38% branches, 42.71% functions
-- **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%), Breadcrumb (100%), QuestionList (100%)
+- **Overall Coverage**: 17.55% statements, 74.48% branches, 48.35% functions
+- **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%), Breadcrumb (100%), QuestionList (100%), Auth pages (LoginPage 98%, ChangePasswordPage 100%, ForgotPasswordPage 100%), ProfilePage (100%)
 - **Needs Testing**: Most page components (0%), many business logic components, context providers, and integration flows
 
 ## Priority 1: Critical Business Logic & Utilities (High Impact, Low Effort)
@@ -19,6 +19,10 @@
 - [x] **`src/utils/betterUpdateQuery.ts`** - GraphQL cache utility
   - Test cache update logic **(done)**
   - Test with null/undefined data scenarios **(done)**
+- [x] **`src/utils/debounce.ts`** - Debounce utility
+  - Test debounce functionality **(done)**
+- [x] **`src/lib/utils.ts`** - Utility functions
+  - Test utility functions **(done)**
 
 ### 1.2 Core Components (Improved coverage)
 
@@ -30,12 +34,16 @@
   - Test rendering of question cards **(done)**
   - Test empty questions array **(done)**
   - Test with single/multiple questions **(done)**
+- [x] **`src/components/QuestionCard.tsx`** (99% coverage)
+  - Test form validation and submission **(done)**
+  - Test create and edit modes **(done)**
+  - Test error handling **(done)**
 
 ## Priority 2: Authentication & User Management (High Business Value)
 
-### 2.1 Auth Pages (0% coverage)
+### 2.1 Auth Pages (Improved coverage)
 
-- [x] **`src/pages/auth/LoginPage.tsx`** (0% coverage)
+- [x] **`src/pages/auth/LoginPage.tsx`** (98% coverage)
   - Test form validation and submission **(done)**
   - Test error handling and display **(done)**
   - Test navigation after successful login **(done)**
@@ -49,9 +57,9 @@
 
 ### 2.2 User Management
 
-- [ ] **`src/pages/users/ProfilePage.tsx`** (0% coverage)
-  - Test profile display and editing
-  - Test user data updates
+- [x] **`src/pages/users/ProfilePage.tsx`** (100% coverage)
+  - Test profile display and editing **(done)**
+  - Test user data updates **(done)**
 
 ## Priority 3: Interview Management (Core Business Logic)
 
@@ -174,7 +182,7 @@
 
 ## Next Steps
 
-1. Start with Priority 1 utilities (formatters, dates, betterUpdateQuery)
-2. Move to Priority 1 components (Breadcrumb, QuestionList)
-3. Focus on authentication flows (Priority 2)
-4. Build up to complex interview management (Priority 3)
+1. ✅ Start with Priority 1 utilities (formatters, dates, betterUpdateQuery) **(completed)**
+2. ✅ Move to Priority 1 components (Breadcrumb, QuestionList, QuestionCard) **(completed)**
+3. ✅ Focus on authentication flows (Priority 2) **(completed)**
+4. 🔄 Build up to complex interview management (Priority 3) **(in progress)**

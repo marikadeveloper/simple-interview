@@ -1,3 +1,12 @@
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   CandidateInterviewFragment,
   KeystrokeInput,
@@ -16,6 +25,7 @@ interface InterviewSessionProps {
 
 export const InterviewSession = ({ interview }: InterviewSessionProps) => {
   const navigate = useNavigate();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   // start from the first question that does not have any answer
   const lastQuestionWithNoAnswer =
     interview.interviewTemplate.questions.findIndex(
@@ -101,19 +111,7 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
     }
 
     if (isLastQuestion) {
-      // TODO: replace this with a dialog
-      const confirmed = window.confirm(
-        'Are you sure you want to end the interview?',
-      );
-      if (confirmed) {
-        const { error } = await confirmCompletion({ id: interview.id });
-        if (error) {
-          return;
-        }
-        navigate('/dashboard', {
-          state: { message: 'Thank you for completing the interview!' },
-        });
-      }
+      setShowConfirmDialog(true);
     } else {
       setCurrentQuestionIndex((prev) => prev + 1);
     }
@@ -123,9 +121,23 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
     isLastQuestion,
     interview.id,
     createAnswer,
-    confirmCompletion,
-    navigate,
+    saveKeystrokes,
   ]);
+
+  const handleConfirmCompletion = useCallback(async () => {
+    const { error } = await confirmCompletion({ id: interview.id });
+    if (error) {
+      return;
+    }
+    setShowConfirmDialog(false);
+    navigate('/dashboard', {
+      state: { message: 'Thank you for completing the interview!' },
+    });
+  }, [interview.id, confirmCompletion, navigate]);
+
+  const handleCancelCompletion = useCallback(() => {
+    setShowConfirmDialog(false);
+  }, []);
 
   return (
     <div className='py-8'>
@@ -156,6 +168,30 @@ export const InterviewSession = ({ interview }: InterviewSessionProps) => {
           </button>
         </div>
       </div>
+
+      <Dialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Interview Completion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to end the interview? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={handleCancelCompletion}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmCompletion}>
+              Complete Interview
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

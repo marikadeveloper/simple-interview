@@ -16,7 +16,9 @@ export { Skeleton };
 
 export function TableSkeleton() {
   return (
-    <div className='rounded-md border mb-2'>
+    <div
+      data-testid='tableskeleton'
+      className='rounded-md border mb-2'>
       <table className='min-w-full'>
         <thead>
           <tr>
@@ -58,7 +60,9 @@ export function DetailPageSkeleton({
   contentBlocks?: number;
 }) {
   return (
-    <div className='container mx-auto py-8'>
+    <div
+      className='container mx-auto py-8'
+      data-testid='detailpageskeleton'>
       <div className='mb-8'>
         <Skeleton className='h-10 w-1/2 mb-4' />
         <Skeleton className='h-6 w-1/3 mb-8' />

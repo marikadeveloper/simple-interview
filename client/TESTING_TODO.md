@@ -122,8 +122,8 @@
 
 - [x] **`src/components/AppSidebar.tsx`** (100% coverage)
   - Test sidebar navigation and role-based menu items **(done)**
-- [ ] **`src/components/Layout.tsx`** (0% coverage)
-  - Test layout structure and responsive behavior
+- [x] **`src/components/Layout.tsx`** (100% coverage)
+  - Test layout structure and responsive behavior **(done)**
 
 ## Priority 6: Advanced Features & Edge Cases
 

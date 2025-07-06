@@ -11,6 +11,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    headers: {
+      'Service-Worker-Allowed': '/',
+    },
+  },
+  publicDir: 'public',
   test: {
     globals: true,
     environment: 'jsdom',

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { KeystrokeFragment } from '@/generated/graphql';
-import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
+import { Pause, Play, RotateCcw } from 'lucide-react';
 import React, {
   useCallback,
   useEffect,
@@ -143,7 +143,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
 
     // Start replaying from the current position
     replayKeystroke(startIndex);
-  }, [progress, speed, onComplete]);
+  }, [progress, speed, onComplete, sortedKeystrokes]);
 
   const pause = useCallback(() => {
     if (replayTimerRef.current) {
@@ -186,7 +186,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
         setCurrentText(initialText);
       }
     },
-    [initialText, pause],
+    [initialText, pause, sortedKeystrokes],
   );
 
   const handleSeekStart = useCallback(() => {
@@ -225,7 +225,9 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
           {language}
         </div>
       )}
-      <SyntaxHighlighter language={language}>
+      <SyntaxHighlighter
+        language={language}
+        data-testid='code-snippet'>
         {currentText || initialText}
       </SyntaxHighlighter>
 
@@ -262,6 +264,8 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
 
             <div className='buttons flex items-center justify-center gap-4'>
               <Button
+                role='button'
+                data-testid='reset'
                 onClick={reset}
                 variant='ghost'
                 size='icon'
@@ -269,16 +273,10 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
                 <RotateCcw className='h-5 w-5' />
               </Button>
 
-              <Button
-                onClick={() => seek(Math.max(0, progress - 10))}
-                variant='ghost'
-                size='icon'
-                className='h-10 w-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800'>
-                <SkipBack className='h-5 w-5' />
-              </Button>
-
               {!isPlaying ? (
                 <Button
+                  role='button'
+                  data-testid='play'
                   onClick={play}
                   disabled={sortedKeystrokes.length === 0}
                   size='icon'
@@ -287,6 +285,8 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
                 </Button>
               ) : (
                 <Button
+                  role='button'
+                  data-testid='pause'
                   onClick={pause}
                   size='icon'
                   className='h-12 w-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white'>
@@ -294,16 +294,9 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({
                 </Button>
               )}
 
-              <Button
-                onClick={() => seek(Math.min(100, progress + 10))}
-                variant='ghost'
-                size='icon'
-                className='h-10 w-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800'>
-                <SkipForward className='h-5 w-5' />
-              </Button>
-
               <div className='speed-control ml-4'>
                 <select
+                  data-testid='speed'
                   value={speed}
                   onChange={(e) => handleSpeedChange(Number(e.target.value))}
                   className='bg-transparent border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer'>

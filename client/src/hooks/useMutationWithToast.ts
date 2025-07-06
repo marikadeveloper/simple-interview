@@ -18,6 +18,7 @@ export function useMutationWithToast<T, V extends AnyVariables>(
   const executeWithToast = async (variables: V) => {
     try {
       const response = await executeMutation(variables);
+      console.log('response', response);
 
       if (response.error) {
         toast.error(errorMessage, {

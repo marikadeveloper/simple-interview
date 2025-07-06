@@ -77,12 +77,12 @@
 
 ### 3.2 Interview Management Pages
 
-- [ ] **`src/pages/interviews/index.tsx`** (0% coverage)
-  - Test interview listing and filtering
-  - Test interview creation/deletion flows
-- [ ] **`src/pages/interviews/components/CreateInterviewDialog.tsx`** (0% coverage)
-  - Test interview creation form
-  - Test validation and submission
+- [x] **`src/pages/interviews/index.tsx`** (100% coverage)
+  - Test interview listing and filtering **(done)**
+  - Test interview creation/deletion flows **(done)**
+- [x] **`src/pages/interviews/components/CreateInterviewDialog.tsx`** (100% coverage)
+  - Test interview creation form **(done)**
+  - Test validation and submission **(done)**
 
 ## Priority 4: Question & Template Management
 

@@ -60,7 +60,7 @@ export const CreateInterviewDialog: React.FC<
   });
   const [{ data: usersData }] = useGetUsersQuery({
     variables: {
-      filters: {},
+      filter: '',
     },
   });
   const [, createInterview] = useMutationWithToast(useCreateInterviewMutation, {

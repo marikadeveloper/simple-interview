@@ -448,8 +448,7 @@ describe('CreateTemplateDialog', () => {
   });
 
   it('does not submit form when Enter is pressed with invalid data', async () => {
-    const user = userEvent.setup();
-    render(<CreateTemplateDialog tags={mockTags} />);
+    const { user } = setup(<CreateTemplateDialog tags={mockTags} />);
 
     // Open dialog
     await user.click(screen.getByRole('button', { name: /add template/i }));

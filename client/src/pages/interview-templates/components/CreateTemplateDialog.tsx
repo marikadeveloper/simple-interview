@@ -79,6 +79,9 @@ export const CreateTemplateDialog: React.FC<CreateTemplateDialogProps> = ({
     if (error) {
       return;
     }
+    if (!data?.createInterviewTemplate) {
+      return;
+    }
     setIsOpen(false);
     navigate(`/interview-templates/${data?.createInterviewTemplate?.slug}`);
     form.reset();

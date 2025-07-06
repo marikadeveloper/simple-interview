@@ -120,8 +120,8 @@
 
 ### 5.2 Navigation Components
 
-- [ ] **`src/components/AppSidebar.tsx`** (0% coverage)
-  - Test sidebar navigation and role-based menu items
+- [x] **`src/components/AppSidebar.tsx`** (100% coverage)
+  - Test sidebar navigation and role-based menu items **(done)**
 - [ ] **`src/components/Layout.tsx`** (0% coverage)
   - Test layout structure and responsive behavior
 
@@ -194,4 +194,5 @@
 3. ✅ Focus on authentication flows (Priority 2) **(completed)**
 4. ✅ Build up to complex interview management (Priority 3) **(completed)**
 5. ✅ Move to dashboard and navigation components (Priority 5) **(completed)**
-6. 🔄 Move to navigation components (Priority 5.2) **(next)**
+6. ✅ Move to navigation components (Priority 5.2) **(completed)**
+7. 🔄 Move to Layout component (Priority 5.2) **(next)**

@@ -328,5 +328,5 @@
 10. ✅ **Focus on Priority 8 components** - AuthContext completed **(completed)**
 11. **Improve createUrqlClient coverage** - Currently at 29%, needs more comprehensive testing
 12. **Add tests for remaining dialog components** - Many deletion and action dialogs need coverage
-13. **Test main routing and app initialization** - App.tsx, AppRoutes.tsx, main.tsx
+13. **Test main routing and app initialization** - App.tsx, main.tsx
 14. **Complete interview page testing** - All interview-related pages and components

@@ -186,8 +186,8 @@
   - Test template listing and management **(done)**
 - [x] **`src/pages/question-banks/index.tsx`** (100% coverage)
   - Test question bank listing **(done)**
-- [ ] **`src/pages/users/index.tsx`** (0% coverage)
-  - Test user management page
+- [x] **`src/pages/users/index.tsx`** (100% coverage)
+  - Test user management page **(done)**
 
 ### 8.6 Dialog Components
 

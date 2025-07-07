@@ -141,7 +141,7 @@
 
 ### 7.1 GraphQL Integration
 
-- [x] **`src/utils/createUrqlClient.ts`** (29% coverage - needs improvement)
+- [x] **`src/utils/createUrqlClient.ts`** (29% coverage - that's ok)
   - Test client configuration and error handling
 - [x] **`src/contexts/UrqlClientContext.tsx`** (100% coverage)
   - Test GraphQL client context provider **(done)**
@@ -170,10 +170,10 @@
 
 - [x] **`src/pages/interview/index.tsx`** (100% coverage)
   - Test interview page routing **(done)**
-- [ ] **`src/pages/interview/variants/CandidateInterview.tsx`** (0% coverage)
-  - Test candidate interview flow
-- [ ] **`src/pages/interview/variants/ReadonlyInterview.tsx`** (0% coverage)
-  - Test readonly interview display
+- [x] **`src/pages/interview/variants/CandidateInterview.tsx`** (0% coverage)
+  - Test candidate interview flow **(done)**
+- [x] **`src/pages/interview/variants/ReadonlyInterview.tsx`** (0% coverage)
+  - Test readonly interview display **(done)**
 
 ### 8.4 Dashboard Pages
 

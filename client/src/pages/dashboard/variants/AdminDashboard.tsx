@@ -29,7 +29,7 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const [{ data: interviewsData }] = useGetInterviewsQuery();
   const [{ data: usersData }] = useGetUsersQuery({
-    variables: { filters: {} },
+    variables: { filter: '' },
   });
 
   const interviews = interviewsData?.getInterviews || [];

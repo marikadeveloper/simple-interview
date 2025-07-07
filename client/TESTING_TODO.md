@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Coverage**: 17.55% statements, 74.48% branches, 48.35% functions
-- **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%), Breadcrumb (100%), QuestionList (100%), Auth pages (LoginPage 98%, ChangePasswordPage 100%, ForgotPasswordPage 100%), ProfilePage (100%)
+- **Overall Coverage**: 19.5% statements, 76.2% branches, 51.0% functions
+- **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%), Breadcrumb (100%), QuestionList (100%), Auth pages (LoginPage 98%, ChangePasswordPage 100%, ForgotPasswordPage 100%), ProfilePage (100%), createUrqlClient (100%), UrqlClientContext (100%)
 - **Needs Testing**: Most page components (0%), many business logic components, context providers, and integration flows
 
 ## Priority 1: Critical Business Logic & Utilities (High Impact, Low Effort)
@@ -143,10 +143,10 @@
 
 ### 7.1 GraphQL Integration
 
-- [ ] **`src/utils/createUrqlClient.ts`** (0% coverage)
-  - Test client configuration and error handling
-- [ ] **`src/contexts/UrqlClientContext.tsx`** (0% coverage)
-  - Test GraphQL client context provider
+- [x] **`src/utils/createUrqlClient.ts`** (100% coverage)
+  - Test client configuration and error handling **(done)**
+- [x] **`src/contexts/UrqlClientContext.tsx`** (100% coverage)
+  - Test GraphQL client context provider **(done)**
 
 ### 7.2 Route Testing
 

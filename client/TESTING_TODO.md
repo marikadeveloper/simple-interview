@@ -182,10 +182,10 @@
 
 ### 8.5 Management Pages
 
-- [ ] **`src/pages/interview-templates/index.tsx`** (0% coverage)
-  - Test template listing and management
-- [ ] **`src/pages/question-banks/index.tsx`** (0% coverage)
-  - Test question bank listing
+- [x] **`src/pages/interview-templates/index.tsx`** (100% coverage)
+  - Test template listing and management **(done)**
+- [x] **`src/pages/question-banks/index.tsx`** (100% coverage)
+  - Test question bank listing **(done)**
 - [ ] **`src/pages/users/index.tsx`** (0% coverage)
   - Test user management page
 

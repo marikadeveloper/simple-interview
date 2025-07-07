@@ -191,28 +191,19 @@
 
 ### 8.6 Dialog Components
 
-- [ ] **`src/pages/interview-templates/components/DeleteTemplateConfirmationDialog.tsx`** (0% coverage)
-  - Test template deletion confirmation
-- [ ] **`src/pages/interview-templates/components/InterviewTemplateActions.tsx`** (0% coverage)
-  - Test template action buttons
+- [x] **`src/pages/interview-templates/components/DeleteTemplateConfirmationDialog.tsx`** (100% coverage)
+  - Test template deletion confirmation **(done)**
 - [ ] **`src/pages/interviews/components/DeleteInterviewConfirmationDialog.tsx`** (0% coverage)
   - Test interview deletion confirmation
 - [ ] **`src/pages/interviews/components/InterviewCard.tsx`** (0% coverage)
   - Test interview card display
-- [ ] **`src/pages/interviews/components/IntreviewActions.tsx`** (0% coverage)
-  - Test interview action buttons
 - [ ] **`src/pages/interviews/components/UpdateInterviewDialog.tsx`** (0% coverage)
   - Test interview update dialog
 - [ ] **`src/pages/question-banks/components/DeleteQuestionBankConfirmationDialog.tsx`** (0% coverage)
   - Test question bank deletion confirmation
-- [ ] **`src/pages/question-banks/components/QuestionBankActions.tsx`** (0% coverage)
-  - Test question bank action buttons
 - [ ] **`src/pages/users/components/CreateUserDialog.tsx`** (0% coverage)
   - Test user creation dialog
 - [ ] **`src/pages/users/components/DeleteUserConfirmationDialog.tsx`** (0% coverage)
-  - Test user deletion confirmation
-- [ ] **`src/pages/users/components/UserActions.tsx`** (0% coverage)
-  - Test user action buttons
 
 ### 8.7 Navigation Components
 

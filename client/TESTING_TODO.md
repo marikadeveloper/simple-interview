@@ -193,8 +193,8 @@
 
 - [x] **`src/pages/interview-templates/components/DeleteTemplateConfirmationDialog.tsx`** (100% coverage)
   - Test template deletion confirmation **(done)**
-- [ ] **`src/pages/interviews/components/DeleteInterviewConfirmationDialog.tsx`** (0% coverage)
-  - Test interview deletion confirmation
+- [x] **`src/pages/interviews/components/DeleteInterviewConfirmationDialog.tsx`** (100% coverage)
+  - Test interview deletion confirmation **(done)**
 - [ ] **`src/pages/interviews/components/InterviewCard.tsx`** (0% coverage)
   - Test interview card display
 - [ ] **`src/pages/interviews/components/UpdateInterviewDialog.tsx`** (0% coverage)

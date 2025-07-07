@@ -1,7 +1,5 @@
-import { createUrqlClient } from '@/utils/createUrqlClient';
 import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { UrqlClientProvider } from './UrqlClientContext';
 
 // Mock the createUrqlClient utility
 vi.mock('@/utils/createUrqlClient', () => ({
@@ -17,7 +15,6 @@ vi.mock('urql', () => ({
 }));
 
 describe('UrqlClientContext', () => {
-  const mockCreateUrqlClient = vi.mocked(createUrqlClient);
   const mockClient = {
     url: 'http://localhost:3000/graphql',
     fetchOptions: {
@@ -29,10 +26,19 @@ describe('UrqlClientContext', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCreateUrqlClient.mockReturnValue(mockClient);
+    // Reset module cache to ensure fresh imports
+    vi.resetModules();
   });
 
-  it('creates a client using createUrqlClient', () => {
+  it('creates a client using createUrqlClient', async () => {
+    // Import the module after setting up mocks
+    const { createUrqlClient } = await import('@/utils/createUrqlClient');
+    const mockCreateUrqlClient = vi.mocked(createUrqlClient);
+    mockCreateUrqlClient.mockReturnValue(mockClient);
+
+    // Import the component which will trigger the module-level initialization
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
+
     render(
       <UrqlClientProvider>
         <div>Test content</div>
@@ -42,7 +48,9 @@ describe('UrqlClientContext', () => {
     expect(mockCreateUrqlClient).toHaveBeenCalledTimes(1);
   });
 
-  it('renders children wrapped in Provider', () => {
+  it('renders children wrapped in Provider', async () => {
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
+
     const { getByTestId, getByText } = render(
       <UrqlClientProvider>
         <div>Test content</div>
@@ -53,9 +61,16 @@ describe('UrqlClientContext', () => {
     expect(getByText('Test content')).toBeInTheDocument();
   });
 
-  it('passes the created client to the Provider', () => {
-    const { Client } = require('urql');
+  it('passes the created client to the Provider', async () => {
+    const { createUrqlClient } = await import('@/utils/createUrqlClient');
+    const mockCreateUrqlClient = vi.mocked(createUrqlClient);
+    mockCreateUrqlClient.mockReturnValue(mockClient);
+
+    const { Client } = await import('urql');
     const MockClient = vi.mocked(Client);
+
+    // Import the component which will trigger the module-level initialization
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
 
     render(
       <UrqlClientProvider>
@@ -66,17 +81,32 @@ describe('UrqlClientContext', () => {
     expect(MockClient).toHaveBeenCalledWith(mockClient);
   });
 
-  it('creates only one client instance', () => {
+  it('creates only one client instance', async () => {
+    const { createUrqlClient } = await import('@/utils/createUrqlClient');
+    const mockCreateUrqlClient = vi.mocked(createUrqlClient);
+    mockCreateUrqlClient.mockReturnValue(mockClient);
+
+    // Import the component which will trigger the module-level initialization
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
+
     render(
       <UrqlClientProvider>
         <div>Test content</div>
       </UrqlClientProvider>,
     );
 
+    // The client is created once at module import time
     expect(mockCreateUrqlClient).toHaveBeenCalledTimes(1);
   });
 
-  it('handles multiple renders without recreating client', () => {
+  it('handles multiple renders without recreating client', async () => {
+    const { createUrqlClient } = await import('@/utils/createUrqlClient');
+    const mockCreateUrqlClient = vi.mocked(createUrqlClient);
+    mockCreateUrqlClient.mockReturnValue(mockClient);
+
+    // Import the component which will trigger the module-level initialization
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
+
     const { rerender } = render(
       <UrqlClientProvider>
         <div>Test content</div>
@@ -93,7 +123,9 @@ describe('UrqlClientContext', () => {
     expect(mockCreateUrqlClient).toHaveBeenCalledTimes(1);
   });
 
-  it('renders complex nested children correctly', () => {
+  it('renders complex nested children correctly', async () => {
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
+
     const { getByTestId, getByText } = render(
       <UrqlClientProvider>
         <div>
@@ -110,7 +142,9 @@ describe('UrqlClientContext', () => {
     expect(getByText('Click me')).toBeInTheDocument();
   });
 
-  it('handles empty children', () => {
+  it('handles empty children', async () => {
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
+
     const { getByTestId } = render(
       <UrqlClientProvider>{null}</UrqlClientProvider>,
     );
@@ -118,7 +152,9 @@ describe('UrqlClientContext', () => {
     expect(getByTestId('urql-provider')).toBeInTheDocument();
   });
 
-  it('handles null children', () => {
+  it('handles null children', async () => {
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
+
     const { getByTestId } = render(
       <UrqlClientProvider>{null}</UrqlClientProvider>,
     );
@@ -126,7 +162,9 @@ describe('UrqlClientContext', () => {
     expect(getByTestId('urql-provider')).toBeInTheDocument();
   });
 
-  it('handles undefined children', () => {
+  it('handles undefined children', async () => {
+    const { UrqlClientProvider } = await import('./UrqlClientContext');
+
     const { getByTestId } = render(
       <UrqlClientProvider>{undefined}</UrqlClientProvider>,
     );

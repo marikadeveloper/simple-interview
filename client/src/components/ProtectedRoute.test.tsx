@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ProtectedRoute } from '../../components/ProtectedRoute';
-import { UserRole } from '../../generated/graphql';
-import { render, screen } from '../utils';
+import { UserRole } from '../generated/graphql';
+import { render, screen } from '../test/utils';
+import { ProtectedRoute } from './ProtectedRoute';
 
 // Mock the useAuth hook but keep AuthProvider
-vi.mock('../../contexts/AuthContext', async (importOriginal) => {
+vi.mock('../contexts/AuthContext', async (importOriginal) => {
   const actual = (await importOriginal()) as any;
   return {
     ...actual,
@@ -12,9 +12,7 @@ vi.mock('../../contexts/AuthContext', async (importOriginal) => {
   };
 });
 
-const mockUseAuth = vi.mocked(
-  await import('../../contexts/AuthContext'),
-).useAuth;
+const mockUseAuth = vi.mocked(await import('../contexts/AuthContext')).useAuth;
 
 describe('ProtectedRoute', () => {
   const TestContent = () => <div>Protected Content</div>;

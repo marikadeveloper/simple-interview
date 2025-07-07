@@ -7,17 +7,15 @@ import {
   Users,
 } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
-import { UserFragment, UserRole } from '../../generated/graphql';
-import { useNavLinks } from '../../hooks/useNavLinks';
+import { UserFragment, UserRole } from '../generated/graphql';
+import { useNavLinks } from './useNavLinks';
 
 // Mock the AuthContext
-vi.mock('../../contexts/AuthContext', () => ({
+vi.mock('../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
-const mockUseAuth = vi.mocked(
-  await import('../../contexts/AuthContext'),
-).useAuth;
+const mockUseAuth = vi.mocked(await import('../contexts/AuthContext')).useAuth;
 
 describe('useNavLinks', () => {
   beforeEach(() => {

@@ -1,16 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { QuestionCard } from '../../components/QuestionCard';
-import { QuestionFragment } from '../../generated/graphql';
+import { QuestionFragment } from '../generated/graphql';
+import { QuestionCard } from './QuestionCard';
 
 // Mock the useMutationWithToast hook
-vi.mock('../../hooks/useMutationWithToast', () => ({
+vi.mock('../hooks/useMutationWithToast', () => ({
   useMutationWithToast: vi.fn(),
 }));
 
 const mockUseMutationWithToast = vi.mocked(
-  await import('../../hooks/useMutationWithToast'),
+  await import('../hooks/useMutationWithToast'),
 ).useMutationWithToast;
 
 describe('QuestionCard', () => {
@@ -35,7 +35,7 @@ describe('QuestionCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (mockUseMutationWithToast as any).mockImplementation(
-      (mutationHook: any, options: any) => {
+      (mutationHook: any) => {
         const mockState = {
           data: null,
           error: null,

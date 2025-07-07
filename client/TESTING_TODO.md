@@ -2,7 +2,7 @@
 
 ## Current Status
 
-- **Overall Coverage**: 19.5% statements, 76.2% branches, 51.0% functions
+- **Overall Coverage**: 43.56% statements, 86.18% branches, 54.25% functions
 - **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%), Breadcrumb (100%), QuestionList (100%), Auth pages (LoginPage 98%, ChangePasswordPage 100%, ForgotPasswordPage 100%), ProfilePage (100%), createUrqlClient (100%), UrqlClientContext (100%)
 - **Needs Testing**: Most page components (0%), many business logic components, context providers, and integration flows
 
@@ -68,10 +68,10 @@
 - [x] **`src/pages/interview/components/InterviewSession.tsx`** (100% coverage)
   - Test interview flow and state management **(done)**
   - Test question navigation **(done)**
-- [x] **`src/pages/interview/components/KeystrokeRecordingTextarea.tsx`** (100% coverage)
+- [x] **`src/pages/interview/components/KeystrokeRecordingTextarea.tsx`** (99% coverage)
   - Test keystroke recording functionality **(done)**
   - Test text input and recording state **(done)**
-- [x] **`src/pages/interview/components/KeystrokeReplay.tsx`** (100% coverage)
+- [x] **`src/pages/interview/components/KeystrokeReplay.tsx`** (94% coverage)
   - Test keystroke replay functionality **(done)**
   - Test timing and playback controls **(done)**
 
@@ -88,15 +88,15 @@
 
 - [x] **`src/pages/interview-template/index.tsx`** (100% coverage)
   - Test template creation and editing **(done)**
-- [x] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (100% coverage)
+- [x] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (87% coverage)
   - Test template creation form **(done)**
 
 ## Priority 4: Question & Template Management
 
 ### 4.1 Question Management
 
-- [x] **`src/pages/question-bank/index.tsx`** (100% coverage)
-  - Test question bank display and management **(done)**
+- [x] **`src/pages/question-bank/index.tsx`** (0% coverage - needs testing)
+  - Test question bank display and management
 - [x] **`src/pages/question-banks/components/CreateQuestionBankDialog.tsx`** (100% coverage)
   - Test question bank creation flow **(done)**
 
@@ -104,7 +104,7 @@
 
 - [x] **`src/pages/interview-template/index.tsx`** (100% coverage)
   - Test template creation and editing **(done)**
-- [x] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (100% coverage)
+- [x] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (87% coverage)
   - Test template creation form **(done)**
 
 ## Priority 5: Dashboard & Navigation
@@ -129,13 +129,11 @@
 
 ### 6.1 Interview Feedback
 
-- [x] **`src/pages/interview-feedback/index.tsx`** (100% coverage)
+- [x] **`src/pages/interview-feedback/index.tsx`** (99% coverage)
   - Test feedback display and evaluation features **(done)**
 
 ### 6.2 Advanced Components
 
-- [x] **`src/components/DropIndicator.tsx`** (100% coverage)
-  - Test drag and drop functionality **(done)**
 - [x] **`src/components/InterviewEvaluationIcon.tsx`** (100% coverage)
   - Test evaluation status display **(done)**
 
@@ -143,17 +141,146 @@
 
 ### 7.1 GraphQL Integration
 
-- [x] **`src/utils/createUrqlClient.ts`** (100% coverage)
-  - Test client configuration and error handling **(done)**
+- [x] **`src/utils/createUrqlClient.ts`** (29% coverage - needs improvement)
+  - Test client configuration and error handling
 - [x] **`src/contexts/UrqlClientContext.tsx`** (100% coverage)
   - Test GraphQL client context provider **(done)**
 
 ### 7.2 Route Testing
 
-- [ ] **`src/AppRoutes.tsx`** (0% coverage)
-  - Test route configuration and protected routes
-- [ ] **`src/components/PublicRoute.tsx`** (0% coverage)
-  - Test public route handling
+- [x] **`src/components/PublicRoute.tsx`** (100% coverage)
+  - Test public route handling **(done)**
+
+## Priority 8: Remaining Components (Low Coverage Areas)
+
+### 8.1 Auth Context
+
+- [x] **`src/contexts/AuthContext.tsx`** (100% coverage)
+  - Test authentication state management **(done)**
+  - Test login/logout flows **(done)**
+  - Test user role handling **(done)**
+
+### 8.2 Main Application Files
+
+- [ ] **`src/App.tsx`** (0% coverage)
+  - Test main app component
+  - Test routing setup
+- [ ] **`src/main.tsx`** (0% coverage)
+  - Test app initialization
+
+### 8.3 Interview Pages
+
+- [ ] **`src/pages/interview/index.tsx`** (0% coverage)
+  - Test interview page routing
+- [ ] **`src/pages/interview/variants/CandidateInterview.tsx`** (0% coverage)
+  - Test candidate interview flow
+- [ ] **`src/pages/interview/variants/ReadonlyInterview.tsx`** (0% coverage)
+  - Test readonly interview display
+
+### 8.4 Dashboard Pages
+
+- [ ] **`src/pages/dashboard/index.tsx`** (0% coverage)
+  - Test dashboard routing logic
+
+### 8.5 Management Pages
+
+- [ ] **`src/pages/interview-templates/index.tsx`** (0% coverage)
+  - Test template listing and management
+- [ ] **`src/pages/question-banks/index.tsx`** (0% coverage)
+  - Test question bank listing
+- [ ] **`src/pages/users/index.tsx`** (0% coverage)
+  - Test user management page
+
+### 8.6 Dialog Components
+
+- [ ] **`src/pages/interview-templates/components/DeleteTemplateConfirmationDialog.tsx`** (0% coverage)
+  - Test template deletion confirmation
+- [ ] **`src/pages/interview-templates/components/InterviewTemplateActions.tsx`** (0% coverage)
+  - Test template action buttons
+- [ ] **`src/pages/interviews/components/DeleteInterviewConfirmationDialog.tsx`** (0% coverage)
+  - Test interview deletion confirmation
+- [ ] **`src/pages/interviews/components/InterviewCard.tsx`** (0% coverage)
+  - Test interview card display
+- [ ] **`src/pages/interviews/components/IntreviewActions.tsx`** (0% coverage)
+  - Test interview action buttons
+- [ ] **`src/pages/interviews/components/UpdateInterviewDialog.tsx`** (0% coverage)
+  - Test interview update dialog
+- [ ] **`src/pages/question-banks/components/DeleteQuestionBankConfirmationDialog.tsx`** (0% coverage)
+  - Test question bank deletion confirmation
+- [ ] **`src/pages/question-banks/components/QuestionBankActions.tsx`** (0% coverage)
+  - Test question bank action buttons
+- [ ] **`src/pages/users/components/CreateUserDialog.tsx`** (0% coverage)
+  - Test user creation dialog
+- [ ] **`src/pages/users/components/DeleteUserConfirmationDialog.tsx`** (0% coverage)
+  - Test user deletion confirmation
+- [ ] **`src/pages/users/components/UserActions.tsx`** (0% coverage)
+  - Test user action buttons
+
+### 8.7 Navigation Components
+
+- [ ] **`src/components/MobileNavigationLink.tsx`** (0% coverage)
+  - Test mobile navigation link
+- [ ] **`src/components/NavigationLink.tsx`** (0% coverage)
+  - Test navigation link component
+
+### 8.8 Hooks
+
+- [ ] **`src/hooks/useIsMobile.ts`** (0% coverage)
+  - Test mobile detection hook
+- [ ] **`src/hooks/useIsMobile.tsx`** (0% coverage)
+  - Test mobile detection hook (alternative)
+
+### 8.9 Auth Pages
+
+- [ ] **`src/pages/auth/AdminSignupPage.tsx`** (0% coverage)
+  - Test admin signup flow
+- [ ] **`src/pages/auth/FirstPasswordChangePage.tsx`** (0% coverage)
+  - Test first password change flow
+- [ ] **`src/pages/auth/NotAuthorizedPage.tsx`** (0% coverage)
+  - Test unauthorized page
+- [ ] **`src/pages/auth/NotFoundPage.tsx`** (0% coverage)
+  - Test 404 page
+
+### 8.10 Interview Template Components
+
+- [ ] **`src/pages/interview-template/components/FormHeading.tsx`** (0% coverage)
+  - Test form heading component
+- [ ] **`src/pages/interview-template/components/QuestionBankSelector.tsx`** (0% coverage)
+  - Test question bank selector
+- [ ] **`src/pages/interview-template/components/ReadonlyHeading.tsx`** (0% coverage)
+  - Test readonly heading component
+- [ ] **`src/pages/interview-template/components/utils.ts`** (0% coverage)
+  - Test template utility functions
+
+### 8.11 Question Bank Components
+
+- [ ] **`src/pages/question-bank/components/FormHeading.tsx`** (0% coverage)
+  - Test form heading component
+- [ ] **`src/pages/question-bank/components/ReadonlyHeading.tsx`** (0% coverage)
+  - Test readonly heading component
+
+### 8.12 Interview Components
+
+- [ ] **`src/pages/interview/components/QuestionCard.tsx`** (0% coverage)
+  - Test interview question card
+
+### 8.13 Column Definitions
+
+- [ ] **`src/pages/interview-templates/columns.tsx`** (0% coverage)
+  - Test template column definitions
+- [ ] **`src/pages/interviews/columns.tsx`** (0% coverage)
+  - Test interview column definitions
+- [ ] **`src/pages/question-banks/columns.tsx`** (0% coverage)
+  - Test question bank column definitions
+- [ ] **`src/pages/users/columns.tsx`** (0% coverage)
+  - Test user column definitions
+
+### 8.14 Variant Pages
+
+- [ ] **`src/pages/interviews/variants/AdminInterviews.tsx`** (0% coverage)
+  - Test admin interviews page
+- [ ] **`src/pages/interviews/variants/CandidateInterviews.tsx`** (0% coverage)
+  - Test candidate interviews page
 
 ## Testing Guidelines
 
@@ -198,3 +325,8 @@
 7. ✅ Move to Layout component (Priority 5.2) **(completed)**
 8. ✅ Move to Interview Feedback page (Priority 6.1) **(completed)**
 9. ✅ Move to Advanced Components (Priority 6.2) **(completed)**
+10. ✅ **Focus on Priority 8 components** - AuthContext completed **(completed)**
+11. **Improve createUrqlClient coverage** - Currently at 29%, needs more comprehensive testing
+12. **Add tests for remaining dialog components** - Many deletion and action dialogs need coverage
+13. **Test main routing and app initialization** - App.tsx, AppRoutes.tsx, main.tsx
+14. **Complete interview page testing** - All interview-related pages and components

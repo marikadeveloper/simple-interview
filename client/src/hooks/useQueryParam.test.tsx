@@ -1,6 +1,6 @@
+import { useQueryParam } from '@/hooks/useQueryParam';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useQueryParam } from '../../hooks/useQueryParam';
 
 // Mock useSearchParams from react-router
 vi.mock('react-router', async (importOriginal) => {

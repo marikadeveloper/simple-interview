@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useMutationWithToast } from '../../hooks/useMutationWithToast';
+import { useMutationWithToast } from './useMutationWithToast';
 
 // Mock sonner toast
 vi.mock('sonner', () => ({

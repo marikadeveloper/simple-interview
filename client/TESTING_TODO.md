@@ -162,14 +162,14 @@
 
 ### 8.2 Main Application Files
 
-- [ ] **`src/App.tsx`** (0% coverage)
-  - Test main app component
-  - Test routing setup
+- [x] **`src/App.tsx`** (100% coverage)
+  - Test main app component **(done)**
+  - Test routing setup **(done)**
 
 ### 8.3 Interview Pages
 
-- [ ] **`src/pages/interview/index.tsx`** (0% coverage)
-  - Test interview page routing
+- [x] **`src/pages/interview/index.tsx`** (100% coverage)
+  - Test interview page routing **(done)**
 - [ ] **`src/pages/interview/variants/CandidateInterview.tsx`** (0% coverage)
   - Test candidate interview flow
 - [ ] **`src/pages/interview/variants/ReadonlyInterview.tsx`** (0% coverage)

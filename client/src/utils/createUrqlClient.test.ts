@@ -9,6 +9,18 @@ vi.mock('./betterUpdateQuery', () => ({
 // Mock environment variables
 const originalEnv = process.env;
 
+// Mock console.log to avoid noise in tests
+vi.spyOn(console, 'log').mockImplementation(() => {});
+
+// Mock window.location
+const mockLocation = {
+  href: '',
+};
+Object.defineProperty(window, 'location', {
+  value: mockLocation,
+  writable: true,
+});
+
 describe('createUrqlClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -20,6 +32,8 @@ describe('createUrqlClient', () => {
         VITE_API_URL: 'http://localhost:3000/graphql',
       },
     });
+    // Reset window.location
+    mockLocation.href = '';
   });
 
   afterEach(() => {
@@ -102,5 +116,29 @@ describe('createUrqlClient', () => {
     const client = createUrqlClient();
 
     expect(client.fetchOptions.headers).toBeUndefined();
+  });
+
+  describe('environment variable handling', () => {
+    it('falls back to default URL when VITE_API_URL is empty', () => {
+      vi.stubGlobal('import.meta', {
+        env: {
+          VITE_API_URL: '',
+        },
+      });
+
+      const client = createUrqlClient();
+
+      expect(client.url).toBe('http://localhost:3000/graphql');
+    });
+
+    it('falls back to default URL when VITE_API_URL is undefined', () => {
+      vi.stubGlobal('import.meta', {
+        env: {},
+      });
+
+      const client = createUrqlClient();
+
+      expect(client.url).toBe('http://localhost:3000/graphql');
+    });
   });
 });

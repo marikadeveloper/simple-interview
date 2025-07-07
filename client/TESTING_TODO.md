@@ -177,8 +177,8 @@
 
 ### 8.4 Dashboard Pages
 
-- [ ] **`src/pages/dashboard/index.tsx`** (0% coverage)
-  - Test dashboard routing logic
+- [x] **`src/pages/dashboard/index.tsx`** (100% coverage)
+  - Test dashboard routing logic **(done)**
 
 ### 8.5 Management Pages
 

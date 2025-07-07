@@ -165,8 +165,6 @@
 - [ ] **`src/App.tsx`** (0% coverage)
   - Test main app component
   - Test routing setup
-- [ ] **`src/main.tsx`** (0% coverage)
-  - Test app initialization
 
 ### 8.3 Interview Pages
 
@@ -328,5 +326,5 @@
 10. ✅ **Focus on Priority 8 components** - AuthContext completed **(completed)**
 11. **Improve createUrqlClient coverage** - Currently at 29%, needs more comprehensive testing
 12. **Add tests for remaining dialog components** - Many deletion and action dialogs need coverage
-13. **Test main routing and app initialization** - App.tsx, main.tsx
+13. **Test app initialization** - App.tsx
 14. **Complete interview page testing** - All interview-related pages and components

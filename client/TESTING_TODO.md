@@ -195,11 +195,11 @@
   - Test template deletion confirmation **(done)**
 - [x] **`src/pages/interviews/components/DeleteInterviewConfirmationDialog.tsx`** (100% coverage)
   - Test interview deletion confirmation **(done)**
-- [ ] **`src/pages/interviews/components/InterviewCard.tsx`** (0% coverage)
-  - Test interview card display
+- [x] **`src/pages/interviews/components/InterviewCard.tsx`** (100% coverage)
+  - Test interview card display **(done)**
 - [ ] **`src/pages/interviews/components/UpdateInterviewDialog.tsx`** (0% coverage)
   - Test interview update dialog
-- [ ] **`src/pages/question-banks/components/DeleteQuestionBankConfirmationDialog.tsx`** (0% coverage)
+- [x] **`src/pages/question-banks/components/DeleteQuestionBankConfirmationDialog.tsx`** (100% coverage)
   - Test question bank deletion confirmation
 - [ ] **`src/pages/users/components/CreateUserDialog.tsx`** (0% coverage)
   - Test user creation dialog

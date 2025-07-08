@@ -2,27 +2,29 @@
 
 ## Current Status
 
-- **Overall Coverage**: 43.56% statements, 86.18% branches, 54.25% functions
-- **Well Tested**: Hooks (100%), ProtectedRoute (100%), QuestionCard (99%), Utility functions (100%), Breadcrumb (100%), QuestionList (100%), Auth pages (LoginPage 98%, ChangePasswordPage 100%, ForgotPasswordPage 100%), ProfilePage (100%), createUrqlClient (100%), UrqlClientContext (100%)
-- **Needs Testing**: Most page components (0%), many business logic components, context providers, and integration flows
+- **Overall Coverage**: 70.88% statements, 87.77% branches, 67.05% functions
+- **Well Tested**: Most core components, utility functions, and business logic. See below for details. Some hooks and dialog/action components are not fully covered.
+- **Needs Testing**: Some hooks (e.g., useIsMobile), dialog/action components, and a few business logic and integration flows.
 
 ## Priority 1: Critical Business Logic & Utilities (High Impact, Low Effort)
 
 ### 1.1 Utility Functions (100% coverage)
 
-- [x] **`src/utils/formatters.ts`** - `pathnameToBreadcrumbLabel` function
+- [x] **`src/utils/formatters.ts`** - `pathnameToBreadcrumbLabel` function (100%)
   - Test path conversion logic (dash to space, capitalization) **(done)**
   - Test edge cases (empty string, single word, multiple dashes) **(done)**
-- [x] **`src/utils/dates.ts`** - Date formatting functions
+- [x] **`src/utils/dates.ts`** - Date formatting functions (100%)
   - Test `formatDate`, `formatDateTime`, `formatDateRelative` **(done)**
   - Test with various date formats and edge cases **(done)**
-- [x] **`src/utils/betterUpdateQuery.ts`** - GraphQL cache utility
+- [x] **`src/utils/betterUpdateQuery.ts`** - GraphQL cache utility (100%)
   - Test cache update logic **(done)**
   - Test with null/undefined data scenarios **(done)**
-- [x] **`src/utils/debounce.ts`** - Debounce utility
+- [x] **`src/utils/debounce.ts`** - Debounce utility (100%)
   - Test debounce functionality **(done)**
-- [x] **`src/lib/utils.ts`** - Utility functions
+- [x] **`src/lib/utils.ts`** - Utility functions (100%)
   - Test utility functions **(done)**
+- [ ] **`src/utils/createUrqlClient.ts`** (29% coverage)
+  - Test client configuration and error handling (needs more tests)
 
 ### 1.2 Core Components (Improved coverage)
 
@@ -80,7 +82,7 @@
 - [x] **`src/pages/interviews/index.tsx`** (100% coverage)
   - Test interview listing and filtering **(done)**
   - Test interview creation/deletion flows **(done)**
-- [x] **`src/pages/interviews/components/CreateInterviewDialog.tsx`** (100% coverage)
+- [x] **`src/pages/interviews/components/CreateInterviewDialog.tsx`** (99.7% coverage)
   - Test interview creation form **(done)**
   - Test validation and submission **(done)**
 
@@ -88,7 +90,7 @@
 
 - [x] **`src/pages/interview-template/index.tsx`** (100% coverage)
   - Test template creation and editing **(done)**
-- [x] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (87% coverage)
+- [x] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (86.5% coverage)
   - Test template creation form **(done)**
 
 ## Priority 4: Question & Template Management
@@ -104,7 +106,7 @@
 
 - [x] **`src/pages/interview-template/index.tsx`** (100% coverage)
   - Test template creation and editing **(done)**
-- [x] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (87% coverage)
+- [x] **`src/pages/interview-templates/components/CreateTemplateDialog.tsx`** (86.5% coverage)
   - Test template creation form **(done)**
 
 ## Priority 5: Dashboard & Navigation
@@ -129,7 +131,7 @@
 
 ### 6.1 Interview Feedback
 
-- [x] **`src/pages/interview-feedback/index.tsx`** (99% coverage)
+- [x] **`src/pages/interview-feedback/index.tsx`** (99.4% coverage)
   - Test feedback display and evaluation features **(done)**
 
 ### 6.2 Advanced Components
@@ -141,8 +143,8 @@
 
 ### 7.1 GraphQL Integration
 
-- [x] **`src/utils/createUrqlClient.ts`** (29% coverage - that's ok)
-  - Test client configuration and error handling
+- [x] **`src/utils/createUrqlClient.ts`** (29% coverage)
+  - Test client configuration and error handling (needs more tests)
 - [x] **`src/contexts/UrqlClientContext.tsx`** (100% coverage)
   - Test GraphQL client context provider **(done)**
 
@@ -170,9 +172,9 @@
 
 - [x] **`src/pages/interview/index.tsx`** (100% coverage)
   - Test interview page routing **(done)**
-- [x] **`src/pages/interview/variants/CandidateInterview.tsx`** (0% coverage)
+- [x] **`src/pages/interview/variants/CandidateInterview.tsx`** (100% coverage)
   - Test candidate interview flow **(done)**
-- [x] **`src/pages/interview/variants/ReadonlyInterview.tsx`** (0% coverage)
+- [x] **`src/pages/interview/variants/ReadonlyInterview.tsx`** (100% coverage)
   - Test readonly interview display **(done)**
 
 ### 8.4 Dashboard Pages
@@ -182,22 +184,22 @@
 
 ### 8.5 Management Pages
 
-- [x] **`src/pages/interview-templates/index.tsx`** (100% coverage)
+- [x] **`src/pages/interview-templates/index.tsx`** (95% coverage)
   - Test template listing and management **(done)**
-- [x] **`src/pages/question-banks/index.tsx`** (100% coverage)
+- [x] **`src/pages/question-banks/index.tsx`** (98% coverage)
   - Test question bank listing **(done)**
-- [x] **`src/pages/users/index.tsx`** (100% coverage)
+- [x] **`src/pages/users/index.tsx`** (98% coverage)
   - Test user management page **(done)**
 
 ### 8.6 Dialog Components
 
 - [x] **`src/pages/interview-templates/components/DeleteTemplateConfirmationDialog.tsx`** (100% coverage)
   - Test template deletion confirmation **(done)**
-- [x] **`src/pages/interviews/components/DeleteInterviewConfirmationDialog.tsx`** (100% coverage)
+- [x] **`src/pages/interviews/components/DeleteInterviewConfirmationDialog.tsx`** (91% coverage)
   - Test interview deletion confirmation **(done)**
-- [x] **`src/pages/interviews/components/InterviewCard.tsx`** (100% coverage)
+- [x] **`src/pages/interviews/components/InterviewCard.tsx`** (94% coverage)
   - Test interview card display **(done)**
-- [x] **`src/pages/interviews/components/UpdateInterviewDialog.tsx`** (100% coverage)
+- [x] **`src/pages/interviews/components/UpdateInterviewDialog.tsx`** (93% coverage)
   - Test interview update dialog **(done)**
 - [x] **`src/pages/question-banks/components/DeleteQuestionBankConfirmationDialog.tsx`** (100% coverage)
   - Test question bank deletion confirmation
@@ -208,7 +210,7 @@
 
 ### 8.7 Navigation Components
 
-- [x] **`src/components/MobileNavigationLink.tsx`** (100% coverage)
+- [x] **`src/components/MobileNavigationLink.tsx`** (95% coverage)
   - Test mobile navigation link **(done)**
 - [x] **`src/components/NavigationLink.tsx`** (100% coverage)
   - Test navigation link component **(done)**
@@ -220,7 +222,7 @@
 
 ### 8.9 Auth Pages
 
-- [x] **`src/pages/auth/AdminSignupPage.tsx`** (100% coverage)
+- [x] **`src/pages/auth/AdminSignupPage.tsx`** (96% coverage)
   - Test admin signup flow **(done)**
 - [x] **`src/pages/auth/FirstPasswordChangePage.tsx`** (100% coverage)
   - Test first password change flow **(done)**
@@ -231,9 +233,9 @@
 
 ### 8.10 Interview Template Components
 
-- [x] **`src/pages/interview-template/components/FormHeading.tsx`** (100% coverage)
+- [x] **`src/pages/interview-template/components/FormHeading.tsx`** (86% coverage)
   - Test form heading component **(done)**
-- [x] **`src/pages/interview-template/components/QuestionBankSelector.tsx`** (100% coverage)
+- [x] **`src/pages/interview-template/components/QuestionBankSelector.tsx`** (85% coverage)
   - Test question bank selector **(done)**
 - [x] **`src/pages/interview-template/components/ReadonlyHeading.tsx`** (100% coverage)
   - Test readonly heading component **(done)**
@@ -242,8 +244,8 @@
 
 ### 8.11 Question Bank Components
 
-- [x] **`src/pages/question-bank/components/FormHeading.tsx`** (100% coverage)
-  - Test form heading component **(done)**
+- [ ] **`src/pages/question-bank/components/FormHeading.tsx`** (0% coverage - needs testing)
+  - Test form heading component
 - [x] **`src/pages/question-bank/components/ReadonlyHeading.tsx`** (100% coverage)
   - Test readonly heading component **(done)**
 
@@ -256,7 +258,7 @@
 
 - [x] **`src/pages/interview-templates/columns.tsx`** (100% coverage)
   - Test template column definitions **(done)**
-- [x] **`src/pages/interviews/columns.tsx`** (100% coverage)
+- [x] **`src/pages/interviews/columns.tsx`** (95% coverage)
   - Test interview column definitions **(done)**
 - [x] **`src/pages/question-banks/columns.tsx`** (100% coverage)
   - Test question bank column definitions **(done)**
@@ -302,19 +304,15 @@
 - **Pages**: 70%+ (focus on form handling and navigation)
 - **Overall**: 60%+ (realistic target for React app)
 
-## Next Steps
+## Next Steps (as of latest coverage)
 
-1. ✅ Start with Priority 1 utilities (formatters, dates, betterUpdateQuery) **(completed)**
-2. ✅ Move to Priority 1 components (Breadcrumb, QuestionList, QuestionCard) **(completed)**
-3. ✅ Focus on authentication flows (Priority 2) **(completed)**
-4. ✅ Build up to complex interview management (Priority 3) **(completed)**
-5. ✅ Move to dashboard and navigation components (Priority 5) **(completed)**
-6. ✅ Move to navigation components (Priority 5.2) **(completed)**
-7. ✅ Move to Layout component (Priority 5.2) **(completed)**
-8. ✅ Move to Interview Feedback page (Priority 6.1) **(completed)**
-9. ✅ Move to Advanced Components (Priority 6.2) **(completed)**
-10. ✅ **Focus on Priority 8 components** - AuthContext completed **(completed)**
-11. **Improve createUrqlClient coverage** - Currently at 29%, needs more comprehensive testing
-12. **Add tests for remaining dialog components** - Many deletion and action dialogs need coverage
-13. **Test app initialization** - App.tsx
-14. **Complete interview page testing** - All interview-related pages and components
+1. **Increase coverage for low-coverage files:**
+   - `src/hooks/useIsMobile.ts` (currently 0%)
+   - `src/pages/question-bank/index.tsx` (currently 0%)
+   - `src/pages/question-bank/components/FormHeading.tsx` (currently 0%)
+   - Dialog/action components with <70% coverage (see above)
+2. **Focus on branch/function coverage for components in the 70-95% range.**
+3. **Add more tests for edge cases and error handling in dialog/action components.**
+4. **Review hooks and utility files for any missed edge cases.**
+5. **Maintain high coverage for business logic and core flows.**
+6. **Re-run coverage after each major test addition to track progress.**

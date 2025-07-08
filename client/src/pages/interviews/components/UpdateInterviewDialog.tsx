@@ -69,7 +69,7 @@ export const UpdateInterviewDialog: React.FC<UpdateInterviewDialogProps> = ({
   });
   const [{ data: usersData }] = useGetUsersQuery({
     variables: {
-      filters: {},
+      filter: '',
     },
   });
   const candidatesData = useMemo(() => {

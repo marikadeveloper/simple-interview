@@ -235,8 +235,8 @@
   - Test form heading component **(done)**
 - [x] **`src/pages/interview-template/components/QuestionBankSelector.tsx`** (100% coverage)
   - Test question bank selector **(done)**
-- [ ] **`src/pages/interview-template/components/ReadonlyHeading.tsx`** (0% coverage)
-  - Test readonly heading component
+- [x] **`src/pages/interview-template/components/ReadonlyHeading.tsx`** (100% coverage)
+  - Test readonly heading component **(done)**
 - [ ] **`src/pages/interview-template/components/utils.ts`** (0% coverage)
   - Test template utility functions
 

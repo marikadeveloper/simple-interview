@@ -220,8 +220,8 @@
 
 ### 8.9 Auth Pages
 
-- [ ] **`src/pages/auth/AdminSignupPage.tsx`** (0% coverage)
-  - Test admin signup flow
+- [x] **`src/pages/auth/AdminSignupPage.tsx`** (100% coverage)
+  - Test admin signup flow **(done)**
 - [ ] **`src/pages/auth/FirstPasswordChangePage.tsx`** (0% coverage)
   - Test first password change flow
 - [ ] **`src/pages/auth/NotAuthorizedPage.tsx`** (0% coverage)

@@ -12,6 +12,15 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = vi.fn();
 
+// Polyfill for Radix UI Select in jsdom
+defineHasPointerCapturePolyfill();
+
+function defineHasPointerCapturePolyfill() {
+  if (!Element.prototype.hasPointerCapture) {
+    Element.prototype.hasPointerCapture = () => false;
+  }
+}
+
 // Establish API mocking before all tests
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 

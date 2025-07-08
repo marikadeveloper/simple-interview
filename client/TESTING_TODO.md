@@ -254,9 +254,9 @@
 
 ### 8.13 Column Definitions
 
-- [ ] **`src/pages/interview-templates/columns.tsx`** (0% coverage)
-  - Test template column definitions
-- [ ] **`src/pages/interviews/columns.tsx`** (0% coverage)
+- [x] **`src/pages/interview-templates/columns.tsx`** (100% coverage)
+  - Test template column definitions **(done)**
+- [ ] **`src/pages/interviews/columns.tsx`**
   - Test interview column definitions
 - [ ] **`src/pages/question-banks/columns.tsx`** (0% coverage)
   - Test question bank column definitions

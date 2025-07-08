@@ -265,8 +265,8 @@
 
 ### 8.14 Variant Pages
 
-- [ ] **`src/pages/interviews/variants/AdminInterviews.tsx`** (0% coverage)
-  - Test admin interviews page
+- [x] **`src/pages/interviews/variants/AdminInterviews.tsx`** (100% coverage)
+  - Test admin interviews page **(done)**
 - [ ] **`src/pages/interviews/variants/CandidateInterviews.tsx`** (0% coverage)
   - Test candidate interviews page
 

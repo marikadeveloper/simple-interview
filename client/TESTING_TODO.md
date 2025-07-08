@@ -197,12 +197,12 @@
   - Test interview deletion confirmation **(done)**
 - [x] **`src/pages/interviews/components/InterviewCard.tsx`** (100% coverage)
   - Test interview card display **(done)**
-- [ ] **`src/pages/interviews/components/UpdateInterviewDialog.tsx`** (0% coverage)
-  - Test interview update dialog
+- [x] **`src/pages/interviews/components/UpdateInterviewDialog.tsx`** (100% coverage)
+  - Test interview update dialog **(done)**
 - [x] **`src/pages/question-banks/components/DeleteQuestionBankConfirmationDialog.tsx`** (100% coverage)
   - Test question bank deletion confirmation
-- [ ] **`src/pages/users/components/CreateUserDialog.tsx`** (0% coverage)
-  - Test user creation dialog
+- [x] **`src/pages/users/components/CreateUserDialog.tsx`** (100% coverage)
+  - Test user creation dialog **(done)**
 - [ ] **`src/pages/users/components/DeleteUserConfirmationDialog.tsx`** (0% coverage)
 
 ### 8.7 Navigation Components

@@ -85,9 +85,9 @@ export const CreateUserDialog: React.FC<UserCreateDialogProps> = ({}) => {
 
   const renderTitle = () => {
     if (user?.role === UserRole.Interviewer) {
-      return 'Add Candidate';
+      return 'New Candidate';
     }
-    return 'Create User';
+    return 'New User';
   };
 
   const renderDescription = () => {

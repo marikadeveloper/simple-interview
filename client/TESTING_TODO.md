@@ -222,8 +222,8 @@
 
 - [x] **`src/pages/auth/AdminSignupPage.tsx`** (100% coverage)
   - Test admin signup flow **(done)**
-- [ ] **`src/pages/auth/FirstPasswordChangePage.tsx`** (0% coverage)
-  - Test first password change flow
+- [x] **`src/pages/auth/FirstPasswordChangePage.tsx`** (100% coverage)
+  - Test first password change flow **(done)**
 - [ ] **`src/pages/auth/NotAuthorizedPage.tsx`** (0% coverage)
   - Test unauthorized page
 - [ ] **`src/pages/auth/NotFoundPage.tsx`** (0% coverage)

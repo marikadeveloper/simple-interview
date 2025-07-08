@@ -203,7 +203,8 @@
   - Test question bank deletion confirmation
 - [x] **`src/pages/users/components/CreateUserDialog.tsx`** (100% coverage)
   - Test user creation dialog **(done)**
-- [ ] **`src/pages/users/components/DeleteUserConfirmationDialog.tsx`** (0% coverage)
+- [x] **`src/pages/users/components/DeleteUserConfirmationDialog.tsx`** (100% coverage)
+  - Test user deletion confirmation **(done)**
 
 ### 8.7 Navigation Components
 

@@ -244,8 +244,8 @@
 
 ### 8.11 Question Bank Components
 
-- [ ] **`src/pages/question-bank/components/FormHeading.tsx`** (0% coverage - needs testing)
-  - Test form heading component
+- [x] **`src/pages/question-bank/components/FormHeading.tsx`** (100% coverage)
+  - Test form heading component **(done)**
 - [x] **`src/pages/question-bank/components/ReadonlyHeading.tsx`** (100% coverage)
   - Test readonly heading component **(done)**
 

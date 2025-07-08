@@ -260,8 +260,8 @@
   - Test interview column definitions **(done)**
 - [x] **`src/pages/question-banks/columns.tsx`** (100% coverage)
   - Test question bank column definitions **(done)**
-- [ ] **`src/pages/users/columns.tsx`** (0% coverage)
-  - Test user column definitions
+- [x] **`src/pages/users/columns.tsx`** (100% coverage)
+  - Test user column definitions **(done)**
 
 ### 8.14 Variant Pages
 

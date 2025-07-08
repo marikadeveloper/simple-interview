@@ -231,8 +231,8 @@
 
 ### 8.10 Interview Template Components
 
-- [ ] **`src/pages/interview-template/components/FormHeading.tsx`** (0% coverage)
-  - Test form heading component
+- [x] **`src/pages/interview-template/components/FormHeading.tsx`** (100% coverage)
+  - Test form heading component **(done)**
 - [ ] **`src/pages/interview-template/components/QuestionBankSelector.tsx`** (0% coverage)
   - Test question bank selector
 - [ ] **`src/pages/interview-template/components/ReadonlyHeading.tsx`** (0% coverage)

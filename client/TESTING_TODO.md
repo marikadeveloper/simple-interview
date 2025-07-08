@@ -237,8 +237,8 @@
   - Test question bank selector **(done)**
 - [x] **`src/pages/interview-template/components/ReadonlyHeading.tsx`** (100% coverage)
   - Test readonly heading component **(done)**
-- [ ] **`src/pages/interview-template/components/utils.ts`** (0% coverage)
-  - Test template utility functions
+- [x] **`src/pages/interview-template/components/utils.ts`** (100% coverage)
+  - Test template utility functions **(done)**
 
 ### 8.11 Question Bank Components
 

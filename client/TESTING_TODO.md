@@ -249,8 +249,8 @@
 
 ### 8.12 Interview Components
 
-- [ ] **`src/pages/interview/components/QuestionCard.tsx`** (0% coverage)
-  - Test interview question card
+- [x] **`src/pages/interview/components/QuestionCard.tsx`** (100% coverage)
+  - Test interview question card **(done)**
 
 ### 8.13 Column Definitions
 

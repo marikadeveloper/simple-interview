@@ -256,8 +256,8 @@
 
 - [x] **`src/pages/interview-templates/columns.tsx`** (100% coverage)
   - Test template column definitions **(done)**
-- [ ] **`src/pages/interviews/columns.tsx`**
-  - Test interview column definitions
+- [x] **`src/pages/interviews/columns.tsx`** (100% coverage)
+  - Test interview column definitions **(done)**
 - [ ] **`src/pages/question-banks/columns.tsx`** (0% coverage)
   - Test question bank column definitions
 - [ ] **`src/pages/users/columns.tsx`** (0% coverage)

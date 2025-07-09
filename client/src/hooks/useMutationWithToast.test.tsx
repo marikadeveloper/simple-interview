@@ -38,7 +38,7 @@ describe('useMutationWithToast', () => {
       }),
     );
 
-    const [mutationResult, executeWithToast] = result.current;
+    const [, executeWithToast] = result.current;
 
     await act(async () => {
       const response = await executeWithToast({ input: 'test' });
@@ -74,7 +74,7 @@ describe('useMutationWithToast', () => {
       }),
     );
 
-    const [mutationResult, executeWithToast] = result.current;
+    const [, executeWithToast] = result.current;
 
     await act(async () => {
       const response = await executeWithToast({ input: 'test' });
@@ -107,7 +107,7 @@ describe('useMutationWithToast', () => {
       }),
     );
 
-    const [mutationResult, executeWithToast] = result.current;
+    const [, executeWithToast] = result.current;
 
     await act(async () => {
       await expect(executeWithToast({ input: 'test' })).rejects.toThrow(
@@ -139,7 +139,7 @@ describe('useMutationWithToast', () => {
       }),
     );
 
-    const [mutationResult, executeWithToast] = result.current;
+    const [, executeWithToast] = result.current;
 
     await act(async () => {
       await expect(executeWithToast({ input: 'test' })).rejects.toBe(
@@ -169,7 +169,7 @@ describe('useMutationWithToast', () => {
 
     const { result } = renderHook(() => useMutationWithToast(mockMutationHook));
 
-    const [mutationResult, executeWithToast] = result.current;
+    const [, executeWithToast] = result.current;
 
     await act(async () => {
       await executeWithToast({ input: 'test' });

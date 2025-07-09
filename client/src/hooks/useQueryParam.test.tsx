@@ -21,7 +21,7 @@ describe('useQueryParam', () => {
     vi.mocked(router.useSearchParams).mockReturnValue([
       {
         get: (key: string) => (key === 'foo' ? 'bar' : null),
-        getAll: (key: string) => [],
+        getAll: (_key: string) => [],
       } as any,
       vi.fn(),
     ]);

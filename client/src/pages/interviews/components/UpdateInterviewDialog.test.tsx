@@ -312,13 +312,9 @@ describe('UpdateInterviewDialog', () => {
 
   it('shows fallback content when dialog is opened for non-pending interview', async () => {
     const user = userEvent.setup();
-    const completedInterview = {
-      ...mockInterview,
-      status: InterviewStatus.Completed,
-    };
 
     // Mock the component to bypass the disabled button logic
-    const MockUpdateDialog = ({ interview }: { interview: any }) => {
+    const MockUpdateDialog = () => {
       const [isOpen, setIsOpen] = React.useState(false);
       return (
         <>
@@ -336,7 +332,7 @@ describe('UpdateInterviewDialog', () => {
       );
     };
 
-    render(<MockUpdateDialog interview={completedInterview} />);
+    render(<MockUpdateDialog />);
 
     const updateButton = screen.getByRole('button');
     await user.click(updateButton);

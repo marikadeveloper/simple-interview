@@ -1,4 +1,5 @@
 import { useAdminRegisterMutation } from '@/generated/graphql';
+import { useMutationWithToast } from '@/hooks/useMutationWithToast';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
@@ -10,7 +11,10 @@ export default function AdminSignupPage() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [, adminRegister] = useAdminRegisterMutation();
+  const [, adminRegister] = useMutationWithToast(useAdminRegisterMutation, {
+    successMessage: 'Admin account created successfully',
+    errorMessage: 'Failed to create admin account',
+  });
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
